@@ -1,0 +1,1 @@
+export type queryText = (text:string) => void
