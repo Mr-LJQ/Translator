@@ -1,0 +1,47 @@
+{
+  "name":"Anki划词助手",
+  "manifest_version":2,
+  "version":"0.0.2",
+  "description":"便捷的翻译器，提供了拖蓝选中、热键自动选中、搜索栏查询等多种查询翻译的能力，并且可以很方便的将翻译添加到Anki中进行学习！",
+  "icons": {
+    "48": "logo_48.png"
+  },
+  "content_security_policy": "script-src 'self' 'unsafe-eval'",
+  "background":{
+    "scripts":["./background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["./foreground.js"]
+    }
+  ],
+  "browser_action":{
+    "default_icon": {
+      "16":"logo_16.png",
+      "32":"logo_32.png",
+      "64":"logo_64.png"
+    },
+    "default_popup":"popup.html",
+    "default_title":"Anki划词助手"
+  },
+  "options_ui":{
+    "page": "options.html"
+  },
+  "permissions":["storage"],
+  "web_accessible_resources":["shower.js","shower.html"],
+  "commands": {
+    "enabled": {
+      "suggested_key": {
+        "default": "Alt+Q"
+      },
+      "description": "打开/关闭插件"
+    },
+    "search_bar": {
+      "suggested_key": {
+        "default": "Alt+R"
+      },
+      "description": "打开/关闭搜索栏"
+    }
+}
+}

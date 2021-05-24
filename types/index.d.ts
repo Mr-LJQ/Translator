@@ -1,25 +1,33 @@
 export type {
+  WordData,
+  PhraseData,
+  SentenceData,
+  TranslationResult,
   Phonetic,
   TranslationUnit,
   ExampleSentence,
-  ExampleSentence,
-  WordTranslation,
-  DictionaryScript,
-  SentenceTranslation,
-}from "./dictionary"
+} from "./Translation"
 
 
 export type {
-  Options,
-  laxOptions
-}from "./Options"
+  HotKey,
+  NoteWordData,
+  NotePhraseData,
+  NoteSentenceData,
+  WordConfig,
+  PhraseConfig,
+  SentenceConfig,
+  BasisAnkiConfig,
+  CachedOptions,
+  DeckAndModels,
+} from "./Options"
 
 export type {
-  queryText
-}from "./frontEnd"
+  AnkiResponse,
+  AnkiCallback,
+} from "./Anki"
 
 export type {
   Handler,
-  Message,
-  sendResponse,
-}from "./Handler"
+  SendResponse,
+} from "./Handler"

@@ -1,83 +1,144 @@
-import {KeyboardWatcher} from "./KeyboardWatcher"
-import {PopupSearchBar} from "./PopupSearchBar"
-import {SelectionWatcher} from "./SelectionWatcher"
-import {FrontToBack} from "../communication"
+//监听用户操作的模块
+import { KeyboardWatcher } from "../watcher/KeyboardWatcher"
+import { PopupSearchBar } from "../watcher/PopupSearchBar"
+import { SelectionWatcher } from "../watcher/SelectionWatcher"
 
-import display from "../shower/index.html"
+//展示模块
+import { Shower } from "../shower/Shower"
 
-//对用户输入的数据进行处理
-//将用户输入的数据处理后发生给后端进行查询
-//获取查询响应，将其传递给展示模块
-//处理展示模块传输的添加到Anki的请求
-//将添加到Anki的请求发送给后端
+import { postBackend, onMessage } from "../utils/index"
+
+import { CachedOptions } from "../../types/index"
+
 class FrontEnd {
-  private keyboardWatcher
-  private popupSearchBar
+  keyboardWatcher
+  popupSearchBar
   private selectionChange
-  private frontToBack
-  private iframe:HTMLIFrameElement
-  constructor () {
+  private shower
+  constructor() {
     //必须绑定this
-    this.queryText = this.queryText.bind(this)
-    this.frontToBack = new FrontToBack()
-    this.keyboardWatcher = new KeyboardWatcher()
-    this.popupSearchBar = new PopupSearchBar(this.queryText)
-    this.selectionChange = new SelectionWatcher(this.queryText)
-    this.install()
-    const iframe = this.iframe = document.createElement("iframe")
-    const url = chrome.runtime.getURL(display)
-    iframe.src = url
-    document.body.append(iframe)
+    this.showTranslated = this.showTranslated.bind(this)
+    this.handler = this.handler.bind(this)
+
+    this.keyboardWatcher = new KeyboardWatcher(this.showTranslated)
+    this.popupSearchBar = new PopupSearchBar(this.showTranslated)
+    this.selectionChange = new SelectionWatcher(this.showTranslated)
+
+    //监听展示模块传递的指令，并进行处理
+    this.shower = new Shower(this.handler)
+
+    //监听后端传递的指令并进行处理
+    onMessage(this.handler)
   }
 
-  install () {
-    let {keyboardWatcher,popupSearchBar,selectionChange} = this
+  async handler(message: any, sendResponse: any):Promise<void> {
+    const { command, data } = message 
+    let response
+    switch (command) {
+      case "addWordNote":
+        response = await postBackend("addWordNote", data)
+        sendResponse(response)
+        break;
+      case "addAllWordsNotes":
+        response = await postBackend("addAllWordsNotes", data)
+        sendResponse(response)
+        break;
+      case "addPhraseNote":
+        response = await postBackend("addPhraseNote", data)
+        sendResponse(response)
+        break;
+      case "addSentenceNote":
+        response = await postBackend("addSentenceNote", data)
+        sendResponse(response)
+        break;
+      case "showTranslated":
+        this.showTranslated(data)
+        break
+      case "switchSearchBar":
+        this.popupSearchBar.toggleSearchBar()
+        break;
+      default:
+        throw new Error("存在未处理的指令:" + command)
+    }
+  }
+
+  install() {
+    let { keyboardWatcher, selectionChange, shower } = this
     selectionChange.install()
     keyboardWatcher.install()
-    popupSearchBar.install()
+    shower.install()
   }
 
-  uninstall () {
-    let {keyboardWatcher,popupSearchBar,selectionChange} = this
+  uninstall() {
+    let { keyboardWatcher, selectionChange, shower } = this
     selectionChange.uninstall()
     keyboardWatcher.uninstall()
-    popupSearchBar.uninstall()
+    shower.uninstall()
   }
 
   /**
-   * 向后端发生获取翻译的请求，之后将请求传递给展示模块展示
-   * @param text 
+   * 向后端发送获取翻译的请求，之后将请求传递给展示模块展示
+   * @param text 未经处理的数据，仍可能为空，为无需翻译的字符(例如：中文)
    */
-  private async queryText (text:string) {
+  private async showTranslated(text: string) {
     let translated
-    text = this.optimizeText(text)
-    if (this.isSentence(text)) {
-      translated = await this.frontToBack.postBackEnd("querySentence",text)
-    }else {
-      // 统一为小写字符(大小写不同，查询结果存在差异)
-      text = text.toLowerCase()
-      translated = await this.frontToBack.postBackEnd("queryWord",text)
-    }
-    console.log(translated)
-    return translated
+    const result = this.validateText(text)
+    if (!result) return
+    translated = await postBackend("translateText", text)
+    this.shower.showTranslation(translated)
   }
+
   /**
-   * - 处理驼峰命名，去掉驼峰
-   * - 处理下划线连接符
-   * - 处理HTML标签字符(转义)
+   * 纯函数，过滤掉无效查询
+   *  - 字符串为空的情况
+   *  - 查询主体并非英文
    * @param text 
-   * @returns 
+   * @return 返回过滤后的字符，该字符应当是符合查询要求的
    */
-  private optimizeText (text:string):string {
-    return text
-  }
-  /**
-   * 判断待翻译的文本是否为句子
-   * @param text 
-   */
-  private isSentence (text:string) {
-    return /\s/.test(text)
+  private validateText(text: string) {
+    text = text.trim()
+
+    //过滤为空的字符串
+    if (!text) return false
+
+    //如果英文字母数量不足百分之五十，则认为其并非需要查询的内容
+    const amount = text.match(/\b[a-z]+\b/ig)?.reduce((amount, item) => {
+      return amount + item.length
+    }, 0)
+    if (!amount || (amount / text.length < 0.5)) return false
+
+    //过滤用户对URL的复制的查询
+    if (text.search(/http:|https:/gi) === 0) return false
+
+    //存在3个以上换行符时，用户可能只是进行复制粘贴操作，过滤掉
+    const nLength = text.match(/\n/g)?.length
+    if (nLength && nLength > 3) return false  
+
+    return true
   }
 }
 
-new FrontEnd()
+const frontEnd = new FrontEnd()
+//根据默认值决定是否开启内容脚本
+const cacheOptions: Partial<CachedOptions> = {
+  isOpen: true,//设置默认值
+  hotKey: "shiftKey"//设置默认值
+}
+chrome.storage.local.get(cacheOptions, ({
+  isOpen,
+  hotKey
+}: Partial<CachedOptions>) => {
+  if (isOpen) frontEnd.install()
+  frontEnd.keyboardWatcher.updateHotKey(hotKey)
+})
+
+//监听用户配置改变
+chrome.storage.onChanged.addListener(({ isOpen, hotKey }: Partial<Record<keyof CachedOptions, any>>) => {
+  const newIsOpen = isOpen?.newValue
+  const newHotKey = hotKey?.newValue
+  newHotKey ? frontEnd.keyboardWatcher.updateHotKey(newHotKey) : null
+
+  if (newIsOpen === undefined) return
+  newIsOpen ? frontEnd.install() : frontEnd.uninstall()
+})
+

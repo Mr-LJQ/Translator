@@ -1,0 +1,55 @@
+@height:30px;
+@width:76px;
+@color:#76ff03;
+@margin:3px;
+@fontColor:#ddd;
+
+.switch-button {
+  position: relative;
+  
+  width: @width;
+  height: @height;
+  line-height: @height;
+  
+  border-radius: (@height / 2);
+  background: #555;
+  
+  font-family: "微软雅黑";
+  font-weight: 700;
+
+  cursor: pointer;
+  user-select: none;
+}
+
+.left-text {
+  float: left;
+  padding-left: 11px;
+  color: @fontColor;
+  transition: all .5s;
+}
+
+.right-text {
+  float: right;
+  padding-right: 11px;
+  color:@fontColor;
+}
+
+.switch {
+  position: absolute;
+  left: 0;
+  top: 0;
+  margin: @margin;
+  width: (@width / 2);
+  height: (@height - $margin * 2);
+  border-radius: ($height / 2);
+  background: @fontColor;
+  transition: all .5s;
+}
+
+.switch.open {
+  left:(@width / 2 - @margin * 2);
+  background:@color;
+}
+.left-text.open {
+  color: @color;
+}
