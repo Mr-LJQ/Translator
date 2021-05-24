@@ -51,6 +51,7 @@ export default class WordCard extends React.PureComponent<Props> {
               hidden={translationUnits === undefined}
               onClick={addAllNotes}
               initStatusText="全部添加到Anki!"
+              key={word}
             />
           </div>
           <div className="word_flex flex_wrap">

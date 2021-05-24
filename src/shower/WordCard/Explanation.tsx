@@ -17,7 +17,7 @@ export default function Explanation(props: Props) {
     <p>
       <span className="word_part_of_speech">{part_of_speech}</span>
 
-      <AddButton initStatusText="添加到Anki!" onClick={addNote} />
+      <AddButton initStatusText="添加到Anki!" onClick={addNote} key={definition+translation}/>
 
       {translateBTag(definition)}
       <span className="blue_color">{translation}</span>

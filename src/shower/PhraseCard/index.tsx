@@ -38,7 +38,7 @@ export default class PhraseCard extends React.PureComponent<Props> {
               audio={audio}
               audioURL={phrase_audio}
             />
-            <AddButton initStatusText="添加到Anki." onClick={addNote} />
+            <AddButton key={phrase} initStatusText="添加到Anki." onClick={addNote} />
           </div>
           <ul>
             {translations.reduce((acc, cur) => {

@@ -36,7 +36,7 @@ export default class SentenceCard extends React.PureComponent<Props> {
           <h1 className="sentence">{sentence}</h1>
         </header>
         <main className="sentence_translation">
-          <AddButton initStatusText="添加到Anki" onClick={addNote} />
+          <AddButton key={sentence} initStatusText="添加到Anki" onClick={addNote} />
           {sentenceTranslation}
         </main>
       </div>

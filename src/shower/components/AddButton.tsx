@@ -1,7 +1,5 @@
 import React from "react"
 import classnames from "classnames"
-
-
 import "./AddButton.less"
 
 import { AnkiCallback, AnkiResponse } from "../../../types/index"
