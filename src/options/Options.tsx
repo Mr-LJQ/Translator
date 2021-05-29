@@ -1,10 +1,10 @@
-import React from "react";
+import React, { ChangeEvent } from "react";
 import "./index.less";
 
 import { postBackend } from "../utils/messager";
 import { Dispatch, getDeckAndModels, tabPaneDataFactory } from "./utils/index";
 
-import BasisConfig from "./BasisConfig";
+import BasisConfig from "./components/BasisConfig/index";
 import AnkiConfig from "./components/AnkiConfig/index";
 import Tab, { TabPane } from "../components/Tabs/index";
 
@@ -18,6 +18,7 @@ import {
   SentenceConfig,
   WordConfig,
   DeckAndModels,
+  TabPaneKey,
 } from "../../types/index";
 
 interface State {
@@ -25,16 +26,18 @@ interface State {
   connectedAnki: boolean;
   savaTip:string;
   reconnectTip:string
+  ankiConnectionURL:string
 }
 
 interface Props {
-  defaultActiveIndex?: string;
+  defaultActiveIndex?: TabPaneKey;
   connectedAnki: boolean;
   cachedConfigs: {
-    wordConfig: WordConfig & Dispatch;
-    phraseConfig: PhraseConfig & Dispatch;
-    sentenceConfig: SentenceConfig & Dispatch;
+    wordConfig: Required<WordConfig> & Dispatch;
+    phraseConfig: Required<PhraseConfig> & Dispatch;
+    sentenceConfig: Required<SentenceConfig> & Dispatch;
   };
+  ankiConnectionURL:string
 }
 
 export default class Options extends React.Component<Props, State> {
@@ -86,7 +89,10 @@ export default class Options extends React.Component<Props, State> {
     connectedAnki: this.props.connectedAnki,
     savaTip:"",
     reconnectTip:"",
+    ankiConnectionURL:this.props.ankiConnectionURL
   };
+  reconnectFlag = false
+  saveConfigFlag = false
   constructor(props: Props) {
     super(props);
 
@@ -94,6 +100,7 @@ export default class Options extends React.Component<Props, State> {
     this.closeOptions = this.closeOptions.bind(this);
     this.setDeckAndModels = this.setDeckAndModels.bind(this);
     this.reconnectAnkiConnect = this.reconnectAnkiConnect.bind(this);
+    this.updateAnkiConnectionURL = this.updateAnkiConnectionURL.bind(this);
   }
 
   componentDidMount() {
@@ -109,11 +116,14 @@ export default class Options extends React.Component<Props, State> {
   }
 
   private async reconnectAnkiConnect() {
+    if (this.reconnectFlag) return
+    this.reconnectFlag = true
     const version = await postBackend("getVersion");
     if (!version) {
       setTimeout(() => {
+        this.reconnectFlag = false
         this.setState({reconnectTip:""})
-      }, 1000);
+      }, 500);
       return this.setState({reconnectTip:"✖"})
     }
     this.setState({ connectedAnki: true });
@@ -126,33 +136,49 @@ export default class Options extends React.Component<Props, State> {
 
   private savaConfig() {
     const configs = this.props.cachedConfigs;
+    const {ankiConnectionURL} = this.state
     //去除dispatch
     let {
-      wordConfig: { dispatch: W, ...wordConfig },
-      phraseConfig: { dispatch: P, ...phraseConfig },
-      sentenceConfig: { dispatch: S, ...sentenceConfig },
+      wordConfig: { dispatch: D1, ...wordConfig },
+      phraseConfig: { dispatch: D2, ...phraseConfig },
+      sentenceConfig: { dispatch: D3, ...sentenceConfig },
     } = configs;
     const cached: Partial<CachedOptions> = {
       wordConfig,
       phraseConfig,
       sentenceConfig,
+      ankiConnectionURL,
     };
     chrome.storage.local.set(cached,() => {
       this.setState({savaTip:"✔"})
+      if (this.saveConfigFlag) return
+      this.saveConfigFlag = true
       setTimeout(() => {
+        this.saveConfigFlag = false
         this.setState({savaTip:""})
       }, 1000);
     });
   }
 
+  /**
+   * 用于更新ankiConnection的函数
+   * @param event 如果值不存在，则使用默认值
+   */
+  updateAnkiConnectionURL (event?:ChangeEvent<HTMLInputElement>) {
+    const ankiConnectionURL = event?.target.value || "http://127.0.0.1:8765"
+    this.setState({
+      ankiConnectionURL,
+    })
+  }
+
   render() {
-    const { reconnectAnkiConnect } = this;
-    const { defaultActiveIndex = "0", cachedConfigs } = this.props;
-    const { deckAndModels, connectedAnki, savaTip ,reconnectTip} = this.state;
+    const { reconnectAnkiConnect,updateAnkiConnectionURL } = this;
+    const { defaultActiveIndex = "basis", cachedConfigs,} = this.props;
+    const { deckAndModels, connectedAnki, savaTip ,reconnectTip,ankiConnectionURL} = this.state;
 
     const configs = cachedConfigs;
     const tabPanes = [
-      tabPaneDataFactory("基础配置", <BasisConfig />),
+      tabPaneDataFactory("基础配置", <BasisConfig ankiConnectionURL={ankiConnectionURL} updateAnkiConnectionURL={updateAnkiConnectionURL}/>,"basis"),
       tabPaneDataFactory(
         "单词配置",
         <AnkiConfig
@@ -162,7 +188,8 @@ export default class Options extends React.Component<Props, State> {
           cachedConfig={configs.wordConfig}
           mappingTable={this.wordMappingTable}
           BasisAnkiMappingTable={this.BasisAnkiMappingTable}
-        />
+        />,
+        "word",
       ),
       tabPaneDataFactory(
         "短语配置",
@@ -173,7 +200,8 @@ export default class Options extends React.Component<Props, State> {
           cachedConfig={configs.phraseConfig}
           mappingTable={this.phraseMappingTable}
           BasisAnkiMappingTable={this.BasisAnkiMappingTable}
-        />
+        />,
+        "phrase",
       ),
       tabPaneDataFactory(
         "句子配置",
@@ -184,16 +212,17 @@ export default class Options extends React.Component<Props, State> {
           cachedConfig={configs.sentenceConfig}
           mappingTable={this.sentenceMappingTable}
           BasisAnkiMappingTable={this.BasisAnkiMappingTable}
-        />
+        />,
+        "sentence",
       ),
     ];
 
     return (
       <>
         <Tab tabsContainerClass="tabMenu" initActiveKey={defaultActiveIndex}>
-          {tabPanes.map((tabPane, index) => {
+          {tabPanes.map((tabPane) => {
             return (
-              <TabPane tabItem={tabPane.tabItem} key={index}>
+              <TabPane tabItem={tabPane.tabItem} key={tabPane.key}>
                 {tabPane.children}
               </TabPane>
             );

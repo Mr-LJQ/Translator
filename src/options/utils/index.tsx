@@ -1,7 +1,7 @@
 import { ChangeEvent, ReactElement, ReactNode, useCallback, useState } from 'react'   
 import { postBackend } from '../../utils/index'
 
-import { WordConfig } from '../../../types/index'
+import { TabPaneKey, WordConfig } from '../../../types/index'
 import { TabPaneProps } from '../../components/Tabs/index'
 
 export async function getDeckAndModels() {
@@ -44,10 +44,12 @@ export function dispatch(
 
 export function tabPaneDataFactory(
   tabItem: ReactNode,
-  children: ReactElement
-): TabPaneProps {
+  children: ReactElement,
+  key:TabPaneKey,
+): TabPaneProps<TabPaneKey> {
   return {
     tabItem,
     children,
+    key,
   };
 }

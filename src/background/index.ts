@@ -39,22 +39,14 @@ class BackEnd {
         response = await this.translateText(data)
         sendResponse(response)
         break
-      case "addWordNote":
-        response = await this.anki.addWordNote(data)
+      case "addNote":
+        response = await this.anki.addNote(data)
         sendResponse(response)
         break;
-      case "addAllWordsNotes":
-        response = await this.anki.addAllWordsNotes(data)
+      case "relearnNote":
+        response = await this.anki.relearnCards(data)
         sendResponse(response)
-        break;
-      case "addPhraseNote":
-        response = await this.anki.addPhraseNote(data)
-        sendResponse(response)
-        break;
-      case "addSentenceNote":
-        response = await this.anki.addSentenceNote(data)
-        sendResponse(response)
-        break;
+        break
       case "getDeckNames":
         response = await this.anki.getDeckNames()
         sendResponse(response)
@@ -109,16 +101,18 @@ chrome.commands.onCommand.addListener((command) => {
 
 
 //初始化AnkiConfig
-const cachedOptions: Array<keyof CachedOptions> = ["wordConfig", "phraseConfig", "sentenceConfig"]
+const cachedOptions: Array<keyof CachedOptions> = ["wordConfig", "phraseConfig", "sentenceConfig","ankiConnectionURL"]
 chrome.storage.local.get(cachedOptions, ({
   wordConfig,
   phraseConfig,
   sentenceConfig,
+  ankiConnectionURL
 }: Partial<CachedOptions>) => {
   backEnd.anki.updateAnkiConfig({
     wordConfig,
     phraseConfig,
     sentenceConfig,
+    ankiConnectionURL,
   })
 })
 

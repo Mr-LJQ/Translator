@@ -24,7 +24,7 @@ export default async function translateWord(word:string,dom:Document): Promise<W
  */
  function getOriginText(dom: Document): string {
   return (
-    dom.querySelector(".wordbook-js")?.firstElementChild?.textContent ||
+    dom.querySelector(".wordbook-js")?.firstElementChild?.textContent?.trim() ||
     ""
   )
 }
@@ -92,11 +92,11 @@ function getTranslationUnits(dom: Document,word:string): Array<TranslationUnit> 
       return result
     }
     let [text, index] = textResult
-    const definition = text.slice(0, index)
+    const definition = text.slice(0, index).trim()
     //清除<b></b>避免影响音频获取
     const definition_origin = definition.replace(/\<b\>|\<\/b\>/g,"")
     result.push({
-      word:dom.querySelector("#collinsResult .wt-container h4 span.title")?.textContent || word,
+      word:dom.querySelector("#collinsResult .wt-container h4 span.title")?.textContent?.trim() || word,
       part_of_speech: getPartOfSpeech(li), //词性
       definition, //定义
       definition_audio: `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(definition_origin)}&le=eng`,
@@ -117,7 +117,7 @@ function getTranslationUnits(dom: Document,word:string): Array<TranslationUnit> 
  */
  function getPartOfSpeech(li: Element): string {
   let targetNode = li.querySelector(".collinsMajorTrans p .additional")
-  return (targetNode && targetNode.textContent) || ""
+  return (targetNode && targetNode.textContent?.trim()) || ""
 }
 
 /**
@@ -167,8 +167,8 @@ function getTranslationUnits(dom: Document,word:string): Array<TranslationUnit> 
   let div_example_s = li.querySelectorAll(".exampleLists .examples")
   let exampleSentences = Array.from(div_example_s).reduce((acc, div) => {
     let children = div.children
-    let example_sentence = children[0]?.textContent || ""
-    let example_sentence_translation = children[1]?.textContent || ""
+    let example_sentence = children[0]?.textContent?.trim() || ""
+    let example_sentence_translation = children[1]?.textContent?.trim() || ""
 
     //如果例句存在才添加，否则应该过滤掉
     if (example_sentence) {

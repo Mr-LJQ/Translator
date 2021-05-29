@@ -3,9 +3,10 @@ import { ExampleSentence, PhraseData } from "../../types/index"
 export default function translatePhrase(dom:Document): PhraseData | undefined {
   const phrase = getOriginText(dom)
     if (!phrase) return
-    let translation = dom.querySelectorAll('#ydTrans .trans-container p')[1]?.textContent
+    let translation = dom.querySelectorAll('#ydTrans .trans-container p')[1]?.textContent?.trim()
     const translations = getTranslation(dom) || (translation && [translation])
     if (!translations) return
+    
     const phrase_audio = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(phrase)}`
     const exampleSentences = getPhraseExamples(dom)
     if (!exampleSentences) return
@@ -24,7 +25,7 @@ export default function translatePhrase(dom:Document): PhraseData | undefined {
  */
  function getOriginText(dom: Document): string {
   return (
-    dom.querySelector(".wordbook-js")?.firstElementChild?.textContent ||
+    dom.querySelector(".wordbook-js")?.firstElementChild?.textContent?.trim() ||
     ""
   )
 }
@@ -39,7 +40,7 @@ export default function translatePhrase(dom:Document): PhraseData | undefined {
   if (!ul) return
   const liNodes = ul.children
   let result = Array.from(liNodes).reduce((result, li) => {
-    let text = li.textContent
+    let text = li.textContent?.trim()
     if (!text) return result
     result.push(text)
     return result
@@ -59,7 +60,7 @@ export default function translatePhrase(dom:Document): PhraseData | undefined {
     let pNodes = li.querySelectorAll("p")
     if (!pNodes[0] || !pNodes[1]) return result
     //用于获取音频
-    const example_sentence_origin = pNodes[0]?.textContent || ""
+    const example_sentence_origin = pNodes[0]?.textContent?.trim() || ""
     //获取短语加粗的例句
     const example_sentence = Array.from(pNodes[0].childNodes).reduce((sentence, node) => {
       let text
@@ -75,9 +76,9 @@ export default function translatePhrase(dom:Document): PhraseData | undefined {
         return text
       }, "")
       return sentence + text
-    }, "")
+    }, "").trim()
 
-    const example_sentence_translation = pNodes[1].textContent || ""
+    const example_sentence_translation = pNodes[1].textContent?.trim() || ""
     const example_audio = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(example_sentence_origin)}&le=eng`
     result.push({
       example_audio,

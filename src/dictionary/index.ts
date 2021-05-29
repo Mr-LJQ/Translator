@@ -3,14 +3,10 @@ import translatePhrase from "./translatePhrase"
 import translateSentence from "./translateSentence"
 
 import { PhraseData, SentenceData, TranslationResult } from "../../types/index"
-import { Cacher } from "../utils/index"
 
 
 export default class Collins_en_cn {
-  cacher
-  constructor() {
-    this.cacher = new Cacher()
-  }
+  constructor() {}
   /**
      * 向外暴露的接口，是对翻译word与sentence函数的封装
      * @param text 需要进行翻译的文本
@@ -18,8 +14,6 @@ export default class Collins_en_cn {
   async translateText(text: string): Promise<TranslationResult> {
     let result
     try {
-      result = this.cacher.get(text)
-      if (result) return result
       const dom = await getPageDOM(text)
       //如果存在空格，则认为其为多个单词组合的句子、词组
       if (/\s/g.test(text)) {
@@ -33,14 +27,11 @@ export default class Collins_en_cn {
       //捕获自定义错误
       result = error
     }
-    //只缓存正确的翻译结果
-    if (typeof result !== "string") this.cacher.set(text, result)
     return result
   }
   async translateWords(dom:Document): Promise<SentenceData | PhraseData | string> {
     //情况一：待翻译的是短语
     const translatedPhrase = translatePhrase(dom)
-    console.log(translatedPhrase)
     if (translatedPhrase) return translatedPhrase
 
     //情况二:待翻译的是句子

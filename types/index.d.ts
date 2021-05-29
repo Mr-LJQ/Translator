@@ -20,14 +20,23 @@ export type {
   BasisAnkiConfig,
   CachedOptions,
   DeckAndModels,
+  TabPaneKey,
 } from "./Options"
 
 export type {
+  NoteData,
   AnkiResponse,
   AnkiCallback,
+  AddNoteParams,
 } from "./Anki"
 
 export type {
+  Message,
   Handler,
   SendResponse,
 } from "./Handler"
+
+export type {
+  ShowData,
+  AddButtonState
+}from "./Shower"

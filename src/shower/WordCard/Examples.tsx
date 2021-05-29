@@ -14,7 +14,7 @@ export default function Examples(props: Props) {
         return (
           <li className="word_example" key={index}>
             <p>{example_sentence}</p>
-            <p className="blue_color">{example_sentence_translation}</p>
+            <p className="word_blue_color">{example_sentence_translation}</p>
           </li>
         );
       })}

@@ -13,7 +13,6 @@ import {
   CachedOptions,
 } from "../../types/index";
 
-
 render();
 
 async function render() {
@@ -23,16 +22,15 @@ async function render() {
   ]);
   let {
     defaultActiveIndex,
+    ankiConnectionURL,
     wordConfig: _wordConfig,
     phraseConfig: _phraseConfig,
     sentenceConfig: _sentenceConfig,
   } = cachedOptions;
-  //存在默认值，该行不会触发
-  if (!_wordConfig || !_phraseConfig || !_sentenceConfig) return;
 
-  let wordConfig = { ..._wordConfig, dispatch };
-  let phraseConfig = { ..._phraseConfig, dispatch };
-  let sentenceConfig = { ..._sentenceConfig, dispatch };
+  let wordConfig = { ..._wordConfig as Required<WordConfig>, dispatch };
+  let phraseConfig = { ..._phraseConfig as Required<PhraseConfig>, dispatch };
+  let sentenceConfig = { ..._sentenceConfig as Required<SentenceConfig>, dispatch };
 
   //绑定this
   wordConfig.dispatch = dispatch.bind(wordConfig);
@@ -44,6 +42,7 @@ async function render() {
       cachedConfigs={{wordConfig,phraseConfig,sentenceConfig}}
       defaultActiveIndex={defaultActiveIndex}
       connectedAnki={version !== null}
+      ankiConnectionURL={ankiConnectionURL as string}//因为存在默认值，所以必定不会为undefined
     />,
     document.getElementById("root")
   );
@@ -106,7 +105,8 @@ async function getCachedOptions(): Promise<Partial<CachedOptions>> {
       wordConfig,
       phraseConfig,
       sentenceConfig,
-      defaultActiveIndex: "0",
+      defaultActiveIndex: "basis",
+      ankiConnectionURL:"http://127.0.0.1:8765",
     };
     chrome.storage.local.get(
       cachedOptions,

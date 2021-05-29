@@ -3,7 +3,8 @@
   padding: 0;
 }
 
-ul,li {
+ul,
+li {
   list-style: none;
 }
 
@@ -11,21 +12,42 @@ ul,li {
   min-height: 100vh;
   font-size: 20px;
   line-height: 1.5;
-  color:rgb(165, 59, 73);
-  text-align:center;
-  padding-left: .5em;
+  color: rgb(165, 59, 73);
+  text-align: center;
+  padding-left: 0.5em;
   background: #c7edcc;
 }
 
-
-.blue_color {
-  color: #0d47a1;
+.history_nav {
+  height: 16px;
 }
 
-.float_right {
-  float: right;
+.history_bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 50px;
+  box-sizing: border-box;
+  background: #f1f1f1;
+  border-radius: 25% 25% 0 0 / 50% 50% 0 0;
 }
 
-.margin_top_10 {
-  margin-top: 10px;
+.button {
+  width: 25px;
+  height: 25px;
+  border: none;
+  font-size: 20px;
+  font-weight: 700;
+  background: transparent;
+  user-select: none;
+}
+
+.button.left {
+  border-radius: 50% 0 0 0;
+}
+.button.right {
+  border-radius: 0 50% 0 0;
+}
+.button:hover {
+  background: #00bfff;
 }

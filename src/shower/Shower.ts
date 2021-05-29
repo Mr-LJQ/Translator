@@ -1,37 +1,36 @@
 import {
+  Message,
+  Handler,
+  SendResponse,
   TranslationResult,
-  Handler
 } from "../../types/index"
 
-import { agent,PostMessage } from "../utils/index"
+import { Agent, PostMessage } from "../utils/index"
 
 export class Shower {
 
+  private agent?: Agent
+  private postMessage?: PostMessage
   private iframe: HTMLIFrameElement
-  private postMessage:PostMessage | null 
 
   constructor(handler: Handler) {
 
     const iframe = this.iframe = document.createElement("iframe")
-    this.postMessage = null
     //保证获取contentWindow
     iframe.addEventListener("load", () => {
       let contentWindow = <Window>this.iframe.contentWindow
       //建立通信
-      this.postMessage = agent({
+      this.agent = new Agent({
         self: window,
         target: contentWindow,
-        handler
+        handler,
       })
+      this.agent?.onMessage()
+      this.postMessage = this.agent.postMessage
     })
 
     //此处的shower.html需要参考所生成文件的具体名称
     iframe.src = chrome.runtime.getURL("shower.html")
-
-    //禁止iframe中的鼠标滚轮效果冒泡到外部
-    iframe.addEventListener("scroll", function (event) {
-      event.stopPropagation()
-    })
 
     this.onClickToggle = this.onClickToggle.bind(this)
   }
@@ -51,12 +50,13 @@ export class Shower {
     //初始化时不显示
 
     this.iframe.style.visibility = "hidden"
-
+    this.agent?.onMessage()
     document.addEventListener("click", this.onClickToggle)
     document.body.append(this.iframe)
   }
 
   uninstall() {
+    this.agent?.offMessage()
     document.removeEventListener("click", this.onClickToggle)
     this.iframe.remove()
   }
@@ -66,7 +66,7 @@ export class Shower {
    * @param event 
    */
   private onClickToggle(event: MouseEvent) {
-    if (event.target !== this.iframe) {
+    if (event.target !== this.iframe && this.iframe.style.visibility !== "hidden") {
       this.iframe.style.visibility = "hidden"
       this.postMessage?.("pauseAudio")
     }
@@ -93,7 +93,7 @@ export class Shower {
   }
 
   /**
-   * 设置拖蓝选中时iframe样式，这是单词查询版本
+   * 设置拖蓝选中时iframe样式
    */
   private setSelectedUI(range: Range) {
     let width = 400
@@ -149,7 +149,7 @@ export class Shower {
   }
 
   /**
-  * 设置搜索时iframe样式，这是单词查询版本
+  * 设置搜索时iframe样式
   */
   private setSearchUI(form: Element) {
     let width = 400
@@ -197,5 +197,4 @@ export class Shower {
     if (range.commonAncestorContainer.nodeType === 1) element = <Element>range.commonAncestorContainer
     if (element && element.id === "extension_searchBar") return element
   }
-
 }

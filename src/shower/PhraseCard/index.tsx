@@ -1,15 +1,17 @@
-import React, { ReactNode } from "react";
+import React from "react";
 import "./index.less";
 
-import { AnkiCallback, PhraseData } from "../../../types/index";
+import { AddButtonState, PhraseData } from "../../../types/index";
 
-import AudioContext from "../AudioContext";
-import AddButton from "../components/AddButton";
+import AudioContext from "../Context/AudioContext";
+import AddButton from "../components/AddButton/index";
 import AudioButton from "../components/AudioButton";
+import { translateBTag } from "../utils/index";
 
 interface Props extends PhraseData {
-  addNote: (callback:AnkiCallback) => void;
+  addNote: () => void;
   hidden: boolean;
+  addButtonState?: AddButtonState;
 }
 
 export default class PhraseCard extends React.PureComponent<Props> {
@@ -26,6 +28,7 @@ export default class PhraseCard extends React.PureComponent<Props> {
       translations,
       phrase_audio,
       exampleSentences,
+      addButtonState,
       addNote,
     } = this.props;
     return (
@@ -38,7 +41,13 @@ export default class PhraseCard extends React.PureComponent<Props> {
               audio={audio}
               audioURL={phrase_audio}
             />
-            <AddButton key={phrase} initStatusText="添加到Anki." onClick={addNote} />
+            {addButtonState && (
+              <AddButton
+                key={phrase}
+                {...addButtonState}
+                onClick={addNote}
+              />
+            )}
           </div>
           <ul>
             {translations.reduce((acc, cur) => {
@@ -47,17 +56,17 @@ export default class PhraseCard extends React.PureComponent<Props> {
           </ul>
         </header>
         {exampleSentences && (
-          <ul className="margin_top_10">
+          <ul className="phrase_example_container">
             {exampleSentences.map((item, index) => {
               return (
                 <li key={index} className="phrase_example">
                   <AudioButton
                     audio={audio}
                     audioURL={item.example_audio}
-                    className="float_right phrase_audioButton"
+                    className="phrase_audioButton"
                   />
                   <p>{translateBTag(item.example_sentence)}</p>
-                  <p className="blue_color">
+                  <p className="phrase_example_sentence_translation">
                     {item.example_sentence_translation}
                   </p>
                 </li>
@@ -68,15 +77,4 @@ export default class PhraseCard extends React.PureComponent<Props> {
       </div>
     );
   }
-}
-
-function translateBTag(text:string):ReactNode[] {
-  const reg = new RegExp(`(<b>.+?)</b>`,"gi")
-  const textArr = text.split(reg)
-  return textArr.reduce((result,text,index) => {
-    let reactNode:ReactNode = text
-    if (text.includes("<b>")) reactNode = <b key={index}>{text.slice(3)}</b>
-    result.push(reactNode)
-    return result
-  },[] as ReactNode[])
 }

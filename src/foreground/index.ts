@@ -6,15 +6,15 @@ import { SelectionWatcher } from "../watcher/SelectionWatcher"
 //展示模块
 import { Shower } from "../shower/Shower"
 
-import { postBackend, onMessage } from "../utils/index"
+import { postBackend, onMessage,Cacher } from "../utils/index"
 
 import { CachedOptions } from "../../types/index"
 
 class FrontEnd {
-  keyboardWatcher
-  popupSearchBar
+  keyboardWatcher:KeyboardWatcher
+  popupSearchBar:PopupSearchBar
   private selectionChange
-  private shower
+  private shower:Shower
   constructor() {
     //必须绑定this
     this.showTranslated = this.showTranslated.bind(this)
@@ -35,28 +35,21 @@ class FrontEnd {
     const { command, data } = message 
     let response
     switch (command) {
-      case "addWordNote":
-        response = await postBackend("addWordNote", data)
+      case "addNote":
+        response = await postBackend("addNote", data)
         sendResponse(response)
         break;
-      case "addAllWordsNotes":
-        response = await postBackend("addAllWordsNotes", data)
+      case "relearnNote":
+        response = await postBackend("relearnNote", data)
         sendResponse(response)
-        break;
-      case "addPhraseNote":
-        response = await postBackend("addPhraseNote", data)
-        sendResponse(response)
-        break;
-      case "addSentenceNote":
-        response = await postBackend("addSentenceNote", data)
-        sendResponse(response)
-        break;
+      break;
       case "showTranslated":
         this.showTranslated(data)
         break
       case "switchSearchBar":
         this.popupSearchBar.toggleSearchBar()
         break;
+      
       default:
         throw new Error("存在未处理的指令:" + command)
     }
@@ -75,47 +68,55 @@ class FrontEnd {
     keyboardWatcher.uninstall()
     shower.uninstall()
   }
-
+  //缓存翻译
+  cacher = new Cacher(5)
   /**
    * 向后端发送获取翻译的请求，之后将请求传递给展示模块展示
    * @param text 未经处理的数据，仍可能为空，为无需翻译的字符(例如：中文)
    */
   private async showTranslated(text: string) {
     let translated
-    const result = this.validateText(text)
+    const result = validateText(text)
     if (!result) return
-    translated = await postBackend("translateText", text)
+    translated = this.cacher.get(text)
+    if (!translated) {
+      translated = await postBackend("translateText", text)
+      //字符串为错误信息，不对错误信息进行缓存
+      if (typeof translated !== "string"){
+        this.cacher.set(text,translated)
+      } 
+    }
     this.shower.showTranslation(translated)
   }
 
-  /**
+}
+ /**
    * 纯函数，过滤掉无效查询
    *  - 字符串为空的情况
    *  - 查询主体并非英文
    * @param text 
    * @return 返回过滤后的字符，该字符应当是符合查询要求的
    */
-  private validateText(text: string) {
-    text = text.trim()
+function validateText(text: string) {
+  text = text.trim()
 
-    //过滤为空的字符串
-    if (!text) return false
+  //过滤为空的字符串
+  if (!text) return false
 
-    //如果英文字母数量不足百分之五十，则认为其并非需要查询的内容
-    const amount = text.match(/\b[a-z]+\b/ig)?.reduce((amount, item) => {
-      return amount + item.length
-    }, 0)
-    if (!amount || (amount / text.length < 0.5)) return false
+  //如果英文字母数量不足百分之五十，则认为其并非需要查询的内容
+  const amount = text.match(/\b[a-z]+\b/ig)?.reduce((amount, item) => {
+    return amount + item.length
+  }, 0)
+  if (!amount || (amount / text.length < 0.5)) return false
 
-    //过滤用户对URL的复制的查询
-    if (text.search(/http:|https:/gi) === 0) return false
+  //过滤用户对URL的复制的查询
+  if (text.search(/http:|https:/gi) === 0) return false
 
-    //存在3个以上换行符时，用户可能只是进行复制粘贴操作，过滤掉
-    const nLength = text.match(/\n/g)?.length
-    if (nLength && nLength > 3) return false  
+  //存在3个以上换行符时，用户可能只是进行复制粘贴操作，过滤掉
+  const nLength = text.match(/\n/g)?.length
+  if (nLength && nLength > 3) return false  
 
-    return true
-  }
+  return true
 }
 
 const frontEnd = new FrontEnd()

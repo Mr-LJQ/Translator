@@ -1,19 +1,21 @@
 import React, { RefObject } from "react";
 import "./index.less";
 
-import AudioContext from "../AudioContext";
+import AudioContext from "../Context/AudioContext";
 import Explanation from "./Explanation";
 import ExampleSentences from "./Examples";
-import AddButton from "../components/AddButton";
+import AddButton from "../components/AddButton/index";
 import AudioButton from "../components/AudioButton";
 import Translations from "../components/Translations";
 
-import { AnkiCallback, WordData } from "../../../types/index";
+import { AddButtonState, WordData } from "../../../types/index";
 
 interface Props extends WordData {
-  addAllNotes: (callback: AnkiCallback) => void;
-  addNote: (index: number, callback: AnkiCallback) => void;
+  addAllNotes: () => void;
+  addNote: (index: number) => void;
   hidden: boolean;
+  addButtonState?: AddButtonState;
+  addButtonStates?: AddButtonState[];
 }
 
 export default class WordCard extends React.PureComponent<Props> {
@@ -36,6 +38,8 @@ export default class WordCard extends React.PureComponent<Props> {
       phonetic,
       starAmount,
       translations,
+      addButtonState,
+      addButtonStates,
       translationUnits,
       addNote,
       addAllNotes,
@@ -47,12 +51,13 @@ export default class WordCard extends React.PureComponent<Props> {
           <div className="word_flex">
             <h1 className="word">{word}</h1>
             <div className="word_star">{"★".repeat(starAmount)}</div>
-            <AddButton
-              hidden={translationUnits === undefined}
-              onClick={addAllNotes}
-              initStatusText="全部添加到Anki!"
-              key={word}
-            />
+            {addButtonState && (
+              <AddButton
+                {...addButtonState}
+                onClick={addAllNotes}
+                statusIcons={["➕","✔","!"]}
+              />
+            )}
           </div>
           <div className="word_flex flex_wrap">
             <p
@@ -95,7 +100,8 @@ export default class WordCard extends React.PureComponent<Props> {
                   <Explanation
                     {...other}
                     key={index}
-                    addNote={(callback) => addNote(index, callback)}
+                    addNote={() => addNote(index)}
+                    addButtonState={(addButtonStates as AddButtonState[])[index]}
                   />
                   {exampleSentences && (
                     <ExampleSentences examples={exampleSentences} />

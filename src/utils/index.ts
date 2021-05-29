@@ -1,7 +1,7 @@
-export {agent} from "./agent"
-export type {PostMessage} from "./agent"
+export {default as Agent} from "./agent"
+export type{PostMessage} from "./agent"
 export {postBackend,onMessage,postFrontend} from "./messager"
-export {Cacher} from "./cacher"
+export {Cacher,History} from "./cacher"
 
 /**
  * 防抖
@@ -101,4 +101,30 @@ export function isActiveElement() {
   let filterNodeName = ["INPUT", "TEXTAREA"]
   if (filterNodeName.includes(focusNode)) return true
   return false
+}
+
+
+interface Options {
+  predicate:(this:void,...args:any[])=>boolean,
+  callback?:(this:void,...args:any[]) =>void
+  time?:number
+  firstRun?:boolean
+}
+
+export function loopJudgment(options:Options) {
+  const {predicate,callback,time = 1000,firstRun = false} = options
+  let count = 0
+  let timerId:any 
+  if (firstRun && predicate(count)) return callback?.()
+  const loopCallback = function () {
+    if (predicate(count)) {
+      return callback?.()
+    }
+    count++
+    timerId = setTimeout(loopCallback, time);
+  }
+  timerId = setTimeout(loopCallback, time);
+  return function () {
+    clearTimeout(timerId)
+  }
 }

@@ -1,15 +1,16 @@
 import React from "react";
 import "./index.less";
 
-import { AnkiCallback, SentenceData } from "../../../types/index";
+import { AddButtonState, SentenceData } from "../../../types/index";
 
-import AudioContext from "../AudioContext";
+import AudioContext from "../Context/AudioContext";
 import AudioButton from "../components/AudioButton";
-import AddButton from "../components/AddButton";
+import AddButton from "../components/AddButton/index";
 
 interface Props extends SentenceData {
   hidden: boolean;
-  addNote: (callback: AnkiCallback) => void;
+  addNote: () => void;
+  addButtonState?:AddButtonState
 }
 
 export default class SentenceCard extends React.PureComponent<Props> {
@@ -22,7 +23,7 @@ export default class SentenceCard extends React.PureComponent<Props> {
 
   render() {
     const audio = this.context;
-    const { hidden, sentence, sentence_audio, sentenceTranslation, addNote } =
+    const { hidden, sentence, sentence_audio,addButtonState, sentenceTranslation, addNote } =
       this.props;
     return (
       <div id="sentenceCard" hidden={hidden}>
@@ -36,7 +37,7 @@ export default class SentenceCard extends React.PureComponent<Props> {
           <h1 className="sentence">{sentence}</h1>
         </header>
         <main className="sentence_translation">
-          <AddButton key={sentence} initStatusText="添加到Anki" onClick={addNote} />
+          {addButtonState && <AddButton key={sentence} {...addButtonState} onClick={addNote} />}
           {sentenceTranslation}
         </main>
       </div>
