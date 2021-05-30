@@ -52,7 +52,7 @@ export default class Collins_en_cn {
 async function getPageDOM(input: string): Promise<Document> {
   return new Promise((resolve, reject) => {
     //词典基于有道网页版
-    let BASE_URL = "http://dict.youdao.com/w/"
+    let BASE_URL = "https://dict.youdao.com/w/"
     let searchURL = BASE_URL + encodeURIComponent(input)
     let xhr = new XMLHttpRequest()
     xhr.open("GET", searchURL)

@@ -1,21 +1,21 @@
 import { ExampleSentence, PhraseData } from "../../types/index"
 
-export default function translatePhrase(dom:Document): PhraseData | undefined {
+export default function translatePhrase(dom: Document): PhraseData | undefined {
   const phrase = getOriginText(dom)
-    if (!phrase) return
-    let translation = dom.querySelectorAll('#ydTrans .trans-container p')[1]?.textContent?.trim()
-    const translations = getTranslation(dom) || (translation && [translation])
-    if (!translations) return
-    
-    const phrase_audio = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(phrase)}`
-    const exampleSentences = getPhraseExamples(dom)
-    if (!exampleSentences) return
-    return {
-      phrase,
-      translations,
-      phrase_audio,
-      exampleSentences
-    }
+  if (!phrase) return
+  let translation = dom.querySelectorAll('#ydTrans .trans-container p')[1]?.textContent?.trim()
+  const translations = getTranslation(dom) || (translation && [translation])
+  if (!translations) return
+
+  const phrase_audio = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(phrase)}`
+  const exampleSentences = getPhraseExamples(dom)
+  if (!exampleSentences) return
+  return {
+    phrase,
+    translations,
+    phrase_audio,
+    exampleSentences
+  }
 }
 
 /**
@@ -23,7 +23,7 @@ export default function translatePhrase(dom:Document): PhraseData | undefined {
  * @param dom 
  * @returns 
  */
- function getOriginText(dom: Document): string {
+function getOriginText(dom: Document): string {
   return (
     dom.querySelector(".wordbook-js")?.firstElementChild?.textContent?.trim() ||
     ""
@@ -35,7 +35,7 @@ export default function translatePhrase(dom:Document): PhraseData | undefined {
  * @param dom 具有翻译内容的页面DOM
  * @returns 
  */
- function getTranslation(dom: Document): string[] | undefined {
+function getTranslation(dom: Document): string[] | undefined {
   const ul = dom.querySelector("#phrsListTab .trans-container > ul")
   if (!ul) return
   const liNodes = ul.children
@@ -54,7 +54,7 @@ export default function translatePhrase(dom:Document): PhraseData | undefined {
  * @param dom 
  * @returns 
  */
- function getPhraseExamples(dom: Document): ExampleSentence[] | undefined {
+function getPhraseExamples(dom: Document): ExampleSentence[] | undefined {
   let liNodes = dom.querySelectorAll("#bilingual .ol li")
   let result = Array.from(liNodes).reduce((result, li) => {
     let pNodes = li.querySelectorAll("p")

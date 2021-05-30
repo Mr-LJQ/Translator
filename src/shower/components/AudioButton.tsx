@@ -12,7 +12,7 @@ export default class AudioButton extends React.Component<Props> {
   }
 
   playAudio() {
-    const {audioURL,audio} = this.props
+    let {audioURL,audio} = this.props
     if (!audioURL) return
     //避免重复加载
     if (audio.src !== audioURL) {

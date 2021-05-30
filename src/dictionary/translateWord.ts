@@ -57,8 +57,8 @@ export default async function translateWord(word:string,dom:Document): Promise<W
   let en = dom.querySelectorAll(".pronounce")?.[0]?.textContent?.replace(/\s*|\r|\n/g, "")
   let am = dom.querySelectorAll(".pronounce")?.[1]?.textContent?.replace(/\s*|\r|\n/g, "")
   let am_audio, en_audio
-  if (en) en_audio = `http://dict.youdao.com/dictvoice?audio=${word}&type=1`
-  if (am) am_audio = `http://dict.youdao.com/dictvoice?audio=${word}&type=2`
+  if (en) en_audio = `https://dict.youdao.com/dictvoice?audio=${word}&type=1`
+  if (am) am_audio = `https://dict.youdao.com/dictvoice?audio=${word}&type=2`
 
   let phonetic = dom.querySelector("#collinsResult .wt-container .phonetic")?.textContent?.trim()
   if (phonetic) {
