@@ -79,8 +79,11 @@ export class Shower {
   showTranslation(data: TranslationResult) {
     this.postMessage?.("showTranslation", data, () => {
       //UI更新后再展示iframe,避免闪烁
-      const range = getSelection()?.getRangeAt(0)
-      if (!range) return
+      const selection = getSelection()
+      if (!selection) return
+      const rangeCount = selection.rangeCount 
+      if (!rangeCount) return
+      const range = selection.getRangeAt(0)
       let element = this.getSearchBar(range)
       if (element) {  //搜索栏
         this.setSearchUI(element)

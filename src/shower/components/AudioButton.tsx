@@ -18,9 +18,13 @@ export default class AudioButton extends React.Component<Props> {
     if (audio.src !== audioURL) {
       audio.src = audioURL;
     }
-    //重头开始播放
-    audio.currentTime = 0;
-    audio.play();
+    try {
+      //重头开始播放
+      audio.currentTime = 0;
+      audio.play();
+    }catch(e) {
+      console.warn(e)
+    }
   }
 
   render () {
