@@ -3,11 +3,11 @@ import {SentenceData} from "./index"
 //拓展可以提供给Anki的数据，单词部分
 export interface NoteWordData {
   word: string,
-  starAmount: string,
-  definition: string,
+  starAmount?: string,
+  definition?: string,
   translation: string,
-  part_of_speech: string,
-  definition_audio:string,
+  part_of_speech?: string,
+  definition_audio?:string,
   am?: string,
   en?: string,
   am_audio?: string,

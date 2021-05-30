@@ -13,8 +13,9 @@ import { AddButtonState, WordData } from "../../../types/index";
 interface Props extends WordData {
   addAllNotes: () => void;
   addNote: (index: number) => void;
+  addNote_easy: () => void;
   hidden: boolean;
-  addButtonState?: AddButtonState;
+  addButtonState: AddButtonState;
   addButtonStates?: AddButtonState[];
 }
 
@@ -43,6 +44,7 @@ export default class WordCard extends React.PureComponent<Props> {
       translationUnits,
       addNote,
       addAllNotes,
+      addNote_easy,
     } = this.props;
     const audio = this.context;
     return (
@@ -51,12 +53,14 @@ export default class WordCard extends React.PureComponent<Props> {
           <div className="word_flex">
             <h1 className="word">{word}</h1>
             <div className="word_star">{"★".repeat(starAmount)}</div>
-            {addButtonState && (
+            {addButtonStates ? (
               <AddButton
                 {...addButtonState}
                 onClick={addAllNotes}
-                statusIcons={["➕","✔","!"]}
+                statusIcons={["➕", "✔", "!"]}
               />
+            ) : (
+              <AddButton {...addButtonState} onClick={addNote_easy} />
             )}
           </div>
           <div className="word_flex flex_wrap">
@@ -101,7 +105,9 @@ export default class WordCard extends React.PureComponent<Props> {
                     {...other}
                     key={index}
                     addNote={() => addNote(index)}
-                    addButtonState={(addButtonStates as AddButtonState[])[index]}
+                    addButtonState={
+                      (addButtonStates as AddButtonState[])[index]
+                    }
                   />
                   {exampleSentences && (
                     <ExampleSentences examples={exampleSentences} />

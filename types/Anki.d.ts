@@ -34,6 +34,6 @@ export interface AddNoteParams {
   picture?: MediaItem
 }
 
-export type NoteData = WordData | PhraseData | SentenceData | NoteWordData
+export type NoteData = PhraseData | SentenceData | NoteWordData
 
 export type AnkiCallback = (data: AnkiResponse) => void

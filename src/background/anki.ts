@@ -27,9 +27,9 @@ export class AnkiConnection {
 
   async addNote(data: NoteData): Promise<AnkiResponse> {
     try {
-      if ("sentence" in data) await this.addSentenceNote(data)
+      if ("word" in data) await this.addWordNote(data)
       if ("phrase" in data) await this.addPhraseNote(data)
-      if ("definition" in data) await this.addWordNote(data)
+      if ("sentence" in data) await this.addSentenceNote(data)
     } catch (e) {
       //处理网络异常
       if (e === REQUEST_ERROR) return { status: 3, statusText: "网络连接异常，请检查Anki连接状况" }

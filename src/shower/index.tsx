@@ -69,6 +69,7 @@ class Shower extends React.Component<object, State> {
     this.addSentenceNote = this.addSentenceNote.bind(this);
     this.showTranslation = this.showTranslation.bind(this);
     this.addAllWordsNotes = this.addAllWordsNotes.bind(this);
+    this.addWordNote_easy = this.addWordNote_easy.bind(this);
 
     this.go = this.go.bind(this);
     this.delayed = this.delayed.bind(this);
@@ -137,8 +138,9 @@ class Shower extends React.Component<object, State> {
                 <WordCard
                   {...wordData}
                   hidden={status !== 2} //避免缓存的数据结构显示,最大程度复用已有结构
-                  addButtonState={addWordState}
+                  addButtonState={addWordState as AddButtonState}
                   addNote={this.addWordNote}
+                  addNote_easy = {this.addWordNote_easy}
                   addButtonStates={addButtonStates}
                   addAllNotes={this.addAllWordsNotes}
                 />
@@ -375,6 +377,8 @@ class Shower extends React.Component<object, State> {
     }
     //整理出目标数据
     const noteWordData = getNoteWordData(wordData, index);
+    //避免ts报错，其必定有值
+    if (!noteWordData) return
     this.postMessage("addNote", noteWordData, (data: AnkiResponse) => {
       const { status } = data;
       this.setState((state) => {
@@ -393,6 +397,56 @@ class Shower extends React.Component<object, State> {
         this.addWordNoteFlags[index] = false;
       }
       //如果已经添加成功，则不改变this.addSentenceNoteFlag的值，避免多次添加
+    });
+  }
+
+  //没有定义时的单词添加版本
+  addWordNote_easy () {
+    if (this.addAllWordsNotesFlag) return;
+    this.addAllWordsNotesFlag = true;
+    const { wordData, addWordState } = this.state;
+    if (!wordData || !addWordState) return;
+    this.setState((state) => {
+      const { addWordState } = state;
+      //避免cardIds被覆盖
+      return {
+        addWordState: {
+          ...addWordState,
+          ...{
+            status: -1,
+            statusText: "...",
+          },
+        },
+      };
+    });
+    //["➕", "✔", "✖","✄", "↻", ]
+    //处理重置学习进度的逻辑
+    const {cardIds } = addWordState;
+    if (cardIds) {
+      return this.postMessage("relearnNote", cardIds, (data: AnkiResponse) => {
+        const { status } = data;
+        this.setState((state) => {
+          const { addWordState } = state;
+          return { addWordState: { ...addWordState, ...data } };
+        });
+        if (status === 2 || status === 3) {
+          this.addAllWordsNotesFlag = false;
+        }
+        //如果已经添加成功，则不改变this.addAllWordsNotesFlag的值，避免多次添加
+      });
+    }
+    const data = getNoteWordData_easy(wordData)
+    //添加卡片的逻辑
+    this.postMessage("addNote", data, (data: AnkiResponse) => {
+      const { status } = data;
+      this.setState((state) => {
+        const { addWordState } = state;
+        return { addWordState: data  };
+      });
+      if (status === 2 || status === 3 || status === 4) {
+        this.addAllWordsNotesFlag = false;
+      }
+      //如果已经添加成功，则不改变this.addAllWordsNotesFlag的值，避免多次添加
     });
   }
 
@@ -585,12 +639,16 @@ class Shower extends React.Component<object, State> {
         statusText: "添加到Anki",
       };
     });
-    const addWordState = addButtonStates && {
+    const addWordState = addButtonStates ? {
       status: 0,
       statusText: "一键触发所有添加",
-    };
+    } : {
+      status:0,
+      statusText:"添加到Anki"
+    }
     //更新附带的状态
     this.addWordNoteFlags = [];
+    this.addAllWordsNotesFlag = false
     this.cacheHistory({
       status: 2,
       wordData: data,
@@ -610,6 +668,7 @@ class Shower extends React.Component<object, State> {
 function getNoteWordData(wordData: WordData, index: number) {
   const { starAmount, translationUnits, phonetic } = wordData;
   const { am, en, am_audio, en_audio } = phonetic;
+  if (!translationUnits) return
   const {
     part_of_speech,
     translation,
@@ -617,7 +676,7 @@ function getNoteWordData(wordData: WordData, index: number) {
     definition,
     definition_audio,
     exampleSentences,
-  } = (translationUnits as TranslationUnit[])[index];
+  } = (translationUnits)[index];
   let example_audio, example_sentence, example_sentence_translation;
   if (exampleSentences) {
     example_audio = exampleSentences[0].example_audio;
@@ -641,6 +700,32 @@ function getNoteWordData(wordData: WordData, index: number) {
     example_audio,
   };
   return noteWordData;
+}
+
+/**
+ * 纯函数，用于处理那些没有定义的单词
+ */
+function getNoteWordData_easy(wordData: WordData):NoteWordData {
+  const { starAmount, phonetic,word,translations} = wordData;
+  const { am, en, am_audio, en_audio } = phonetic;
+  const translation = translations?.reduce((acc,cur,index) => {
+    if (index === 0) {
+      acc += cur 
+    } else {
+      acc += `<br />${cur}`
+    }
+    return acc
+  },"") || ""
+  const noteWordData: NoteWordData = {
+    word,
+    starAmount: "★".repeat(starAmount),
+    translation,
+    am,
+    en,
+    am_audio,
+    en_audio,
+  };
+  return noteWordData
 }
 
 //避免内部滚动条影响到外部滚动条，只能够减低灵敏度，实际上还是会影响到
