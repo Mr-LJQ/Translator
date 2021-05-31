@@ -57,7 +57,7 @@ async function getPageDOM(input: string): Promise<Document> {
     let xhr = new XMLHttpRequest()
     xhr.open("GET", searchURL)
     xhr.responseType = "document"
-    xhr.timeout = 3000
+    xhr.timeout = 6000
     xhr.addEventListener("load", function () {
       resolve(xhr.response)
     })

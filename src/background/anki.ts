@@ -46,7 +46,7 @@ export class AnkiConnection {
         return { status: 2, statusText: "请先进行必要配置后再添加卡片" }
       }
       //承接对重复添加的处理(会以错误的形式扔出)
-      if ("status" in e && e.status === 4) return e
+      if (Object(e) === e && e.status === 4) return e
       //其它错误不做特殊处理
       let statusText = e
       e.message && (statusText = e.message)
@@ -114,7 +114,7 @@ export class AnkiConnection {
       if (!phraseConfig) throw PHRASE_CONFIG_ERROR
       const { deckName, matchedFields } = phraseConfig
       if (!deckName || !matchedFields) throw PHRASE_CONFIG_ERROR
-      const fields: Array<keyof NotePhraseData> = ["phrase"]
+      const fields: Array<keyof NotePhraseData> = ["phrase","translations","example_sentence_1","example_sentence_2","example_sentence_3","example_sentence_translation_1","example_sentence_translation_2","example_sentence_translation_3"]
       const query = fields.reduce((query, key) => {
         const field = matchedFields[key]
         const content = notePhraseData[key]
@@ -134,7 +134,7 @@ export class AnkiConnection {
         case 1:
           throw { status: 4, statusText: "卡片重复添加，是否重置其学习进度？", cardIds }
         default:
-          throw `通过:${query} , 进行查询后，发现存在多张卡片，请用户更具该查询字符串，自行查看Anki。`
+          throw `通过:${query} , 进行查询后，发现存在多张卡片，请用户根据该查询字符串，自行查看Anki。`
       }
     }
   }
@@ -153,7 +153,15 @@ export class AnkiConnection {
       if (!deckName || !matchedFields) throw SENTENCE_CONFIG_ERROR
       const { sentence } = matchedFields
       if (!sentence) throw SENTENCE_CONFIG_ERROR
-      const query = `deck:${deckName} "${data["sentenceTranslation"]}"`
+      const fields: Array<keyof NoteSentenceData> = ["sentenceTranslation","sentence"]
+      const query = fields.reduce((query, key) => {
+        const field = matchedFields[key]
+        const content = data[key]
+        if (!field || !content) return query
+        //注意前方的空格，其是必须的
+        query += ` "${content}"`
+        return query
+      }, `deck:${deckName}`)
       const cardIds = await this.findCards(query)
       const { length } = cardIds
       switch (length) {
@@ -165,7 +173,7 @@ export class AnkiConnection {
         case 1:
           throw { status: 4, statusText: "卡片重复添加，是否重置其学习进度？", cardIds }
         default:
-          throw `通过:${query} , 进行查询后，发现存在多张卡片，请用户更具该查询字符串，自行查看Anki。`
+          throw `通过:${query} , 进行查询后，发现存在多张卡片，请用户根据该查询字符串，自行查看Anki。`
       }
     }
   }
