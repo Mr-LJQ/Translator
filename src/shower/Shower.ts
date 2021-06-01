@@ -1,7 +1,5 @@
 import {
-  Message,
   Handler,
-  SendResponse,
   TranslationResult,
 } from "../../types/index"
 
@@ -35,6 +33,13 @@ export class Shower {
     this.onClickToggle = this.onClickToggle.bind(this)
   }
 
+  hiddenIframe () {
+    this.iframe.style.cssText = `
+      visibility:hidden;
+      position:fixed;
+    `
+  }
+
   install() {
     /*
       为什么使用visibility控制iframe显示隐藏？
@@ -49,7 +54,8 @@ export class Shower {
     */
     //初始化时不显示
 
-    this.iframe.style.visibility = "hidden"
+    this.hiddenIframe()
+
     this.agent?.onMessage()
     document.addEventListener("click", this.onClickToggle)
     document.body.append(this.iframe)
@@ -67,7 +73,7 @@ export class Shower {
    */
   private onClickToggle(event: MouseEvent) {
     if (event.target !== this.iframe && this.iframe.style.visibility !== "hidden") {
-      this.iframe.style.visibility = "hidden"
+      this.hiddenIframe()
       this.postMessage?.("pauseAudio")
     }
   }
