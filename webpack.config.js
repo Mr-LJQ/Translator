@@ -22,6 +22,9 @@ module.exports = {
       import: "./src/options/index",
       dependOn: "shared",
     },
+    injectScript:{
+      import:"./src/injectScript/index"
+    },
     shared: ["react", "react-dom","classnames"],
   },
   output: {

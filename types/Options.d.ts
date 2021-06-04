@@ -43,7 +43,7 @@ export interface CachedOptions {
   connectionMethod?:string, //获取上次选择的连接到Anki的方法
   isOpen?:boolean, //是否启用插件
   hotKey?:HotKey //自动选词热键
-  defaultActiveIndex?:TabPaneKey //打开options后，首先展示的选项卡
+  activeTabPane?:TabPaneKey //打开options后，首先展示的选项卡
   ankiConnectionURL:string
 }
 
@@ -64,7 +64,7 @@ export interface PhraseConfig extends BasisAnkiConfig{
   matchedFields?:Partial<NotePhraseData>
 }
 
-export type HotKey = "shiftKey" | "ctrlKey" | "altKey" | undefined
+type HotKey = "shiftKey" | "ctrlKey" | "altKey" | undefined
 
 export interface DeckAndModels {
   deckNames:string[]

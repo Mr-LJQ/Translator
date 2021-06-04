@@ -8,9 +8,7 @@ export type {
   ExampleSentence,
 } from "./Translation"
 
-
 export type {
-  HotKey,
   NoteWordData,
   NotePhraseData,
   NoteSentenceData,
@@ -32,7 +30,7 @@ export type {
 
 export type {
   Message,
-  Handler,
+  MessageHandler,
   SendResponse,
 } from "./Handler"
 
@@ -40,3 +38,10 @@ export type {
   ShowData,
   AddButtonState
 }from "./Shower"
+
+export interface Point {
+  x:number,
+  y:number
+}
+
+export type AnyFunction = (...args:any[]) => void

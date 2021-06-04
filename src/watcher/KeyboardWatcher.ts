@@ -4,29 +4,26 @@
     自动选中当前鼠标悬停位置的所对应的单词
     进行对选择单词的查询
 */
-import {getSelectionText ,getRangeFromPoint , isActiveElement} from "../utils/index"
-import { HotKey } from "../../types/index"
-
-interface Point { x: number, y: number }
+import { getSelectionText, getRangeFromPoint } from "../utils/index"
+import { CachedOptions, Point } from "../../types/index"
 
 export class KeyboardWatcher {
 
-  private point: Point
+  private getClientPoint: () => Point
+  private showTranslated: (text: string) => void
+  private hotKey: CachedOptions["hotKey"]
   private checkout: RegExp
-  private hotKey: HotKey
-  private showTranslated
 
-  constructor(showTranslated:(text:string)=>void) {
-    this.hotKey
-    this.point = {} as Point
-    this.checkout = /[a-z_]/i
+  constructor(showTranslated: (text: string) => void, getClientPoint: () => Point) {
+    this.getClientPoint = getClientPoint
     this.showTranslated = showTranslated
+    this.hotKey
+    this.checkout = /[a-z_]/i
 
     //所有向外暴露的方法的this都是绑定的
     this.install = this.install.bind(this)
     this.uninstall = this.uninstall.bind(this)
     this.onKeyDown = this.onKeyDown.bind(this)
-    this.onMouseMove = this.onMouseMove.bind(this)
     this.updateHotKey = this.updateHotKey.bind(this)
     this.updateCheckout = this.updateCheckout.bind(this)
   }
@@ -34,31 +31,20 @@ export class KeyboardWatcher {
   updateCheckout(source: string) {
     this.checkout = new RegExp(source)
   }
-  updateHotKey(hotKey: HotKey) {
+  updateHotKey(hotKey: CachedOptions["hotKey"]) {
     this.hotKey = hotKey
   }
 
   install() {
-    //时刻更新鼠标当前位置到this.point
-    document.addEventListener("mousemove", this.onMouseMove)
     document.addEventListener("keydown", this.onKeyDown)
   }
   uninstall() {
-    document.removeEventListener("mousemove", this.onMouseMove)
     document.removeEventListener("keydown", this.onKeyDown)
   }
 
-  //因为无法直接获取鼠标相对视口的位置，因此需要该监听MouseMove，通过事件对象获取
-  private onMouseMove(event: MouseEvent) {
-    let { point } = this
-    point.x = event.clientX
-    point.y = event.clientY
-  }
-
   private onKeyDown(event: KeyboardEvent) {
-    if (isActiveElement()) return
-    const { hotKey, point } = this
-    const { x, y } = point
+    const { hotKey } = this
+    const { x, y } = this.getClientPoint()
     if (hotKey && event[hotKey]) {
       this.autoSelectText(x, y)
       let selectedText = getSelectionText()
@@ -100,7 +86,6 @@ export class KeyboardWatcher {
 
     selection.removeAllRanges()
     selection.addRange(range)
-    //触发selectionchange监听，查询相关选中
   }
 
   /**

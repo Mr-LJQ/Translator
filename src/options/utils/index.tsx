@@ -1,5 +1,5 @@
 import { ChangeEvent, ReactElement, ReactNode, useCallback, useState } from 'react'   
-import { postBackend } from '../../utils/index'
+import { postBackend } from "../../extensions_API/index"
 
 import { TabPaneKey, WordConfig } from '../../../types/index'
 import { TabPaneProps } from '../../components/Tabs/index'

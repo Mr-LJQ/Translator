@@ -2,18 +2,20 @@ export class Cacher<K = any,T = any> {
   private cacheSpace:T[]
   private cacheIndex:K[]
   private maxAmount:number
+  private index:number
   constructor (amount = 5) {
     this.cacheSpace = []
     this.cacheIndex = []
     this.maxAmount = amount
+    this.index = 0
   }
   set (key:K,value:T) {
-    const {cacheIndex,cacheSpace,maxAmount} = this
-    cacheIndex.push(key)
-    cacheSpace.push(value)
-    if (cacheIndex.length > maxAmount) {
-      cacheIndex.shift()
-      cacheSpace.shift()
+    const {cacheIndex,cacheSpace,maxAmount,index} = this
+    cacheIndex[index] = key
+    cacheSpace[index] = value
+    this.index++
+    if (this.index >= maxAmount) {
+      this.index -= maxAmount
     }
   }
   get (key:K) {

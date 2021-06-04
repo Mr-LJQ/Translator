@@ -1,6 +1,6 @@
 //对用户拖蓝选中的文本进行监听，并进行查询
 
-import {getSelectionText, isActiveElement} from "../utils/index"
+import {getSelectionText} from "../utils/index"
 
 export class SelectionWatcher {
   selectionChanged
@@ -37,7 +37,6 @@ export class SelectionWatcher {
   private onMouseUp () {
     if (!this.selectionChanged) return
     this.selectionChanged = false
-    if (isActiveElement()) return
     let selectedText = getSelectionText()
     if (!selectedText) return
     this.showTranslated(selectedText)

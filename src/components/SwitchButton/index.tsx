@@ -1,39 +1,23 @@
 import React from "react";
+import classnames from "classnames"
 import "./index.less";
 
 interface Props {
-  onSwitchOpen?:(isOpen:boolean) => void
-  defaultOpen?:boolean
+  onClick?: () => void;
+  isOpen: boolean;
 }
 
 export default class SwitchButton extends React.Component<Props> {
-  state = {
-    open: this.props.defaultOpen,
-  };
-  constructor(props:any) {
+  constructor(props: Props) {
     super(props);
-    this.switchOpen = this.switchOpen.bind(this)
-  }
-
-  switchOpen () {
-    const {onSwitchOpen} = this.props
-    const {open} = this.state
-    this.setState({
-      open:!open
-    })
-    onSwitchOpen && onSwitchOpen(!open)
   }
 
   render() {
-    const { open } = this.state;
-    let switchClass = "switch"
-    let openTextClass = "left-text"
-    if (open) {
-      openTextClass += " open"
-      switchClass += " open"
-    }
+    const { isOpen,onClick } = this.props;
+    let switchClass = classnames("switch",{open:isOpen})
+    let openTextClass = classnames("left-text",{open:isOpen})
     return (
-      <div className="switch-button" onClick={this.switchOpen}>
+      <div className="switch-button" onClick={onClick}>
         <span className={openTextClass}>开</span>
         <span className="right-text">关</span>
         <span className={switchClass}></span>
@@ -41,3 +25,4 @@ export default class SwitchButton extends React.Component<Props> {
     );
   }
 }
+

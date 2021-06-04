@@ -4,7 +4,7 @@ import "./index.less";
 
 import Options from "./Options";
 import {dispatch} from "./utils/index"
-import { postBackend } from "../utils/messager";
+import { postBackend } from "../extensions_API/index";
 
 import {
   WordConfig,
@@ -21,7 +21,7 @@ async function render() {
     getCachedOptions(),
   ]);
   let {
-    defaultActiveIndex,
+    activeTabPane,
     ankiConnectionURL,
     wordConfig: _wordConfig,
     phraseConfig: _phraseConfig,
@@ -40,7 +40,7 @@ async function render() {
   ReactDOM.render(
     <Options
       cachedConfigs={{wordConfig,phraseConfig,sentenceConfig}}
-      defaultActiveIndex={defaultActiveIndex}
+      defaultActiveIndex={activeTabPane}
       connectedAnki={version !== null}
       ankiConnectionURL={ankiConnectionURL as string}//因为存在默认值，所以必定不会为undefined
     />,
@@ -105,7 +105,7 @@ async function getCachedOptions(): Promise<Partial<CachedOptions>> {
       wordConfig,
       phraseConfig,
       sentenceConfig,
-      defaultActiveIndex: "basis",
+      activeTabPane: "basis",
       ankiConnectionURL:"http://127.0.0.1:8765",
     };
     chrome.storage.local.get(

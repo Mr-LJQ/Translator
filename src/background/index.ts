@@ -1,18 +1,22 @@
 import { AnkiConnection } from "./anki"
-import  Collins_en_cn  from "../dictionary/index"
+import Collins_en_cn from "../dictionary/index"
 
-import { onMessage, postFrontend } from "../utils/index"
+import { Cacher } from "../utils/index"
+
+import { getStorage, onMessage, onStorageChange, postFrontend, onCommand, setStorage } from "../extensions_API/index"
 
 import {
   CachedOptions,
-  SendResponse
+  SendResponse,
+  TranslationResult
 } from "../../types/index"
 
 
 class BackEnd {
 
-  anki
-  collins
+  cacher: Cacher
+  anki: AnkiConnection
+  collins: Collins_en_cn
 
   constructor() {
 
@@ -21,6 +25,9 @@ class BackEnd {
 
     //获取anki
     this.anki = new AnkiConnection()
+
+    //缓存翻译数据
+    this.cacher = new Cacher(10)
 
     this.handler = this.handler.bind(this)
 
@@ -38,6 +45,10 @@ class BackEnd {
       case "translateText":
         response = await this.translateText(data)
         sendResponse(response)
+        break
+      case "showInjectTranslated":
+        response = await this.translateText(data.text)
+        postFrontend("showInjectTranslated", { translatedData: response, point: data.point })
         break
       case "addNote":
         response = await this.anki.addNote(data)
@@ -74,8 +85,12 @@ class BackEnd {
    * @param text 待翻译文本
    * @param sendResponse 响应翻译请求的回调函数
    */
-  private async translateText(text: string) {
+  private async translateText(text: string): Promise<TranslationResult> {
+    const { cacher } = this
+    let translated = cacher.get(text)
+    if (translated) return translated
     let translatedData = await this.collins.translateText(text)
+    if (typeof translatedData !== "string") this.cacher.set(text, translatedData)
     return translatedData
   }
 }
@@ -83,58 +98,50 @@ class BackEnd {
 const backEnd = new BackEnd()
 
 //监听用户快捷键，用于开关拓展
-chrome.commands.onCommand.addListener((command) => {
-  if (command === "enabled") {
-    const isOpen: keyof CachedOptions = "isOpen"
-    chrome.storage.local.get(isOpen, function ({ isOpen }: Partial<CachedOptions>) {
-      const cacheOptions: Partial<CachedOptions> = {
-        isOpen: !isOpen
-      }
-      chrome.storage.local.set(cacheOptions)
+onCommand({
+  enabled: () => {
+    getStorage({
+      isOpen: (isOpen: CachedOptions['isOpen']) => setStorage({ isOpen: !isOpen })
     })
-  }
-  //内容脚本不存在commands，因此无法监听快捷键指令，因此需要传输指令到内容脚本
-  if (command === "search_bar") {
-    postFrontend("switchSearchBar")
-  }
+  },
+  search_bar: () => postFrontend("switchSearchBar"),
 })
-
 
 //初始化AnkiConfig
-const cachedOptions: Array<keyof CachedOptions> = ["wordConfig", "phraseConfig", "sentenceConfig","ankiConnectionURL"]
-chrome.storage.local.get(cachedOptions, ({
-  wordConfig,
-  phraseConfig,
-  sentenceConfig,
-  ankiConnectionURL
-}: Partial<CachedOptions>) => {
-  backEnd.anki.updateAnkiConfig({
-    wordConfig,
-    phraseConfig,
-    sentenceConfig,
-    ankiConnectionURL,
-  })
+getStorage({
+  wordConfig: null,
+  phraseConfig: null,
+  sentenceConfig: null,
+  ankiConnectionURL: null,
+},(config) => {
+  backEnd.anki.updateAnkiConfig(config)
 })
 
-//监听用户配置改变，并进行相应更新
-const isOpen: keyof CachedOptions = "isOpen"
-chrome.storage.onChanged.addListener((changes) => {
-  //处理Anki配置变化
-  cachedOptions.forEach((name) => {
-    const option = changes[name]
-    if (!option) return
-    const { newValue } = option
-    backEnd.anki.updateAnkiConfig({
-      [name]: newValue
-    })
-  })
+//监听用户配置更新
+onStorageChange({
+  wordConfig: (_, wordConfig: CachedOptions["wordConfig"]) => backEnd.anki.updateAnkiConfig({ wordConfig }),
+  phraseConfig: (_, phraseConfig: CachedOptions["phraseConfig"]) => backEnd.anki.updateAnkiConfig({ phraseConfig }),
+  sentenceConfig: (_, sentenceConfig: CachedOptions["sentenceConfig"]) => backEnd.anki.updateAnkiConfig({ sentenceConfig }),
+  ankiConnectionURL: (_, ankiConnectionURL: CachedOptions["ankiConnectionURL"]) => backEnd.anki.updateAnkiConfig({ ankiConnectionURL }),
   //改变BrowserAction的状态，关闭时添加“off”字样
-  const option = changes[isOpen]
-  if (!option) return
-  const { newValue } = option
-  let text = ""
-  newValue ? text : text = "off"
-  chrome.browserAction.setBadgeText({ text })
+  isOpen: (_, value) => value ? chrome.browserAction.setBadgeText({ text: "" }) : chrome.browserAction.setBadgeText({ text: "off" })
 })
 
+chrome.contextMenus.create({
+  contexts: ["frame"],
+  title: "注入划词助手",
+})
 
+//用于避免重复注入
+const injectedFrames: number[] = []
+
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  const { frameId } = info
+  if (!frameId) throw new Error("info.frameId is undefined")
+  if (injectedFrames.includes(frameId)) return
+  injectedFrames.push(frameId)
+  chrome.tabs.executeScript({
+    frameId: info.frameId,
+    file: "/injectScript.js"
+  })
+})

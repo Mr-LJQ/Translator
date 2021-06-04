@@ -1,4 +1,5 @@
 //监听用户操作的模块
+import { MousePointWatcher } from "../watcher/mousePointWatcher"
 import { KeyboardWatcher } from "../watcher/KeyboardWatcher"
 import { PopupSearchBar } from "../watcher/PopupSearchBar"
 import { SelectionWatcher } from "../watcher/SelectionWatcher"
@@ -6,33 +7,41 @@ import { SelectionWatcher } from "../watcher/SelectionWatcher"
 //展示模块
 import { Shower } from "../shower/Shower"
 
-import { postBackend, onMessage,Cacher } from "../utils/index"
+import { validateText } from "../utils/index"
+import { onMessage, postBackend, getStorage, onStorageChange } from "../extensions_API/index"
 
-import { CachedOptions } from "../../types/index"
+import { CachedOptions, Point, ShowData } from "../../types/index"
 
 class FrontEnd {
-  keyboardWatcher:KeyboardWatcher
-  popupSearchBar:PopupSearchBar
-  private selectionChange
-  private shower:Shower
+  private shower: Shower
+  popupSearchBar: PopupSearchBar
+  keyboardWatcher: KeyboardWatcher
+  private selectionWatcher: SelectionWatcher
+  private mousePointWatcher: MousePointWatcher
+  private previousPoint: Point | null
   constructor() {
     //必须绑定this
-    this.showTranslated = this.showTranslated.bind(this)
     this.handler = this.handler.bind(this)
+    this.showHostTranslated = this.showHostTranslated.bind(this)
 
-    this.keyboardWatcher = new KeyboardWatcher(this.showTranslated)
-    this.popupSearchBar = new PopupSearchBar(this.showTranslated)
-    this.selectionChange = new SelectionWatcher(this.showTranslated)
+    this.mousePointWatcher = new MousePointWatcher()
+    const { getClientPoint } = this.mousePointWatcher
+    this.keyboardWatcher = new KeyboardWatcher(this.showHostTranslated, getClientPoint,)
+    this.popupSearchBar = new PopupSearchBar(this.showHostTranslated)
+    this.selectionWatcher = new SelectionWatcher(this.showHostTranslated)
 
     //监听展示模块传递的指令，并进行处理
     this.shower = new Shower(this.handler)
 
     //监听后端传递的指令并进行处理
     onMessage(this.handler)
+
+    //用于保证在shower中进行查询时，shower的位置不移动
+    this.previousPoint = null
   }
 
-  async handler(message: any, sendResponse: any):Promise<void> {
-    const { command, data } = message 
+  async handler(message: any, sendResponse: any): Promise<void> {
+    const { command, data } = message
     let response
     switch (command) {
       case "addNote":
@@ -42,104 +51,82 @@ class FrontEnd {
       case "relearnNote":
         response = await postBackend("relearnNote", data)
         sendResponse(response)
-      break;
-      case "showTranslated":
-        this.showTranslated(data)
-        break
+        break;
       case "switchSearchBar":
         this.popupSearchBar.toggleSearchBar()
         break;
-      
+      case "showTranslated":
+        this.showShowerTranslated(data)
+        break
+      case "showInjectTranslated":
+        this.showInjectTranslated(data)
+        break
       default:
         throw new Error("存在未处理的指令:" + command)
     }
   }
 
   install() {
-    let { keyboardWatcher, selectionChange, shower } = this
-    selectionChange.install()
+    let { keyboardWatcher, selectionWatcher, shower, mousePointWatcher } = this
+    selectionWatcher.install()
     keyboardWatcher.install()
     shower.install()
+    mousePointWatcher.install()
   }
 
   uninstall() {
-    let { keyboardWatcher, selectionChange, shower } = this
-    selectionChange.uninstall()
+    let { keyboardWatcher, selectionWatcher, shower, mousePointWatcher } = this
+    selectionWatcher.uninstall()
     keyboardWatcher.uninstall()
     shower.uninstall()
+    mousePointWatcher.uninstall()
   }
-  //缓存翻译
-  cacher = new Cacher(5)
   /**
-   * 向后端发送获取翻译的请求，之后将请求传递给展示模块展示
+   * 处理主页面内容脚本的翻译展示处理请求
    * @param text 未经处理的数据，仍可能为空，为无需翻译的字符(例如：中文)
    */
-  private async showTranslated(text: string) {
-    let translated
+  private async showHostTranslated(text: string) {
+    let translatedData
     const result = validateText(text)
     if (!result) return
-    translated = this.cacher.get(text)
-    if (!translated) {
-      translated = await postBackend("translateText", text)
-      //字符串为错误信息，不对错误信息进行缓存
-      if (typeof translated !== "string"){
-        this.cacher.set(text,translated)
-      } 
-    }
-    this.shower.showTranslation(translated)
+    translatedData = await postBackend("translateText", text)
+    const point = this.mousePointWatcher.getClientPoint()
+    this.previousPoint = { ...point }
+    this.shower.showTranslation({ translatedData, point })
   }
 
-}
- /**
-   * 纯函数，过滤掉无效查询
-   *  - 字符串为空的情况
-   *  - 查询主体并非英文
-   * @param text 
-   * @return 返回过滤后的字符，该字符应当是符合查询要求的
+  /**
+   * 用于处理shower传递的翻译，其特别之处在于iframe不会移动(point没有变化)
+   * @param text 待翻译文本
+   * @returns 
    */
-function validateText(text: string) {
-  text = text.trim()
-
-  //过滤为空的字符串
-  if (!text) return false
-
-  //如果英文字母数量不足百分之五十，则认为其并非需要查询的内容
-  const amount = text.match(/\b[a-z]+\b/ig)?.reduce((amount, item) => {
-    return amount + item.length
-  }, 0)
-  if (!amount || (amount / text.length < 0.5)) return false
-
-  //过滤用户对URL的复制的查询
-  if (text.search(/http:|https:/gi) === 0) return false
-
-  //存在3个以上换行符时，用户可能只是进行复制粘贴操作，过滤掉
-  const nLength = text.match(/\n/g)?.length
-  if (nLength && nLength > 3) return false  
-
-  return true
+  private async showShowerTranslated(text: string) {
+    let translatedData
+    const result = validateText(text)
+    if (!result) return
+    translatedData = await postBackend("translateText", text)
+    const point = this.previousPoint as Point //必定有值
+    this.shower.showTranslation({ translatedData, point })
+  }
+  private showInjectTranslated (data:ShowData) {
+    let point = data.point
+    point.x -= window.outerWidth - window.innerWidth
+    point.y -= window.outerHeight - window.innerHeight
+    this.previousPoint = { ...point } //保证其独立
+    this.shower.showTranslation(data)
+  }
 }
 
 const frontEnd = new FrontEnd()
-//根据默认值决定是否开启内容脚本
-const cacheOptions: Partial<CachedOptions> = {
-  isOpen: true,//设置默认值
-  hotKey: "shiftKey"//设置默认值
-}
-chrome.storage.local.get(cacheOptions, ({
-  isOpen,
-  hotKey
-}: Partial<CachedOptions>) => {
-  if (isOpen) frontEnd.install()
-  frontEnd.keyboardWatcher.updateHotKey(hotKey)
+
+getStorage({
+  isOpen: (value: CachedOptions["isOpen"]) => value ? frontEnd.install() : frontEnd.uninstall(),
+  hotKey: (value: CachedOptions["hotKey"]) => frontEnd.keyboardWatcher.updateHotKey(value),
 })
 
-//监听用户配置改变
-chrome.storage.onChanged.addListener(({ isOpen, hotKey }: Partial<Record<keyof CachedOptions, any>>) => {
-  const newIsOpen = isOpen?.newValue
-  const newHotKey = hotKey?.newValue
-  newHotKey ? frontEnd.keyboardWatcher.updateHotKey(newHotKey) : null
-
-  if (newIsOpen === undefined) return
-  newIsOpen ? frontEnd.install() : frontEnd.uninstall()
+onStorageChange({
+  isOpen: (_, value: CachedOptions["isOpen"]) => value ? frontEnd.install() : frontEnd.uninstall(),
+  hotKey: (_, value: CachedOptions["hotKey"]) => frontEnd.keyboardWatcher.updateHotKey(value),
 })
+
 

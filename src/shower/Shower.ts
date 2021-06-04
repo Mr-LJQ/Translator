@@ -1,17 +1,21 @@
 import {
-  Handler,
-  TranslationResult,
+  Point,
+  ShowData,
+  MessageHandler,
 } from "../../types/index"
 
 import { Agent, PostMessage } from "../utils/index"
 
 export class Shower {
-
   private agent?: Agent
+  private mask: HTMLDivElement
   private postMessage?: PostMessage
   private iframe: HTMLIFrameElement
+  private iframeSize: { width: number, height: number }
 
-  constructor(handler: Handler) {
+  constructor(handler: MessageHandler) {
+
+    this.iframeSize = { width: 400, height: 300 }
 
     const iframe = this.iframe = document.createElement("iframe")
     //保证获取contentWindow
@@ -23,126 +27,97 @@ export class Shower {
         target: contentWindow,
         handler,
       })
-      this.agent?.onMessage()
+      this.agent.onMessage()
       this.postMessage = this.agent.postMessage
     })
-
     //此处的shower.html需要参考所生成文件的具体名称
     iframe.src = chrome.runtime.getURL("shower.html")
+
+    //通过蒙版点击监听来隐藏iframe，如果绑定在document上，有可能以为处于其它iframe而无效
+    const mask = this.mask = document.createElement("div")
+    mask.style.cssText = `
+      position:fixed;
+      z-index:99999;
+      left:0;
+      right:0;
+      top:0;
+      bottom:0;
+      background:rgba(0,0,0,.3);
+    `
 
     this.onClickToggle = this.onClickToggle.bind(this)
   }
 
-  hiddenIframe () {
+  hiddenIframe() {
+    const { width, height } = this.iframeSize
+    this.mask.hidden = true
     this.iframe.style.cssText = `
       visibility:hidden;
+      z-index: 999999;
+      resize: auto;
       position:fixed;
+      width:${width}px;
+      height:${height}px;
+      background: white;
+      border-radius: 5px;
+      border: 1px solid rgb(51, 51, 51);
     `
   }
 
   install() {
-    /*
-      为什么使用visibility控制iframe显示隐藏？
-       因为：在visibility：hidden状态下，iframe内部UI的是可以更新的(且在该状态下iframe不会响应事件)
-         而以下的方法，则会导致iframe内部的UI延迟到iframe可见时再进行重新渲染(导致闪烁)
-         - this.iframe.hidden = true
-         - this.iframe.style.display = "none"
-       而其它的一些方法：
-         - opacity:0 (iframe依然可以响应事件)
-         - clip:rect() (不如visibility方便)
-         - transform:scale(0) (不如visibility方便)
-    */
-    //初始化时不显示
-
     this.hiddenIframe()
-
     this.agent?.onMessage()
-    document.addEventListener("click", this.onClickToggle)
+    this.mask.addEventListener("click", this.onClickToggle)
+    document.body.append(this.mask)
     document.body.append(this.iframe)
   }
 
   uninstall() {
+    this.hiddenIframe()
     this.agent?.offMessage()
-    document.removeEventListener("click", this.onClickToggle)
+    this.mask.removeEventListener("click", this.onClickToggle)
+    this.mask.remove()
     this.iframe.remove()
   }
 
   /**
-   * 当用户点击shower外部时，隐藏shower
+   * 当用户点击mask时，隐藏shower
    * @param event 
    */
   private onClickToggle(event: MouseEvent) {
-    if (event.target !== this.iframe && this.iframe.style.visibility !== "hidden") {
-      this.hiddenIframe()
-      this.postMessage?.("pauseAudio")
-    }
+    event.stopPropagation()
+    this.hiddenIframe()
+    this.postMessage?.("pauseAudio")
   }
 
   /**
    * 一层简单的封装，其目的在于使外部调用更加便捷统一
    * @param data 
    */
-  showTranslation(data: TranslationResult) {
-    this.postMessage?.("showTranslation", data, () => {
+  showTranslation(data: ShowData) {
+    const { translatedData, point } = data
+    this.postMessage?.("showTranslation", translatedData, () => {
       //UI更新后再展示iframe,避免闪烁
-      const selection = getSelection()
-      if (!selection) return
-      const rangeCount = selection.rangeCount 
-      if (!rangeCount) return
-      const range = selection.getRangeAt(0)
-      let element = this.getSearchBar(range)
-      if (element) {  //搜索栏
-        this.setSearchUI(element)
-      } else if (range.startContainer.nodeType === 3) {//拖蓝选中
-        this.setSelectedUI(range)
-      } else { //先搜索栏后iframe拖蓝查询
-        //只需维持位置不变
-      }
+      this.showUI(point)
+      this.mask.hidden = false
     })
   }
 
   /**
-   * 设置拖蓝选中时iframe样式
+   * 展示UI
    */
-  private setSelectedUI(range: Range) {
-    let width = 400
-    let height = 300
-    let { bottom: top, left, height: rectHeight } = range.getBoundingClientRect()
-
-    /**
-     * 当用户连续查询单词，且单词左右相邻时，只要iframe处于单词正下方，则不调整left
-     */
-
-    //获取上一次展示时的iframe距离视口的偏移
-    let offsetLeft = this.iframe.offsetLeft
-    let offsetTop = this.iframe.offsetTop
-
-    //因为top获取的值更精准,因此此处需要对top、left进行取整
-    top = Math.round(top)
-    left = Math.round(left)
-    if (
-      offsetTop === top &&
-      offsetLeft < left &&
-      left < offsetLeft + width
-    ) {
-      //保持left不动
-      left = offsetLeft
-    }
-
+  private showUI(point: Point) {
+    let {width,height} = this.iframeSize 
+    let { y: top, x: left } = point
     //用于判断是否超出视口
     let clientWidth = document.documentElement.clientWidth
     let clientHeight = document.documentElement.clientHeight
 
     //对越界位置进行修正
-    if (left + width > clientWidth) {
-      left = clientWidth - width
-      left = Math.max(0, left)
-    }
-    if (top + height > clientHeight) {
-      top = top - height - rectHeight - 10
-      top = Math.max(0, top)
-    }
+    left = Math.min(Math.max(0, left),clientWidth - width)
+    top = Math.min(Math.max(0, top),clientHeight - height)
 
+    //样式是覆盖式设定，为了避免额外的样式复杂度，所有样式都是独立的(通过覆盖更新)
     this.iframe.style.cssText = `
     position:fixed;
     z-index:999999;
@@ -155,55 +130,5 @@ export class Shower {
     border-radius:5px;
     background:white;
     `
-  }
-
-  /**
-  * 设置搜索时iframe样式
-  */
-  private setSearchUI(form: Element) {
-    let width = 400
-    let height = 300
-    let { bottom: top, left, height: rectHeight, width: rectWidth } = form.getBoundingClientRect()
-
-    //使iframe居中显示
-
-    left = left - (width / 2) + (rectWidth / 2)
-
-    //用于判断是否超出视口
-    let clientWidth = document.documentElement.clientWidth
-    let clientHeight = document.documentElement.clientHeight
-
-    //对越界位置进行修正
-    if (left + width > clientWidth) {
-      left = clientWidth - width
-    }
-    if (top + height > clientHeight) {
-      top = top - height - rectHeight
-      top = Math.max(top, 0)
-    }
-
-    this.iframe.style.cssText = `
-    position:fixed;
-    z-index:999999;
-    left:${left}px;
-    top:${top}px;
-    width:${width}px;
-    height:${height}px;
-    resize:auto;
-    border:1px solid #333;
-    border-radius:5px;
-    background:white;
-    `
-  }
-
-  /**
-   * 判断翻译是否使用搜索栏查询,如果是则返回form，否则返回null
-   * @param range 用于判断是否使用search搜索
-   * @returns Boolean
-   */
-  private getSearchBar(range: Range) {
-    let element = null
-    if (range.commonAncestorContainer.nodeType === 1) element = <Element>range.commonAncestorContainer
-    if (element && element.id === "extension_searchBar") return element
   }
 }

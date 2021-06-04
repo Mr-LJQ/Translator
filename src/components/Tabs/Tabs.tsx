@@ -11,14 +11,14 @@ import TabItem from "./TabItem";
 import {Props as TabPaneProps} from "./TabPane"
 
 export interface Props {
-  initActiveKey: string;
+  activeTabPane: string;
   children: ReactElement<TabPaneProps> | ReactElement<TabPaneProps>[]
   tabsContainerClass?:string
 }
 
 function Tabs(props: Props) {
-  const { children, initActiveKey ,tabsContainerClass} = props;
-  const [activeKey, setActiveKey] = useState(".$"+initActiveKey);
+  const { children, activeTabPane ,tabsContainerClass} = props;
+  const [activeKey, setActiveKey] = useState(".$"+activeTabPane);
   
   const tabs = useMemo(() => {
     return toArray(children);

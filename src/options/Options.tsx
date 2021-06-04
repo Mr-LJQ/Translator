@@ -1,7 +1,7 @@
 import React, { ChangeEvent } from "react";
 import "./index.less";
 
-import { postBackend } from "../utils/messager";
+import {postBackend} from "../extensions_API/index"
 import { Dispatch, getDeckAndModels, tabPaneDataFactory } from "./utils/index";
 
 import BasisConfig from "./components/BasisConfig/index";
@@ -219,7 +219,7 @@ export default class Options extends React.Component<Props, State> {
 
     return (
       <>
-        <Tab tabsContainerClass="tabMenu" initActiveKey={defaultActiveIndex}>
+        <Tab tabsContainerClass="tabMenu" activeTabPane={defaultActiveIndex}>
           {tabPanes.map((tabPane) => {
             return (
               <TabPane tabItem={tabPane.tabItem} key={tabPane.key}>

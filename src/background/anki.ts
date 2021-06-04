@@ -1,4 +1,5 @@
 import { AddNoteParams, CachedOptions, NoteWordData, AnkiResponse, PhraseData, SentenceData, WordData, TranslationUnit, NotePhraseData, NoteData, TabPaneKey, SentenceConfig, NoteSentenceData, PhraseConfig, WordConfig } from "../../types/index"
+import { setStorage } from "../extensions_API/index"
 
 type Action = "version" | "addNote" | "addNotes" | "modelNames" | "deckNames" | "modelFieldNames" | "findCards" | "relearnCards"
 
@@ -244,7 +245,7 @@ export class AnkiConnection {
    * @param data NoteWordData
    * @returns 
    */
-  private formatNoteWordData(data: NoteWordData, allowDuplicate: boolean = false): AddNoteParams | void {
+  private formatNoteWordData(data: NoteWordData): AddNoteParams | void {
     const { wordConfig } = this.ankiConfig
     if (!wordConfig) return
     const { deckName, modelName, matchedFields, tags } = wordConfig
@@ -296,7 +297,7 @@ export class AnkiConnection {
       audio,
       tags: tags && tags.trim().split(/\s+/g) || [],
       options: {
-        allowDuplicate,
+        allowDuplicate:false,
         "duplicateScope": "deck",
         "duplicateScopeOptions": {
           deckName,
@@ -310,7 +311,7 @@ export class AnkiConnection {
    * @param data PhraseData
    * @returns 
    */
-  private formatNotePhraseData(data: NotePhraseData, allowDuplicate: boolean = false): AddNoteParams | void {
+  private formatNotePhraseData(data: NotePhraseData): AddNoteParams | void {
     const { phraseConfig } = this.ankiConfig
     if (!phraseConfig) return
     const { deckName, modelName, matchedFields, tags } = phraseConfig
@@ -360,7 +361,7 @@ export class AnkiConnection {
       audio,
       tags: tags && tags.trim().split(/\s+/g) || [],
       options: {
-        allowDuplicate,
+        allowDuplicate:false,
         "duplicateScope": "deck",
         "duplicateScopeOptions": {
           deckName,
@@ -374,7 +375,7 @@ export class AnkiConnection {
    * @param data PhraseData
    * @returns 
    */
-  private formatSentenceNote(data: SentenceData, allowDuplicate: boolean = false): AddNoteParams | void {
+  private formatSentenceNote(data: SentenceData): AddNoteParams | void {
     const { sentenceConfig } = this.ankiConfig
     if (!sentenceConfig) return
     const { deckName, modelName, matchedFields, tags } = sentenceConfig
@@ -417,7 +418,7 @@ export class AnkiConnection {
       audio,
       tags: tags && tags.trim().split(/\s+/g) || [],
       options: {
-        allowDuplicate,
+        allowDuplicate:false,
         "duplicateScope": "deck",
         "duplicateScopeOptions": {
           deckName,
@@ -500,12 +501,7 @@ function getNotePhraseData(data: PhraseData): NotePhraseData {
 }
 
 //如果用户未进行任何短语相关的配置，则弹出配置窗口，让用户进行配置
-const openOptions = function (tabPane: TabPaneKey) {
-  const cachedOptions: Partial<CachedOptions> = {
-    defaultActiveIndex: tabPane
-  }
-  chrome.storage.local.set(cachedOptions, () => {
-    chrome.runtime.openOptionsPage()
-  })
+const openOptions = function (activeTabPane: TabPaneKey) {
+  setStorage({activeTabPane},() => {chrome.runtime.openOptionsPage()})
   return undefined
 }

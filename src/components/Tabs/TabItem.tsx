@@ -1,6 +1,6 @@
 import React, { ReactNode } from "react"
-import "./index"
 import classnames  from "classnames"
+import "./index"
 
 interface Props {
   children:ReactNode
