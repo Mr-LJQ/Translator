@@ -1,5 +1,5 @@
 //监听用户操作的模块
-import { MousePointWatcher } from "../watcher/mousePointWatcher"
+import { MousePointWatcher } from "../watcher/MousePointWatcher"
 import { KeyboardWatcher } from "../watcher/KeyboardWatcher"
 import { PopupSearchBar } from "../watcher/PopupSearchBar"
 import { SelectionWatcher } from "../watcher/SelectionWatcher"
@@ -10,7 +10,7 @@ import { Shower } from "../shower/Shower"
 import { validateText } from "../utils/index"
 import { onMessage, postBackend, getStorage, onStorageChange } from "../extensions_API/index"
 
-import { CachedOptions, Point, ShowData } from "../../types/index"
+import { Point, ShowData } from "../../types/index"
 
 class FrontEnd {
   private shower: Shower
@@ -87,6 +87,10 @@ class FrontEnd {
    */
   private async showHostTranslated(text: string) {
     let translatedData
+    const focusNode = document.activeElement?.nodeName || ""
+    const filterNodeName = ["INPUT", "TEXTAREA"]
+    //过滤掉输入框中的文本选中
+    if (filterNodeName.includes(focusNode)) return 
     const result = validateText(text)
     if (!result) return
     translatedData = await postBackend("translateText", text)
@@ -108,7 +112,7 @@ class FrontEnd {
     const point = this.previousPoint as Point //必定有值
     this.shower.showTranslation({ translatedData, point })
   }
-  private showInjectTranslated (data:ShowData) {
+  private showInjectTranslated(data: ShowData) {
     let point = data.point
     point.x -= window.outerWidth - window.innerWidth
     point.y -= window.outerHeight - window.innerHeight
@@ -120,13 +124,13 @@ class FrontEnd {
 const frontEnd = new FrontEnd()
 
 getStorage({
-  isOpen: (value: CachedOptions["isOpen"]) => value ? frontEnd.install() : frontEnd.uninstall(),
-  hotKey: (value: CachedOptions["hotKey"]) => frontEnd.keyboardWatcher.updateHotKey(value),
+  isOpen: (value) => value ? frontEnd.install() : frontEnd.uninstall(),
+  hotKey: (value) => frontEnd.keyboardWatcher.updateHotKey(value),
 })
 
 onStorageChange({
-  isOpen: (_, value: CachedOptions["isOpen"]) => value ? frontEnd.install() : frontEnd.uninstall(),
-  hotKey: (_, value: CachedOptions["hotKey"]) => frontEnd.keyboardWatcher.updateHotKey(value),
+  isOpen: (_, value) => value ? frontEnd.install() : frontEnd.uninstall(),
+  hotKey: (_, value) => frontEnd.keyboardWatcher.updateHotKey(value),
 })
 
 

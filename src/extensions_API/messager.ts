@@ -1,4 +1,12 @@
-import { MessageHandler, AnkiResponse, TranslationResult, NoteData, Point, ShowData } from "../../types/index"
+import {
+  Point,
+  NoteData,
+  ShowData,
+  AnkiResponse,
+  MessageHandler,
+  TranslationResult,
+} from "../../types/index"
+
 //监听拓展不同模块间消息传递的函数
 export function onMessage(handler: MessageHandler) {
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -22,6 +30,7 @@ export async function postFrontend(command: string, data?: any): Promise<void> {
     })
   })
 }
+
 //向后端发送消息的函数
 export async function postBackend(command: "getDeckNames"): Promise<string[]>
 export async function postBackend(command: "getModelNames"): Promise<string[]>

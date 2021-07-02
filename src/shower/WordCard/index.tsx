@@ -3,7 +3,7 @@ import React from "react";
 import Phonetic from "./Phonetic";
 import Explanation from "./Explanation";
 import ExampleSentences from "./ExampleSentences";
-import AddButton from "../components/AddButton/index";
+import AddButton from "../components/AddButton";
 import Translations from "../components/Translations";
 
 import { AddButtonState, WordData } from "../../../types/index";
@@ -11,15 +11,13 @@ import { AddButtonState, WordData } from "../../../types/index";
 interface Props extends WordData {
   addNote: (index: number) => void;
   addNote_Top: () => void;
-  hidden: boolean;
   addButtonState: AddButtonState;
-  addButtonStates?: AddButtonState[];
+  addButtonStates: AddButtonState[];
 }
 
 function WordCard(props: Props) {
   const {
     word,
-    hidden,
     phonetic,
     starAmount,
     translations,
@@ -30,7 +28,7 @@ function WordCard(props: Props) {
     addNote_Top,
   } = props;
   return (
-    <div className="" hidden={hidden}>
+    <div>
       <header className="bg-green-150 p-2 rounded">
         <div className="flex items-center">
           <h1 className="text-4xl text-black">{word}</h1>
@@ -55,9 +53,8 @@ function WordCard(props: Props) {
               <li className="bg-green-150 rounded text-base my-2" key={index}>
                 <Explanation
                   {...other}
-                  key={index}
                   addNote={() => addNote(index)}
-                  addButtonState={(addButtonStates as AddButtonState[])[index]}
+                  addButtonState={addButtonStates[index]}
                 />
                 {exampleSentences && (
                   <ExampleSentences exampleSentences={exampleSentences} />

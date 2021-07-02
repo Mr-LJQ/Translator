@@ -1,12 +1,12 @@
-import { ExampleSentence, Phonetic, TranslationUnit, WordData } from "../../types/index";
+import { ErrorData, ExampleSentence, Phonetic, TranslationUnit, WordData } from "../../types/index";
 
-export default async function translateWord(word:string,dom:Document): Promise<WordData | string>  {
+export default async function translateWord(word:string,dom:Document): Promise<WordData | ErrorData>  {
   //单词大写开头与小写开头查询到的内容不一致，统一转换为全小写
   word = word.toLowerCase()
   word = getOriginText(dom)
   let starAmount = Number(dom.querySelector(".star")?.className?.match(/star(\d)/)?.[1]) || 0
 
-  if (!word) return "单词不存在。"
+  if (!word) return {error:"单词不存在。"}
 
   return {
     word, //单词本体

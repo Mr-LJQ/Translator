@@ -1,12 +1,49 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-  <title>test</title>
-</head>
-<body>
-  <p>Extensions built with WebExtension APIs are designed to be compatible with Chrome and Opera extensions. As far as possible, extensions written for those browsers should run on Firefox with minimal changes.</p>
-</body>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>CSS Grid - line-based placement starting point</title>
+    <style>
+      fieldset {
+        display: grid;
+      }
+      :required {
+        border: 1px solid red;
+      }
+    </style>
+  </head>
+
+  <body>
+    <form action="#" id="form">
+      <fieldset>
+        <legend>水果</legend>
+        <div id="box">
+          <span>水果</span>
+          <select name="fruit" id="fruit" required>
+            <option value=""></option>
+            <option value="apply">苹果</option>
+            <option value="banana">香蕉</option>
+          </select>
+        </div>
+      </fieldset>
+      <fieldset >
+        <legend>运动</legend>
+        <div id="box">
+          <span>运动</span>
+          <select name="motion" id="motion">
+            <option value=""></option>
+            <option value="basketball">篮球</option>
+            <option value="football">足球</option>
+          </select>
+        </div>
+      </fieldset>
+      <button>提交</button>
+    </form>
+  </body>
+  <script>
+    const form = document.getElementById("form")
+    form.addEventListener("submit",(event) => {
+      console.log(...new FormData(form))
+    })
+  </script>
 </html>

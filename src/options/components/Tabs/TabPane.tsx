@@ -1,10 +1,10 @@
 import React, { ReactNode } from "react";
-import { TabPaneKey } from "../../../types/index";
+import { TabPaneKey } from "../../../../types/index";
 
-export interface Props<T = string> {
+export interface Props{
   tabItem:ReactNode
   children:ReactNode
-  key:T
+  key:TabPaneKey
 }
 
 export function TabPane(props:Props) {

@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from "react"
+import { Key } from "readline"
 
 import {measureTextWidth} from "../../utils/index"
 
 interface Props {
   initTranslations:string[]
+  key:Key
 }
 
 export default function Translations(props:Props) {

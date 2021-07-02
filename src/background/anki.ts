@@ -1,16 +1,29 @@
-import { AddNoteParams, CachedOptions, NoteWordData, AnkiResponse, PhraseData, SentenceData, WordData, TranslationUnit, NotePhraseData, NoteData, TabPaneKey, SentenceConfig, NoteSentenceData, PhraseConfig, WordConfig } from "../../types/index"
+import {
+  Storage,
+  MediaItem,
+  TabPaneKey,
+  AnkiResponse,
+  AddNoteParams,
+  NoteData,
+  PhraseData,
+  SentenceData,
+  WordFieldData,
+  PhraseFieldData,
+  SentenceFieldData,
+} from "../../types/index"
+
 import { setStorage } from "../extensions_API/index"
+import { Status } from "../../types/Shower"
 
 type Action = "version" | "addNote" | "addNotes" | "modelNames" | "deckNames" | "modelFieldNames" | "findCards" | "relearnCards"
-
-type AnkiConfig = Partial<Pick<CachedOptions, "wordConfig" | "phraseConfig" | "sentenceConfig" | "ankiConnectionURL">>
-
+type AnkiConfig = Partial<Pick<Storage, "wordConfig" | "phraseConfig" | "sentenceConfig" | "ankiConnectionURL">>
 
 //魔术字符串
 const REQUEST_ERROR = "failed to issue request"
 const WORD_CONFIG_ERROR = "wordConfig has not been configured"
 const PHRASE_CONFIG_ERROR = "PhraseConfig has not been configured"
 const SENTENCE_CONFIG_ERROR = "sentenceConfig has not been configured"
+const { relearn, success, error, disconnected } = Status
 
 export class AnkiConnection {
 
@@ -33,46 +46,46 @@ export class AnkiConnection {
       if ("sentence" in data) await this.addSentenceNote(data)
     } catch (e) {
       //处理网络异常
-      if (e === REQUEST_ERROR) return { status: 3, statusText: "网络连接异常，请检查Anki连接状况" }
+      if (e === REQUEST_ERROR) return { status: disconnected, statusText: "网络连接异常，请检查Anki连接状况" }
       if (e === WORD_CONFIG_ERROR) {
         openOptions("word")
-        return { status: 2, statusText: "请先进行必要配置后再添加卡片" }
+        return { status: error, statusText: "请先进行必要配置后再添加卡片" }
       }
       if (e === PHRASE_CONFIG_ERROR) {
         openOptions("phrase")
-        return { status: 2, statusText: "请先进行必要配置后再添加卡片" }
+        return { status: error, statusText: "请先进行必要配置后再添加卡片" }
       }
       if (e === SENTENCE_CONFIG_ERROR) {
         openOptions("sentence")
-        return { status: 2, statusText: "请先进行必要配置后再添加卡片" }
+        return { status: error, statusText: "请先进行必要配置后再添加卡片" }
       }
       //承接对重复添加的处理(会以错误的形式扔出)
-      if (Object(e) === e && e.status === 4) return e
+      if (Object(e) === e && e.status === relearn) return e
       //其它错误不做特殊处理
       let statusText = e
       e.message && (statusText = e.message)
-      return { status: 2, statusText }
+      return { status: error, statusText }
     }
-    return { status: 1, statusText: "卡片添加成功" }
+    return { status: success, statusText: "卡片添加成功" }
   }
 
-  private async addWordNote(data: NoteWordData) {
+  private async addWordNote(data: WordFieldData) {
     let note: AddNoteParams | void
     try {
-      note = this.formatNoteWordData(data)
+      note = this.formatWordData(data)
       if (!note) throw WORD_CONFIG_ERROR
       await this.invoke("addNote", { note })
     } catch (e) {
       if (e !== "cannot create note because it is a duplicate") throw e
       const { wordConfig } = this.ankiConfig
       if (!wordConfig) throw WORD_CONFIG_ERROR
-      const { deckName, matchedFields } = wordConfig
-      if (!matchedFields || !deckName) throw WORD_CONFIG_ERROR
+      const { deckName, ...matchedFields } = wordConfig
+      if (!deckName) throw WORD_CONFIG_ERROR
       //重复存在两种可能性：
       //  1.用户曾经添加过，但是其忘了，此时应该询问用户是否要重置学习进度
       //  2.因为Anki查重的逻辑只看第一个field，因此就算其它field不同，依然会显示重复，此时则应该再次添加，因为是新卡片。
       //由 word definition translation这三项确定一个卡片是否重复
-      const fields: Array<keyof NoteWordData> = ["word", "definition", "translation"]
+      const fields: Array<keyof WordFieldData> = ["word", "definition", "translation"]
       const query = fields.reduce((query, key) => {
         const field = matchedFields[key]
         const content = data[key]
@@ -94,7 +107,7 @@ export class AnkiConnection {
           await this.invoke("addNote", { note: note })
           break
         case 1:
-          throw { status: 4, statusText: "卡片重复添加，是否重置其学习进度？", cardIds }
+          throw { status: relearn, statusText: "卡片重复添加，是否重置其学习进度？", cardIds }
         default:
           throw `通过:${query} , 进行查询后，发现存在多张卡片，请根据该查询字符串，自行查看Anki。(可通过配置更多的用于查重的选项来消除该情况)`
       }
@@ -102,20 +115,20 @@ export class AnkiConnection {
   }
 
   private async addPhraseNote(data: PhraseData): Promise<undefined> {
-    let notePhraseData: NotePhraseData
+    let notePhraseData: PhraseFieldData
     let note: void | AddNoteParams
     try {
-      notePhraseData = getNotePhraseData(data)
-      note = this.formatNotePhraseData(notePhraseData)
+      notePhraseData = getPhraseFieldData(data)
+      note = this.formatPhraseData(notePhraseData)
       if (!note) throw PHRASE_CONFIG_ERROR
       await this.invoke("addNote", { note })
     } catch (e) {
       if (e !== "cannot create note because it is a duplicate") throw e
       const { phraseConfig } = this.ankiConfig
       if (!phraseConfig) throw PHRASE_CONFIG_ERROR
-      const { deckName, matchedFields } = phraseConfig
-      if (!deckName || !matchedFields) throw PHRASE_CONFIG_ERROR
-      const fields: Array<keyof NotePhraseData> = ["phrase","translations","example_sentence_1","example_sentence_2","example_sentence_3","example_sentence_translation_1","example_sentence_translation_2","example_sentence_translation_3"]
+      const { deckName, ...matchedFields } = phraseConfig
+      if (!deckName) throw PHRASE_CONFIG_ERROR
+      const fields: Array<keyof PhraseFieldData> = ["phrase", "translations", "example_sentence_1", "example_sentence_2", "example_sentence_3", "example_sentence_translation_1", "example_sentence_translation_2", "example_sentence_translation_3"]
       const query = fields.reduce((query, key) => {
         const field = matchedFields[key]
         const content = notePhraseData[key]
@@ -133,7 +146,7 @@ export class AnkiConnection {
           await this.invoke("addNote", { note: note })
           break
         case 1:
-          throw { status: 4, statusText: "卡片重复添加，是否重置其学习进度？", cardIds }
+          throw { status: relearn, statusText: "卡片重复添加，是否重置其学习进度？", cardIds }
         default:
           throw `通过:${query} , 进行查询后，发现存在多张卡片，请用户根据该查询字符串，自行查看Anki。`
       }
@@ -143,18 +156,18 @@ export class AnkiConnection {
   private async addSentenceNote(data: SentenceData): Promise<undefined> {
     let note: void | AddNoteParams
     try {
-      note = this.formatSentenceNote(data)
+      note = this.formatSentenceData(data)
       if (!note) throw SENTENCE_CONFIG_ERROR
       await this.invoke("addNote", { note })
     } catch (e) {
       if (e !== "cannot create note because it is a duplicate") throw e
       const { sentenceConfig } = this.ankiConfig
-      if (!sentenceConfig)  throw SENTENCE_CONFIG_ERROR
-      const { deckName, matchedFields } = sentenceConfig
-      if (!deckName || !matchedFields) throw SENTENCE_CONFIG_ERROR
+      if (!sentenceConfig) throw SENTENCE_CONFIG_ERROR
+      const { deckName, ...matchedFields } = sentenceConfig
+      if (!deckName) throw SENTENCE_CONFIG_ERROR
       const { sentence } = matchedFields
       if (!sentence) throw SENTENCE_CONFIG_ERROR
-      const fields: Array<keyof NoteSentenceData> = ["sentenceTranslation","sentence"]
+      const fields: Array<keyof SentenceFieldData> = ["sentenceTranslation", "sentence"]
       const query = fields.reduce((query, key) => {
         const field = matchedFields[key]
         const content = data[key]
@@ -172,7 +185,7 @@ export class AnkiConnection {
           await this.invoke("addNote", { note: note })
           break
         case 1:
-          throw { status: 4, statusText: "卡片重复添加，是否重置其学习进度？", cardIds }
+          throw { status: relearn, statusText: "卡片重复添加，是否重置其学习进度？", cardIds }
         default:
           throw `通过:${query} , 进行查询后，发现存在多张卡片，请用户根据该查询字符串，自行查看Anki。`
       }
@@ -185,14 +198,14 @@ export class AnkiConnection {
     })
   }
 
-  async relearnCards(cards:number[]): Promise<AnkiResponse> {
-    let result: AnkiResponse = { status: 1, statusText: "学习进度重置成功" }
+  async relearnCards(cards: number[]): Promise<AnkiResponse> {
+    let result: AnkiResponse = { status: success, statusText: "学习进度重置成功" }
     try {
       //await是必须的
-      await this.invoke("relearnCards", {cards})
+      await this.invoke("relearnCards", { cards })
     } catch (e) {
-      if (e === REQUEST_ERROR) return { status: 3, statusText: "网络连接异常，请检查Anki连接状况" }
-      result.status = 2
+      if (e === REQUEST_ERROR) return { status: disconnected, statusText: "网络连接异常，请检查Anki连接状况" }
+      result.status = error
       result.statusText = e
       e.message && (result.statusText = e.message)
     }
@@ -242,17 +255,17 @@ export class AnkiConnection {
 
   /**
    * 将数据转换为AnkiConnection所需要的数据结构
-   * @param data NoteWordData
+   * @param data
    * @returns 
    */
-  private formatNoteWordData(data: NoteWordData): AddNoteParams | void {
+  private formatWordData(data: WordFieldData): AddNoteParams | void {
     const { wordConfig } = this.ankiConfig
     if (!wordConfig) return
-    const { deckName, modelName, matchedFields, tags } = wordConfig
+    const { deckName, modelName, tags, ...matchedFields } = wordConfig
     if (!deckName) return
     if (!modelName) return
     if (!matchedFields) return
-    const noteDataKeyArray: Array<keyof NoteWordData> = [
+    const noteDataKeyArray: Array<keyof WordFieldData> = [
       "word",
       "starAmount",
       "am",
@@ -263,7 +276,7 @@ export class AnkiConnection {
       "example_sentence",
       "example_sentence_translation",
     ]
-    const audioKeyArray: Array<keyof NoteWordData> = [
+    const audioKeyArray: Array<keyof WordFieldData> = [
       "am_audio",
       "en_audio",
       "example_audio",
@@ -280,7 +293,7 @@ export class AnkiConnection {
         fields: [field]
       })
       return audio
-    }, [] as any)
+    }, [] as MediaItem)
 
     const fields = noteDataKeyArray.reduce((fields, key) => {
       const field = matchedFields[key]
@@ -288,8 +301,10 @@ export class AnkiConnection {
       if (!field || !content) return fields
       fields[field] = content
       return fields
-    }, {} as any)
+    }, {} as AddNoteParams["fields"])
+
     if (!Object.keys(fields).length) return
+
     return {
       deckName,
       modelName,
@@ -297,7 +312,7 @@ export class AnkiConnection {
       audio,
       tags: tags && tags.trim().split(/\s+/g) || [],
       options: {
-        allowDuplicate:false,
+        allowDuplicate: false,
         "duplicateScope": "deck",
         "duplicateScopeOptions": {
           deckName,
@@ -308,17 +323,17 @@ export class AnkiConnection {
   }
   /**
    * 将数据转换为AnkiConnection所需要的数据结构
-   * @param data PhraseData
+   * @param data 
    * @returns 
    */
-  private formatNotePhraseData(data: NotePhraseData): AddNoteParams | void {
+  private formatPhraseData(data: PhraseFieldData): AddNoteParams | void {
     const { phraseConfig } = this.ankiConfig
     if (!phraseConfig) return
-    const { deckName, modelName, matchedFields, tags } = phraseConfig
+    const { deckName, modelName, tags, ...matchedFields } = phraseConfig
     if (!deckName) return
     if (!modelName) return
     if (!matchedFields) return
-    const noteDataKeyArray: Array<keyof NotePhraseData> = [
+    const noteDataKeyArray: Array<keyof PhraseFieldData> = [
       "phrase",
       "translations",
       "example_sentence_1",
@@ -328,7 +343,7 @@ export class AnkiConnection {
       "example_sentence_translation_2",
       "example_sentence_translation_3",
     ]
-    const audioKeyArray: Array<keyof NotePhraseData> = [
+    const audioKeyArray: Array<keyof PhraseFieldData> = [
       "phrase_audio",
       "example_audio_1",
       "example_audio_2",
@@ -344,7 +359,7 @@ export class AnkiConnection {
         fields: [field]
       })
       return audio
-    }, [] as any)
+    }, [] as MediaItem)
 
     const fields = noteDataKeyArray.reduce((fields, key) => {
       const field = matchedFields[key]
@@ -352,7 +367,7 @@ export class AnkiConnection {
       if (!field || !content) return fields
       fields[field] = content
       return fields
-    }, {} as any)
+    }, {} as AddNoteParams["fields"])
     if (!Object.keys(fields).length) return
     return {
       deckName,
@@ -361,7 +376,7 @@ export class AnkiConnection {
       audio,
       tags: tags && tags.trim().split(/\s+/g) || [],
       options: {
-        allowDuplicate:false,
+        allowDuplicate: false,
         "duplicateScope": "deck",
         "duplicateScopeOptions": {
           deckName,
@@ -372,21 +387,21 @@ export class AnkiConnection {
   }
   /**
    * 将数据转换为AnkiConnection所需要的数据结构
-   * @param data PhraseData
+   * @param data
    * @returns 
    */
-  private formatSentenceNote(data: SentenceData): AddNoteParams | void {
+  private formatSentenceData(data: SentenceFieldData): AddNoteParams | void {
     const { sentenceConfig } = this.ankiConfig
     if (!sentenceConfig) return
-    const { deckName, modelName, matchedFields, tags } = sentenceConfig
+    const { deckName, modelName, tags, ...matchedFields } = sentenceConfig
     if (!deckName) return
     if (!modelName) return
     if (!matchedFields) return
-    const noteDataKeyArray: Array<keyof SentenceData> = [
+    const noteDataKeyArray: Array<keyof SentenceFieldData> = [
       "sentence",
       "sentenceTranslation"
     ]
-    const audioKeyArray: Array<keyof SentenceData> = [
+    const audioKeyArray: Array<keyof SentenceFieldData> = [
       "sentence_audio"
     ]
 
@@ -400,7 +415,7 @@ export class AnkiConnection {
         fields: [field]
       })
       return audio
-    }, [] as any)
+    }, [] as MediaItem)
 
     const fields = noteDataKeyArray.reduce((fields, key) => {
       const field = matchedFields[key]
@@ -408,7 +423,7 @@ export class AnkiConnection {
       if (!field || !content) return fields
       fields[field] = content
       return fields
-    }, {} as any)
+    }, {} as AddNoteParams["fields"])
 
     if (!Object.keys(fields).length) return
     return {
@@ -418,7 +433,7 @@ export class AnkiConnection {
       audio,
       tags: tags && tags.trim().split(/\s+/g) || [],
       options: {
-        allowDuplicate:false,
+        allowDuplicate: false,
         "duplicateScope": "deck",
         "duplicateScopeOptions": {
           deckName,
@@ -445,7 +460,7 @@ export class AnkiConnection {
   private async invoke(action: Action, params: { [key: string]: any } = {}): Promise<any> {
     return new Promise((resolve, reject) => {
       const { version } = this
-      const {ankiConnectionURL:targetURL = "http://127.0.0.1:8765"} = this.ankiConfig
+      const { ankiConnectionURL: targetURL = "http://127.0.0.1:8765" } = this.ankiConfig
       const xhr = new XMLHttpRequest();
       xhr.addEventListener('error', () => reject(REQUEST_ERROR));
       xhr.addEventListener('load', () => {
@@ -481,9 +496,9 @@ export class AnkiConnection {
  * @param data PhraseData
  * @returns NotePhraseData
  */
-function getNotePhraseData(data: PhraseData): NotePhraseData {
+function getPhraseFieldData(data: PhraseData): PhraseFieldData {
   const { phrase, phrase_audio, translations, exampleSentences } = data
-  const notePhraseData: NotePhraseData = {
+  const notePhraseData: PhraseFieldData = {
     phrase,
     phrase_audio,
     translations: translations.join(" ; "),
@@ -502,6 +517,6 @@ function getNotePhraseData(data: PhraseData): NotePhraseData {
 
 //如果用户未进行任何短语相关的配置，则弹出配置窗口，让用户进行配置
 const openOptions = function (activeTabPane: TabPaneKey) {
-  setStorage({activeTabPane},() => {chrome.runtime.openOptionsPage()})
+  setStorage({ activeTabPane }, () => { chrome.runtime.openOptionsPage() })
   return undefined
 }

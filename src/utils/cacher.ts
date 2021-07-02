@@ -1,16 +1,16 @@
-export class Cacher<K = any,T = any> {
-  private cacheSpace:T[]
-  private cacheIndex:K[]
-  private maxAmount:number
-  private index:number
-  constructor (amount = 5) {
+export class Cacher<K = any, T = any> {
+  private cacheSpace: T[]
+  private cacheIndex: K[]
+  private maxAmount: number
+  private index: number
+  constructor(amount = 5) {
     this.cacheSpace = []
     this.cacheIndex = []
     this.maxAmount = amount
     this.index = 0
   }
-  set (key:K,value:T) {
-    const {cacheIndex,cacheSpace,maxAmount,index} = this
+  set(key: K, value: T) {
+    const { cacheIndex, cacheSpace, maxAmount, index } = this
     cacheIndex[index] = key
     cacheSpace[index] = value
     this.index++
@@ -18,52 +18,60 @@ export class Cacher<K = any,T = any> {
       this.index -= maxAmount
     }
   }
-  get (key:K) {
-    const {cacheIndex,cacheSpace} = this
+  get(key: K) {
+    const { cacheIndex, cacheSpace } = this
     const index = cacheIndex.lastIndexOf(key)
     return cacheSpace[index]
   }
-  setMaxAmount (amount:number) {
+  setMaxAmount(amount: number) {
     this.maxAmount = amount
   }
 }
 
-
+/**
+ * prev：获取当前指针的上一个历史，并将指针移动到目标位置
+ * next：获取当前指针的下一个历史，并将指针移动到目标位置
+ * update：更新当前指针的历史，指针不动
+ * append:添加一个新历史到下一个指针位置，并将指针移动到目标位置
+ */
 export class History<T> {
-  private cacheSpace:T[]
-  maxAmount:number
-  tail:number
-  head:number 
-  constructor (maxAmount = 10) {
+  private cacheSpace: T[]
+  private maxAmount: number
+  private tail: number
+  private head: number
+  private index: number
+  constructor(maxAmount = 10) {
     this.cacheSpace = []
     this.head = 0
     this.tail = -1
+    this.index = -1
     this.maxAmount = maxAmount
   }
-  
-  get (index:number) {
-    const {head,tail} = this
-    //index出界时返回undefined
-    if (index < head || index > tail) return 
-    //保证最多只能够有maxAmount个
-    return this.cacheSpace[index % this.maxAmount]
+  prev() {
+    const { head, index } = this
+    if (index <= head) return
+    this.index--
+    return this.cacheSpace[this.index]
   }
-  set (index:number,value:T) {
-    const {cacheSpace,maxAmount,tail,head} = this
-    
+  next() {
+    const { tail, index } = this
+    if (index >= tail) return
+    this.index++
+    return this.cacheSpace[this.index]
+  }
+  append(value: T) {
+    this.index++
+    const { cacheSpace, maxAmount, tail, index } = this
     if (index > tail) {
       this.tail = index
-      this.head = Math.max(index - maxAmount + 1,0)
-    } 
-
+      this.head = Math.max(index - maxAmount + 1, 0)
+    }
     cacheSpace[index % maxAmount] = value
-    return this
+    return value
   }
-  size () {
-    return this.cacheSpace.length
-  }
-  setMaxAmount (maxAmount:number)  {
-    this.maxAmount = maxAmount
-    return this
+  update(value: T) {
+    const { index, maxAmount, cacheSpace } = this
+    cacheSpace[index % maxAmount] = value
+    return value
   }
 }

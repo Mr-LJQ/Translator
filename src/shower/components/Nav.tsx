@@ -9,10 +9,10 @@ function Nav(props: Props) {
   return (
     <footer className="h-4">
       <div className="fixed left-0 bottom-0 w-12 bg-gray-50 rounded">
-        <button className="button float-left" onClick={backward}>
+        <button className="button float-left outline-none focus:outline-none" onClick={backward}>
           {"<"}
         </button>
-        <button className="button float-right" onClick={forward}>
+        <button className="button float-right outline-none focus:outline-none" onClick={forward}>
           {">"}
         </button>
       </div>

@@ -1,5 +1,5 @@
 import React from "react";
-import classnames from "classnames"
+import classnames from "classnames";
 
 interface Props {
   onClick?: () => void;
@@ -12,16 +12,28 @@ export default class SwitchButton extends React.Component<Props> {
   }
 
   render() {
-    const { isOpen,onClick } = this.props;
-    let switchClass = classnames("switch",{open:isOpen})
-    let openTextClass = classnames("left-text",{open:isOpen})
+    const { isOpen, onClick } = this.props;
     return (
-      <div className="switch-button" onClick={onClick}>
-        <span className={openTextClass}>开</span>
-        <span className="right-text">关</span>
-        <span className={switchClass}></span>
+      <div
+        className="
+        relative 
+        flex 
+        h-8 
+        w-20
+        items-center
+        justify-between
+        rounded-full 
+        font-bold 
+        select-none 
+        cursor-pointer 
+        bg-gray-700 
+        "
+        onClick={onClick}
+      >
+        <span className={classnames("left-text", { open: isOpen })}>开</span>
+        <span className="float-right pr-3 text-gray-50 ">关</span>
+        <span className={classnames("switch", { open: isOpen })}></span>
       </div>
     );
   }
 }
-

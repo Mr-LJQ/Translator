@@ -2,17 +2,16 @@ import translateWord from "./translateWord"
 import translatePhrase from "./translatePhrase"
 import translateSentence from "./translateSentence"
 
-import { PhraseData, SentenceData, TranslationResult } from "../../types/index"
+import { PhraseData, SentenceData, TranslationResult,ErrorData } from "../../types/index"
 
 
 export default class Collins_en_cn {
-  constructor() {}
   /**
      * 向外暴露的接口，是对翻译word与sentence函数的封装
      * @param text 需要进行翻译的文本
      */
   async translateText(text: string): Promise<TranslationResult> {
-    let result
+    let result:TranslationResult
     try {
       const dom = await getPageDOM(text)
       //如果存在空格，则认为其为多个单词组合的句子、词组
@@ -25,11 +24,11 @@ export default class Collins_en_cn {
       //捕获语法错误
       if (error.message) error = error.message
       //捕获自定义错误
-      result = error
+      result = {error}
     }
     return result
   }
-  async translateWords(dom:Document): Promise<SentenceData | PhraseData | string> {
+  async translateWords(dom:Document): Promise<SentenceData | PhraseData | ErrorData> {
     //情况一：待翻译的是短语
     const translatedPhrase = translatePhrase(dom)
     if (translatedPhrase) return translatedPhrase
@@ -39,7 +38,7 @@ export default class Collins_en_cn {
     if (translatedSentence) return translatedSentence
     
     //情况三：无任何翻译
-    return "没有查找到任何翻译。"
+    return {error:"没有查找到任何翻译。"}
   }
   
 }
@@ -62,10 +61,10 @@ async function getPageDOM(input: string): Promise<Document> {
       resolve(xhr.response)
     })
     xhr.addEventListener("error", function () {
-      reject("翻译查询请求失败。")
+      reject("翻译请求错误，请检查网络")
     })
     xhr.addEventListener("timeout", function () {
-      reject("翻译查询请求超时,请检查网络状况。")
+      reject("翻译请求超时,请检查网络")
     })
     xhr.send(null)
   })

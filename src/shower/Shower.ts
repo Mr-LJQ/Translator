@@ -35,6 +35,7 @@ export class Shower {
 
     //通过蒙版点击监听来隐藏iframe，如果绑定在document上，有可能以为处于其它iframe而无效
     const mask = this.mask = document.createElement("div")
+    mask.id = "extensions-mask"
     mask.style.cssText = `
       position:fixed;
       z-index:99999;

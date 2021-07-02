@@ -9,12 +9,6 @@
     "skipLibCheck": true /* Skip type checking of declaration files. */,
     "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */,
     "jsx": "preserve",
-    "paths": {
-      "classnames":[
-        "./node_modules/classnames/index.d.ts",
-        "./node_modules/classnames/bind.d.ts",
-        "./node_modules/classnames/dedupe.d.ts",
-      ]
-    }
+    "moduleResolution": "Node",
   },
 }

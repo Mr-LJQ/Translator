@@ -4,29 +4,13 @@ export type {
   SentenceData,
   TranslationResult,
   Phonetic,
+  ErrorData,
   TranslationUnit,
   ExampleSentence,
 } from "./Translation"
 
-export type {
-  NoteWordData,
-  NotePhraseData,
-  NoteSentenceData,
-  WordConfig,
-  PhraseConfig,
-  SentenceConfig,
-  BasisAnkiConfig,
-  CachedOptions,
-  DeckAndModels,
-  TabPaneKey,
-} from "./Options"
-
-export type {
-  NoteData,
-  AnkiResponse,
-  AnkiCallback,
-  AddNoteParams,
-} from "./Anki"
+export * from "./Anki"
+export * from "./Storage"
 
 export type {
   Message,
@@ -35,13 +19,10 @@ export type {
 } from "./Handler"
 
 export type {
+  Point,
   ShowData,
   AddButtonState
 }from "./Shower"
-
-export interface Point {
-  x:number,
-  y:number
-}
+export {Status} from "./Shower"
 
 export type AnyFunction = (...args:any[]) => void

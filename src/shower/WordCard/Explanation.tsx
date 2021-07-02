@@ -1,7 +1,7 @@
 import React from "react";
 
 import { translateBTag } from "../utils/index";
-import AddButton from "../components/AddButton/index";
+import AddButton from "../components/AddButton";
 import { AddButtonState } from "../../../types/index";
 
 interface Props {

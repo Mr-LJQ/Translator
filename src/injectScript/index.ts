@@ -1,10 +1,9 @@
-import { MousePointWatcher } from "../watcher/mousePointWatcher"
+import { MousePointWatcher } from "../watcher/MousePointWatcher"
 import { KeyboardWatcher } from "../watcher/KeyboardWatcher"
 import { SelectionWatcher } from "../watcher/SelectionWatcher"
 import { validateText } from "../utils/index"
 
 import { onStorageChange, getStorage, postBackend } from "../extensions_API/index"
-import { CachedOptions } from "../../types/Options"
 
 //添加获取鼠标位置的监听
 const mousePointWatcher = new MousePointWatcher()
@@ -33,13 +32,13 @@ function uninstallAll() {
 }
 
 getStorage({
-  isOpen: (value: CachedOptions["isOpen"]) => value ? installAll() : uninstallAll(),
-  hotKey: (value: CachedOptions["hotKey"]) => keyboardWatcher.updateHotKey(value),
+  isOpen: (value) => value ? installAll() : uninstallAll(),
+  hotKey: (value) => keyboardWatcher.updateHotKey(value),
 })
 
 onStorageChange({
-  isOpen: (_, value: CachedOptions["isOpen"]) => value ? installAll() : uninstallAll(),
-  hotKey: (_, value: CachedOptions["hotKey"]) => keyboardWatcher.updateHotKey(value),
+  isOpen: (_, value) => value ? installAll() : uninstallAll(),
+  hotKey: (_, value) => keyboardWatcher.updateHotKey(value),
 })
 
 

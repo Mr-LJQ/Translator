@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .indent-2 {
+    text-indent: 2em;
+  }
+  .indent-0 {
+    text-indent: 0;
+  }
+  .min-w-24.5 {
+    min-width: 98px;
+  }
+  .h-100 {
+    height:25rem /*400px*/
+  }
+}
+
+@layer components {
+  @variants group-hover, hover {
+    .audio::after {
+      content: "🔊";
+      vertical-align: text-top;
+    }
+  }
+
+  .audio:after {
+    content: "🔉";
+    vertical-align: text-top;
+  }
+  .button {
+    @apply hover:bg-blue-300 select-none bg-transparent font-bold text-xl border-none h-6 w-6;
+  }
+  .switch {
+    transition: all 0.5s;
+    @apply absolute left-0 top-0 m-1 w-10 h-6 rounded-full bg-gray-50;
+  }
+  .switch.open {
+    background-color: #76ff03;
+    @apply left-8;
+  }
+  .left-text {
+    transition: color 0.5s;
+    @apply float-left pl-3 text-gray-50;
+  }
+  .left-text.open {
+    color: #76ff03;
+  }
+}

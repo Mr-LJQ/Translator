@@ -1,48 +1,19 @@
 export { default as Agent } from "./agent"
 export type { PostMessage } from "./agent"
 export { Cacher, History } from "./cacher"
-export {curryN,curry,placeholder} from "./curry"
 
-
-/**
- * 防抖函数
- * @param callback 需要防抖的函数
- * @param time 间隔时间
- * @returns 进行了防抖处理的函数
- */
-export function debounce(callback: Function, time: number, options?: {
-  firstRun: boolean
-}) {
-  const firstRun = options?.firstRun
-  let timerId: number | undefined
-  return function (this: unknown, ...args: any[]) {
-    if (firstRun && timerId == null) callback.apply(this, args)
-    clearTimeout(timerId)
-    timerId = window.setTimeout(() => {
-      callback.apply(this, args)
-    }, time)
-  }
-}
-
-/**
- * 节流函数
- * @param callback 需要节流的函数
- * @param await 间隔时间
- * @returns 进行了节流包裹的函数
- */
-export function throttle(callback: (...args: any[]) => void, await: number) {
+export function throttle(callback: Function, await: number) {
   let startTime = Date.now()
-  return function (this: any, ...args: any[]) {
-    const currentTime = Date.now()
+  return function (this: unknown) {
+    let currentTime = Date.now()
     if (currentTime - startTime < await) return
     startTime = currentTime
-    return callback.apply(this, args)
+    return callback.apply(this, arguments)
   }
 }
 
-
 /**
- * 纯函数，获取当前拖蓝选中的文本
+ * 纯函数，获取当前拖蓝选中的文本(已清除左右空格)
  * @returns string
  */
 export function getSelectionText(): string | undefined {
@@ -108,20 +79,6 @@ export function measureTextWidth(text: string, fontSize: number = 16) {
   }
 }
 
-/**
- * 用于判断当前焦点是否位于目标元素
- * @returns Boolean
- */
-export function isActiveElement() {
-  //当前聚焦元素的nodeName
-  const focusNode = document.activeElement?.nodeName || ""
-  //过滤掉输入框中的文本选中
-  let filterNodeName = ["INPUT", "TEXTAREA"]
-  if (filterNodeName.includes(focusNode)) return true
-  return false
-}
-
-
 interface Options {
   predicate: (this: void, ...args: any[]) => boolean,
   callback?: (this: void, ...args: any[]) => void
@@ -176,12 +133,26 @@ export function validateText(text: string) {
   return true
 }
 
+/**
+ * 纯函数，根据键提取目标对象的值，并返回新对象
+ * @param target 目标对象
+ * @param keys 需要提取的值所对应的键数组
+ * @returns 新对象，包含目标对象特定的键的值
+ */
 export function pick<T extends object>(target: T, keys: Array<keyof T>): Partial<T> {
   const result: Partial<T> = {}
   keys.forEach((key) => {
-    if (Object.prototype.hasOwnProperty.call(target, key)) {
-      result[key] = target[key]
-    }
+    result[key] = target[key]
   })
   return result
+}
+
+/**
+ * 纯函数，Object.entries()的单一版本，只提取单个键的[key,value]
+ * @param target 目标对象
+ * @param key 需要提取的键
+ * @returns [key,value]
+ */
+export function extractEntry<T extends object, K extends keyof T>(target: T, key: K): [K, T[K]] {
+  return [key, target[key]]
 }

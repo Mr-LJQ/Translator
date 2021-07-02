@@ -1,4 +1,8 @@
-export type TranslationResult = WordData | SentenceData | PhraseData | string
+export type TranslationResult = WordData | SentenceData | PhraseData | ErrorData
+
+export interface ErrorData {
+  error:string
+}
 
 export interface WordData {
   word: string  //单词本体

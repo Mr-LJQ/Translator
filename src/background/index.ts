@@ -6,7 +6,7 @@ import { Cacher } from "../utils/index"
 import { getStorage, onMessage, onStorageChange, postFrontend, onCommand, setStorage } from "../extensions_API/index"
 
 import {
-  CachedOptions,
+  Storage,
   SendResponse,
   TranslationResult
 } from "../../types/index"
@@ -90,43 +90,43 @@ class BackEnd {
     let translated = cacher.get(text)
     if (translated) return translated
     let translatedData = await this.collins.translateText(text)
-    if (typeof translatedData !== "string") this.cacher.set(text, translatedData)
+    if (!("error" in translatedData)) this.cacher.set(text, translatedData)
     return translatedData
   }
 }
 
 const backEnd = new BackEnd()
 
+//初始化AnkiConfig
+getStorage(["wordConfig", "phraseConfig", "sentenceConfig", "ankiConnectionURL"], (config) => {
+  backEnd.anki.updateAnkiConfig(config)
+})
+//初始化isOpen标识文本
+getStorage({
+  isOpen (value) {switchBadgeText(!!value)}
+})
+
+//监听用户配置更新
+onStorageChange({
+  wordConfig: (_, wordConfig: any) => backEnd.anki.updateAnkiConfig({ wordConfig }),
+  phraseConfig: (_, phraseConfig: any) => backEnd.anki.updateAnkiConfig({ phraseConfig }),
+  sentenceConfig: (_, sentenceConfig: any) => backEnd.anki.updateAnkiConfig({ sentenceConfig }),
+  ankiConnectionURL: (_, ankiConnectionURL: any) => backEnd.anki.updateAnkiConfig({ ankiConnectionURL }),
+  //改变BrowserAction的状态，关闭时添加“off”字样
+  isOpen: (_, value) => switchBadgeText(!!value)
+})
+
 //监听用户快捷键，用于开关拓展
 onCommand({
   enabled: () => {
     getStorage({
-      isOpen: (isOpen: CachedOptions['isOpen']) => setStorage({ isOpen: !isOpen })
+      isOpen: (isOpen) => setStorage({ isOpen: !isOpen })
     })
   },
   search_bar: () => postFrontend("switchSearchBar"),
 })
 
-//初始化AnkiConfig
-getStorage({
-  wordConfig: null,
-  phraseConfig: null,
-  sentenceConfig: null,
-  ankiConnectionURL: null,
-},(config) => {
-  backEnd.anki.updateAnkiConfig(config)
-})
-
-//监听用户配置更新
-onStorageChange({
-  wordConfig: (_, wordConfig: CachedOptions["wordConfig"]) => backEnd.anki.updateAnkiConfig({ wordConfig }),
-  phraseConfig: (_, phraseConfig: CachedOptions["phraseConfig"]) => backEnd.anki.updateAnkiConfig({ phraseConfig }),
-  sentenceConfig: (_, sentenceConfig: CachedOptions["sentenceConfig"]) => backEnd.anki.updateAnkiConfig({ sentenceConfig }),
-  ankiConnectionURL: (_, ankiConnectionURL: CachedOptions["ankiConnectionURL"]) => backEnd.anki.updateAnkiConfig({ ankiConnectionURL }),
-  //改变BrowserAction的状态，关闭时添加“off”字样
-  isOpen: (_, value) => value ? chrome.browserAction.setBadgeText({ text: "" }) : chrome.browserAction.setBadgeText({ text: "off" })
-})
-
+//--右键注入Anki划词助手的逻辑--
 chrome.contextMenus.create({
   contexts: ["frame"],
   title: "注入划词助手",
@@ -145,3 +145,12 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     file: "/injectScript.js"
   })
 })
+//--------------end---------------
+
+
+//------------辅助函数-------------
+function switchBadgeText(isOpen:boolean) {
+  isOpen 
+    ? chrome.browserAction.setBadgeText({ text: "" })
+    : chrome.browserAction.setBadgeText({ text: "off" })
+}

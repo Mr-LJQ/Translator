@@ -17,8 +17,8 @@ function AudioButton(props: Props, ref: Ref<{ playAudio: () => void }>) {
   const { audioURL, className } = props;
   const audioElement = useContext(AudioContext);
   const playAudio = useCallback(() => {
-    if (!audioURL) return;
     try {
+    if (!audioURL) return;
     //避免重复加载
     if (audioElement.src !== audioURL) {
       audioElement.src = audioURL;

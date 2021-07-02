@@ -1,53 +1,65 @@
+import initialStorage from "./initialStorage"
 import { pick } from "../utils/index"
 
-import { CachedOptions } from "../../types/index"
+import { PhraseConfig, SentenceConfig, Storage, WordConfig } from "../../types/index"
 
-type GetStorageHandler = ((value: any) => void) | null
-type StorageChangedHandler = (oldValue:any,newValue:any) => void
-
-type StorageHandlers<T> = Partial<Record<keyof CachedOptions, T>>
-type CachedOptionsKeys = Array<keyof CachedOptions>
-
-//缓存默认值对象，用于在用户刚刚加载拓展，没有进行任何配置时作为初始配置。
-const initialStorage: Partial<CachedOptions> = {
-  isOpen: true,
-  hotKey: "shiftKey",
-  ankiConnectionURL: "http://127.0.0.1:8765",
-}
+type StorageHandlers<T> = Partial<Record<keyof Storage, T>>
+type StorageKeys = keyof Storage
+type StorageValues = Storage[StorageKeys]
 
 /**
- * 注意：仅在其键存在相应的缓存/初始值时，回调才会调用
- * 注意：不保证调用顺序
- * @param handlers 一个对象，其键为缓存属性的名称，其值为用于处理的回调
- *  
+ * 当handlers是一个对象
+ *  注意：仅在其键存在相应的缓存/初始值时，回调才会调用
+ *  注意：不保证调用顺序
+ * @param handlers object / array
  */
-export function getStorage(handlers: StorageHandlers<GetStorageHandler>, callback?: (cacheItem: Partial<CachedOptions>) => void) {
-  const cacheKeys = <CachedOptionsKeys>Object.keys(handlers)
-  const storage = pick(initialStorage, cacheKeys)
-  chrome.storage.local.get(storage, (cacheItem) => {
-    (<CachedOptionsKeys>Object.keys(cacheItem)).forEach((cacheKey) => {
-      const handler = handlers[cacheKey]
-      const cacheValue = cacheItem[cacheKey]
-      if (handler) {
-        handler(cacheValue)
-      }
-    })
-    callback && callback(cacheItem as Partial<CachedOptions>)
+export function getStorage(handlers: StorageKeys[], callback: (item: Partial<Storage>) => void): void
+export function getStorage(handlers: StorageHandlers<(value: StorageValues) => void>, callback?: (item: Partial<Storage>) => void): void
+export function getStorage(handlers: StorageHandlers<(value: StorageValues) => void> | StorageKeys[], callback?: (item: Partial<Storage>) => void): void {
+  let storageKeys = handlersIsArray(handlers) ? handlers : Object.keys(handlers)
+  const storage = pick(initialStorage, storageKeys)
+  chrome.storage.local.get(storage, (_item) => {
+    let item = _item as Partial<Storage>
+    if (!handlersIsArray(handlers)) {
+      (Object.keys(item)).forEach((key) => {
+        const handler = handlers[key]
+        const cacheValue = item[key]
+        if (handler) {
+          handler(cacheValue)
+        }
+      })
+    }
+    callback && callback(item)
   })
 }
 
-export function onStorageChange(handlers: StorageHandlers<StorageChangedHandler>) {
+/**
+ * 根据名称数组获取其对应的缓存对象
+ * @param names array,需要获取的缓存项的名称数组
+ * @returns object,对应的缓存对象
+ */
+export function getStorageItems<K extends StorageKeys>(names: K[]): Promise<Storage> {
+  return new Promise((resolve) => {
+    getStorage(names, resolve)
+  })
+}
+
+export function onStorageChange(handlers: StorageHandlers<(oldValue: StorageValues, newValue: StorageValues) => void>) {
   chrome.storage.onChanged.addListener((changes) => {
-    (<CachedOptionsKeys>Object.keys(changes)).forEach((cacheKey) => {
-      const handler = handlers[cacheKey]
+    Object.keys(changes).forEach((key) => {
+      const handler = handlers[key as keyof Storage]
       if (handler) {
-        const { oldValue, newValue } = changes[cacheKey]
+        const { oldValue, newValue } = changes[key]
         handler(oldValue, newValue)
       }
     })
   })
 }
 
-export function setStorage(items: Partial<CachedOptions>, callback?: () => void) {
+export function setStorage(items: Partial<Storage>, callback?: () => void) {
   chrome.storage.local.set(items, callback)
+}
+
+function handlersIsArray(handlers: StorageHandlers<(value: any) => void> | StorageKeys[]): handlers is StorageKeys[] {
+  return Array.isArray(handlers)
 }
