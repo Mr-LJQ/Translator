@@ -1,46 +1,37 @@
 import React from "react";
-import "./index.less";
 
 import { AddButtonState, SentenceData } from "../../../types/index";
 
-import AudioContext from "../Context/AudioContext";
 import AudioButton from "../components/AudioButton";
-import AddButton from "../components/AddButton/index";
+import AddButton from "../components/AddButton";
 
 interface Props extends SentenceData {
-  hidden: boolean;
   addNote: () => void;
-  addButtonState?:AddButtonState
+  addButtonState: AddButtonState;
 }
 
-export default class SentenceCard extends React.PureComponent<Props> {
-  audioButtonRef: React.RefObject<AudioButton>;
-  static contextType = AudioContext;
-  constructor(props: Props) {
-    super(props);
-    this.audioButtonRef = React.createRef();
-  }
-
-  render() {
-    const audio = this.context;
-    const { hidden, sentence, sentence_audio,addButtonState, sentenceTranslation, addNote } =
-      this.props;
-    return (
-      <div id="sentenceCard" hidden={hidden}>
-        <header className="sentence_header">
-          <AudioButton
-            ref={this.audioButtonRef}
-            className="sentence_audioButton"
-            audio={audio}
-            audioURL={sentence_audio}
-          />
-          <h1 className="sentence">{sentence}</h1>
-        </header>
-        <main className="sentence_translation">
-          {addButtonState && <AddButton key={sentence} {...addButtonState} onClick={addNote} />}
-          {sentenceTranslation}
-        </main>
-      </div>
-    );
-  }
+function SentenceCard(props: Props) {
+  const {
+    sentence,
+    addButtonState,
+    sentence_audio,
+    sentenceTranslation,
+    addNote,
+  } = props;
+  return (
+    <div>
+      <header className="p-1.5 bg-green-150 rounded">
+        <AudioButton audioURL={sentence_audio} className="float-right" />
+        <h1 className="text-xl indent-2">{sentence}</h1>
+      </header>
+      <main className="mt-1 bg-green-150 p-1.5 text-xl rounded indent-2">
+        {sentence && (
+          <AddButton {...addButtonState} onClick={addNote} />
+        )}
+        {sentenceTranslation}
+      </main>
+    </div>
+  );
 }
+
+export default SentenceCard;

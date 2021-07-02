@@ -1,5 +1,4 @@
 const path = require("path");
-
 const CopyPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
@@ -30,7 +29,6 @@ module.exports = {
   output: {
     filename: "[name].js",
     path: path.resolve(__dirname, "./dist/"),
-    publicPath: "",
     clean: true,
   },
   resolve: {
@@ -38,7 +36,6 @@ module.exports = {
   },
   module: {
     rules: [
-      // { test: /\.tsx?$/i, exclude: /node_modules/, use: "ts-loader" },
       {
         test: /\.(js|ts)x?$/i,
         exclude: /node_modules/,
@@ -57,8 +54,8 @@ module.exports = {
         },
       },
       {
-        test: /\.less$/i,
-        use: ["style-loader", "css-loader", "less-loader"],
+        test: /\.css$/i,
+        use: ["style-loader", "css-loader", "postcss-loader"],
       },
     ],
   },

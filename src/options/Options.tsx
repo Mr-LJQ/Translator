@@ -1,5 +1,4 @@
 import React, { ChangeEvent } from "react";
-import "./index.less";
 
 import {postBackend} from "../extensions_API/index"
 import { Dispatch, getDeckAndModels, tabPaneDataFactory } from "./utils/index";

@@ -1,7 +1,6 @@
 import React,{ ChangeEvent, useCallback, useMemo, useState } from "react";
 import classnames from "classnames"
 
-import "./index.less"
 
 interface Props {
   name: string;

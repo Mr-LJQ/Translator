@@ -1,5 +1,4 @@
 import React, { ChangeEvent } from "react";
-import "./index.less";
 
 import {
   NoteWordData,

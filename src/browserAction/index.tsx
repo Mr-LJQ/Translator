@@ -1,6 +1,5 @@
 import React, { ChangeEvent } from "react";
 import ReactDOM from "react-dom";
-import "./index.less";
 
 import { CachedOptions } from "../../types/index";
 

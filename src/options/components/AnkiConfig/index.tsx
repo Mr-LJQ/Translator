@@ -1,5 +1,4 @@
 import React, { ChangeEvent, useCallback, useState } from "react";
-import "./index.less";
 
 import Header from "../../components/Header/index";
 import Fields from "../../components/Fields/index";

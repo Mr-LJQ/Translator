@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import "./index.less";
+import "tailwindcss/tailwind.css"
 
 import Options from "./Options";
 import {dispatch} from "./utils/index"

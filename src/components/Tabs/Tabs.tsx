@@ -5,7 +5,6 @@ import React, {
   useState,
 } from "react";
 import classnames from "classnames";
-import "./index.less";
 
 import TabItem from "./TabItem";
 import {Props as TabPaneProps} from "./TabPane"

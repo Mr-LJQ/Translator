@@ -34,7 +34,7 @@ export default function Translations(props:Props) {
   })
   
     return (
-      <ul ref={ref}>
+      <ul ref={ref} className="text-base">
         {
           translations.map((item,index) => {
             return (

@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+#root {
+  @apply p-1.5;
+}
+
+@layer components {
+  @variants group-hover, hover {
+    .audio::after {
+      content: "🔊";
+      vertical-align: text-top;
+    }
+  }
+  .audio:after {
+    content: "🔉";
+    vertical-align: text-top;
+  }
+  .button {
+    outline:none;
+    @apply hover:bg-blue-300 select-none bg-transparent font-bold text-xl border-none h-6 w-6 
+  }
+  .indent-2 {
+    text-indent:2em;
+  }
+}

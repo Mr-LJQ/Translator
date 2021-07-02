@@ -1,5 +1,4 @@
 import React, { ChangeEvent } from 'react'
-import "./index.less"
 import Header from '../Header/index'
 import Select from '../Select/index'
 
