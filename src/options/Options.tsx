@@ -1,23 +1,23 @@
+//依赖
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "./features/hooks";
 import { setStorage } from "../extensions_API/index";
+import { pick } from "../utils";
+import { fetchAnki } from "./features/ankiSlice";
 import {
-  getDeckNames,
-  getModelNames,
-  getAnkiConnectionVersion,
-} from "./features/ankiSlice";
-import {
+  updateWordConfig,
   updateBasisConfig,
   updatePhraseConfig,
   updateSentenceConfig,
-  updateWordConfig,
 } from "./features/storageSlice";
 
+//组件
 import Button from "./components/Button";
-import AnkiConfig from "./components/AnkiConfig";
-import BasisConfig from "./components/BasisConfig";
+import AnkiConfig from "./features/AnkiConfig";
+import BasisConfig from "./features/BasisConfig";
 import Tabs, { TabPane } from "./components/Tabs";
 
+//数据
 import {
   wordMappingTable,
   otherMappingTable,
@@ -26,38 +26,36 @@ import {
   sentenceMappingTable,
 } from "./mappingTable";
 
-import {
-  BasisConfig as BasisConfigType,
-  PhraseConfig,
-  SentenceConfig,
-  WordConfig,
-} from "../../types";
-import { pick } from "../utils";
-
 //魔法字符串
 const SUCCESS_LABEL = "√";
 const LOADING_LABEL = "...";
-const REFRESH_LABEL = "⟳"
+const REFRESH_LABEL = "⟳";
 function Options() {
   const storage = useSelector((state) => state.storage);
   const anki = useSelector((state) => state.anki);
   const dispatch = useDispatch();
-  const activeTabPane = storage.activeTabPane || "basis"
+
+  const activeTabPane = storage.activeTabPane || "basis";
+  const wordModel = storage.wordConfig?.modelName || "";
+  const phraseModel = storage.phraseConfig?.modelName || "";
+  const sentenceModel = storage.sentenceConfig?.modelName || "";
+
+  const deckNames = anki.deckNames;
+  const modelNames = anki.modelNames;
+  const modelFieldNames = anki.modelFieldNames;
 
   //处理连接
   const connected = anki.ankiConnectionVersion !== null;
 
   //刷新操作
-  const [refreshLabel,setRefreshLabel] = useState("")
+  const [refreshLabel, setRefreshLabel] = useState("");
   const refresh = () => {
-    if (refreshLabel === REFRESH_LABEL) return
-    setRefreshLabel(REFRESH_LABEL)
+    if (refreshLabel === REFRESH_LABEL) return;
+    setRefreshLabel(REFRESH_LABEL);
     setTimeout(() => {
-      setRefreshLabel("")
+      setRefreshLabel("");
     }, 3000);
-    dispatch(getDeckNames());
-    dispatch(getModelNames());
-    dispatch(getAnkiConnectionVersion());
+    dispatch(fetchAnki());
   };
 
   //处理保存
@@ -86,7 +84,7 @@ function Options() {
         config={basisConfig}
         disabled={!connected}
         mappingTable={basisMappingTable}
-        updateConfig={(name: keyof BasisConfigType, value: string) => {
+        updateConfig={(name, value: string) => {
           dispatch(updateBasisConfig({ name, value }));
         }}
       />
@@ -96,9 +94,12 @@ function Options() {
         title="单词配置"
         config={storage.wordConfig || {}}
         disabled={!connected}
+        deckNames={deckNames}
+        modelNames={modelNames}
+        modelFieldNames={modelFieldNames[wordModel] || []}
         fieldMappingTable={wordMappingTable}
         otherMappingTable={otherMappingTable}
-        updateConfig={(name: keyof WordConfig, value: string) => {
+        updateConfig={(name, value: string) => {
           dispatch(updateWordConfig({ name, value }));
         }}
       />
@@ -106,11 +107,14 @@ function Options() {
     <TabPane tabItem="短语配置" key="phrase">
       <AnkiConfig
         title="短语配置"
+        deckNames={deckNames}
+        modelNames={modelNames}
+        modelFieldNames={modelFieldNames[phraseModel] || []}
         config={storage.phraseConfig || {}}
         disabled={!connected}
         otherMappingTable={otherMappingTable}
         fieldMappingTable={phraseMappingTable}
-        updateConfig={(name: keyof PhraseConfig, value: string) => {
+        updateConfig={(name, value: string) => {
           dispatch(updatePhraseConfig({ name, value }));
         }}
       />
@@ -118,11 +122,14 @@ function Options() {
     <TabPane tabItem="句子配置" key="sentence">
       <AnkiConfig
         title="句子配置"
+        deckNames={deckNames}
+        modelNames={modelNames}
+        modelFieldNames={modelFieldNames[sentenceModel] || []}
         disabled={!connected}
         config={storage.sentenceConfig || {}}
         otherMappingTable={otherMappingTable}
         fieldMappingTable={sentenceMappingTable}
-        updateConfig={(name: keyof SentenceConfig, value: string) => {
+        updateConfig={(name, value: string) => {
           dispatch(updateSentenceConfig({ name, value }));
         }}
       />
@@ -140,11 +147,10 @@ function Options() {
         >
           刷新 {refreshLabel}
         </Button>
-        <p className="text-sm inline-block p-1 mr-1">
+        <p className="inline-block p-1 mr-1 text-sm ">
           连接状态：
           {connected ? "已连接" : <span className="text-red-500">未连接</span>}
         </p>
-
         <Button type="button" className="float-right" onClick={window.close}>
           退出
         </Button>

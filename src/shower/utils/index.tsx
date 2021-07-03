@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import { NoteWordData, WordData } from "../../../types/index";
+import { WordFieldData, WordData } from "../../../types/index";
 
 export function translateBTag(text: string): ReactNode[] {
   const reg = new RegExp(`(<b>.+?)</b>`, "gi");
@@ -37,7 +37,7 @@ export function getNoteWordData(wordData: WordData, index: number) {
     example_sentence_translation =
       exampleSentences[0].example_sentence_translation;
   }
-  const noteWordData: NoteWordData = {
+  const noteWordData: WordFieldData = {
     word,
     starAmount: "★".repeat(starAmount),
     am,
@@ -58,7 +58,7 @@ export function getNoteWordData(wordData: WordData, index: number) {
 /**
  * 纯函数，用于处理那些没有定义的单词
  */
-export function getNoteWordData_Top(wordData: WordData): NoteWordData {
+export function getNoteWordData_Top(wordData: WordData): WordFieldData {
   const { starAmount, phonetic, word, translations } = wordData;
   const { am, en, am_audio, en_audio } = phonetic;
   const translation =
@@ -70,7 +70,7 @@ export function getNoteWordData_Top(wordData: WordData): NoteWordData {
       }
       return acc;
     }, "") || "";
-  const noteWordData: NoteWordData = {
+  const noteWordData: WordFieldData = {
     word,
     starAmount: "★".repeat(starAmount),
     translation,

@@ -1,6 +1,5 @@
 import React, {
   Ref,
-  useCallback,
   useContext,
   useImperativeHandle,
 } from "react";
@@ -16,7 +15,7 @@ interface Props {
 function AudioButton(props: Props, ref: Ref<{ playAudio: () => void }>) {
   const { audioURL, className } = props;
   const audioElement = useContext(AudioContext);
-  const playAudio = useCallback(() => {
+  const playAudio = () => {
     try {
     if (!audioURL) return;
     //避免重复加载
@@ -29,7 +28,7 @@ function AudioButton(props: Props, ref: Ref<{ playAudio: () => void }>) {
     } catch (e) {
       console.warn(e);
     }
-  }, [audioElement, audioURL]);
+  };
 
   useImperativeHandle(
     ref,

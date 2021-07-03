@@ -1,11 +1,13 @@
 import React from "react";
 
+//组件
 import Phonetic from "./Phonetic";
 import Explanation from "./Explanation";
 import ExampleSentences from "./ExampleSentences";
 import AddButton from "../components/AddButton";
-import Translations from "../components/Translations";
+import { TextClamp } from "../components/TextClamp";
 
+//类型
 import { AddButtonState, WordData } from "../../../types/index";
 
 interface Props extends WordData {
@@ -42,7 +44,9 @@ function WordCard(props: Props) {
           <Phonetic symbols={phonetic.am} audioURL={phonetic.am_audio} />
         </div>
         {translations && (
-          <Translations initTranslations={translations} key={word} />
+          <TextClamp key={word} >
+            {translations}
+          </TextClamp>
         )}
       </header>
       <ul className="mt-2 rounded">

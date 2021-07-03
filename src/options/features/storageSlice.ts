@@ -43,7 +43,7 @@ const storageSlice = createSlice({
   },
   extraReducers: builder => {
     builder.addCase(fetchStorage.fulfilled, (state, action) => {
-      state = action.payload
+      return action.payload
     })
   }
 })

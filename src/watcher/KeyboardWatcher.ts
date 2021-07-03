@@ -5,13 +5,13 @@
     进行对选择单词的查询
 */
 import { getSelectionText, getRangeFromPoint } from "../utils/index"
-import { CachedOptions, Point } from "../../types/index"
+import { Storage, Point } from "../../types/index"
 
 export class KeyboardWatcher {
 
   private getClientPoint: () => Point
   private showTranslated: (text: string) => void
-  private hotKey: CachedOptions["hotKey"]
+  private hotKey: Storage["hotKey"]
   private checkout: RegExp
 
   constructor(showTranslated: (text: string) => void, getClientPoint: () => Point) {
@@ -31,7 +31,7 @@ export class KeyboardWatcher {
   updateCheckout(source: string) {
     this.checkout = new RegExp(source)
   }
-  updateHotKey(hotKey: CachedOptions["hotKey"]) {
+  updateHotKey(hotKey: Storage["hotKey"]) {
     this.hotKey = hotKey
   }
 
@@ -63,8 +63,7 @@ export class KeyboardWatcher {
   }
 
   /**
-   * 根据用户鼠标的当前位置，自动选中符合要求的文本，并用拖蓝的形式返回
-   * 间接触发 selectionchange 监听(监听由 ./SelectionWatcher.ts 文件添加)
+   * 根据用户鼠标的当前位置，自动选中符合要求的文本，表现为对应文本拖蓝选中
    * @param x ClientX
    * @param y ClientY
    * @returns 

@@ -62,7 +62,6 @@ module.exports = {
   plugins: [
     new MiniCssExtractPlugin({
       filename:"index.css",
-      
     }),
     new HtmlWebpackPlugin({
       title: "Popup",

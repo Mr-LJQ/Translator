@@ -3,7 +3,11 @@ import classnames from "classnames";
 
 type Props = React.DetailedHTMLProps<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>
 
-function Header(props: Props) {
+/**
+ * h3标签的UI封装
+ * 依赖：tailwindcss
+ */
+function H3(props: Props) {
   const { children, className } = props;
   return (
     <h3
@@ -17,4 +21,4 @@ function Header(props: Props) {
   );
 }
 
-export { Header };
+export { H3 };

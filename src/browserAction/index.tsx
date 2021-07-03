@@ -1,48 +1,49 @@
 import React, { ChangeEvent } from "react";
 import ReactDOM from "react-dom";
-import "../index.css"
-
-import { CachedOptions } from "../../types/index";
-import SwitchButton from "../components/SwitchButton/index";
-
 import {
   onStorageChange,
   setStorage,
   getStorage,
 } from "../extensions_API/storage";
+import "../index.css";
 
-type Props = Pick<CachedOptions, "hotKey" | "isOpen">;
-type State = Pick<CachedOptions, "hotKey" | "isOpen">;
+import SwitchButton from "./SwitchButton";
 
-class Popup extends React.Component<Props, State> {
-  state: State = {
-    isOpen: this.props.isOpen,
-    hotKey: this.props.hotKey,
-  };
+import { Storage } from "../../types/index";
 
-  hotkeys: Array<CachedOptions["hotKey"]> = [
+type State = Pick<Storage, "hotKey" | "isOpen">;
+
+class Popup extends React.Component<{}, State> {
+  state: State = {};
+
+  hotkeys: Array<Storage["hotKey"]> = [
     undefined,
     "shiftKey",
     "ctrlKey",
     "altKey",
   ];
 
-  constructor(props: Props) {
+  constructor(props: {}) {
     super(props);
     this.handleChange = this.handleChange.bind(this);
     this.openOptionsPage = this.openOptionsPage.bind(this);
     this.handleSwitchOpen = this.handleSwitchOpen.bind(this);
   }
   componentDidMount() {
+    getStorage(["isOpen", "hotKey"], ({ isOpen, hotKey }) => {
+      this.setState({ isOpen, hotKey });
+    });
     onStorageChange({
-      isOpen: (_, isOpen) => this.setState({ isOpen }),
-      hotKey: (_, hotKey) => this.setState({ hotKey }),
+      isOpen: (_, isOpen) =>
+        this.setState({ isOpen: isOpen as Storage["isOpen"] }),
+      hotKey: (_, hotKey) =>
+        this.setState({ hotKey: hotKey as Storage["hotKey"] }),
     });
   }
   openOptionsPage() {
-    setStorage({activeTabPane:"basis"},() => {
+    setStorage({ activeTabPane: "basis" }, () => {
       chrome.runtime.openOptionsPage();
-    })
+    });
   }
   handleSwitchOpen() {
     let { isOpen } = this.state;
@@ -51,7 +52,7 @@ class Popup extends React.Component<Props, State> {
     setStorage({ isOpen });
   }
   handleChange(event: ChangeEvent<HTMLSelectElement>) {
-    const hotKey = event.target.value as CachedOptions["hotKey"];
+    const hotKey = event.target.value as Storage["hotKey"];
     this.setState({ hotKey });
     setStorage({ hotKey });
   }
@@ -61,7 +62,10 @@ class Popup extends React.Component<Props, State> {
       <>
         <header className="font-bold text-xl p-1 border rounded-tr-sm bg-blue-gray text-white">
           Options
-          <span className="float-right mr-1 cursor-pointer" onClick={this.openOptionsPage}>
+          <span
+            className="float-right mr-1 cursor-pointer"
+            onClick={this.openOptionsPage}
+          >
             ...
           </span>
         </header>
@@ -71,9 +75,7 @@ class Popup extends React.Component<Props, State> {
             <SwitchButton isOpen={!!isOpen} onClick={this.handleSwitchOpen} />
           </div>
           <div className="flex justify-between p-1 items-center">
-            <span className="text-lg">
-              取词热键
-            </span>
+            <span className="text-lg">取词热键</span>
             <select
               className="rounded h-8 w-20"
               value={hotKey}
@@ -97,11 +99,6 @@ class Popup extends React.Component<Props, State> {
   }
 }
 
-const root = document.getElementById("root") as HTMLElement
-root.classList.add("w-44","m-1","text-sm")
-getStorage(["isOpen","hotKey"],(props) => {
-  ReactDOM.render(
-    <Popup {...props} />,
-    root
-  );
-});
+const root = document.getElementById("root") as HTMLElement;
+root.classList.add("w-44", "m-1", "text-sm");
+ReactDOM.render(<Popup />, root);

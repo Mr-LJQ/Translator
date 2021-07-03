@@ -1,7 +1,7 @@
 import initialStorage from "./initialStorage"
 import { pick } from "../utils/index"
 
-import { PhraseConfig, SentenceConfig, Storage, WordConfig } from "../../types/index"
+import { Storage } from "../../types/index"
 
 type StorageHandlers<T> = Partial<Record<keyof Storage, T>>
 type StorageKeys = keyof Storage
@@ -38,7 +38,7 @@ export function getStorage(handlers: StorageHandlers<(value: StorageValues) => v
  * @param names array,需要获取的缓存项的名称数组
  * @returns object,对应的缓存对象
  */
-export function getStorageItems<K extends StorageKeys>(names: K[]): Promise<Storage> {
+export function getStorageItems<K extends StorageKeys>(names: K[]): Promise<Partial<Storage>> {
   return new Promise((resolve) => {
     getStorage(names, resolve)
   })
@@ -47,7 +47,7 @@ export function getStorageItems<K extends StorageKeys>(names: K[]): Promise<Stor
 export function onStorageChange(handlers: StorageHandlers<(oldValue: StorageValues, newValue: StorageValues) => void>) {
   chrome.storage.onChanged.addListener((changes) => {
     Object.keys(changes).forEach((key) => {
-      const handler = handlers[key as keyof Storage]
+      const handler = handlers[key as StorageKeys]
       if (handler) {
         const { oldValue, newValue } = changes[key]
         handler(oldValue, newValue)

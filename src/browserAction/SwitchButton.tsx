@@ -1,4 +1,4 @@
-import React from "react";
+import React,{Key} from "react";
 import classnames from "classnames";
 
 interface Props {
@@ -30,9 +30,21 @@ export default class SwitchButton extends React.Component<Props> {
         "
         onClick={onClick}
       >
-        <span className={classnames("left-text", { open: isOpen })}>开</span>
+        <span
+          className={classnames(
+            "float-left pl-3 text-gray-50 duration-500 transition-colors",
+            { "prior:text-green-viridity": isOpen }
+          )}
+        >
+          开
+        </span>
         <span className="float-right pr-3 text-gray-50 ">关</span>
-        <span className={classnames("switch", { open: isOpen })}></span>
+        <span
+          className={classnames(
+            "absolute left-0 top-0 transition-all duration-500 m-1 w-10 h-6 rounded-full bg-gray-50 ",
+            { "prior:bg-green-viridity prior:left-8": isOpen }
+          )}
+        ></span>
       </div>
     );
   }

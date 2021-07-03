@@ -1,6 +1,5 @@
-import { AnyFunction } from "../../types/index"
 interface Handlers {
-  [key: string]: AnyFunction
+  [key: string]: (...args: any[]) => void
 }
 
 let onCommand = function (handlers: Handlers) {

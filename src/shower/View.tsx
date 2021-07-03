@@ -1,15 +1,16 @@
 import React from "react";
+import { getNoteWordData_Top, getNoteWordData } from "./utils/index";
+import { Agent, PostMessage, loopJudgment, History } from "../utils/index";
+import { SelectionWatcher } from "../watcher/SelectionWatcher";
 
-import Nav from "./components/Nav";
+//组件
+import NavButton from "./components/NavButton";
 import WordCard from "./WordCard/index";
 import PhraseCard from "./PhraseCard/index";
 import SentenceCard from "./SentenceCard/index";
 import AudioContext from "./Context/AudioContext";
 
-import { getNoteWordData_Top, getNoteWordData } from "./utils/index";
-import { Agent, PostMessage, loopJudgment, History } from "../utils/index";
-import { SelectionWatcher } from "../watcher/SelectionWatcher";
-
+//类型
 import {
   Status,
   NoteData,
@@ -92,7 +93,7 @@ class View extends React.Component<{}, State> {
         <AudioContext.Provider value={this.audio}>
           {component}
         </AudioContext.Provider>
-        <Nav forward={this.forward} backward={this.backward}></Nav>
+        <NavButton forward={this.forward} backward={this.backward}></NavButton>
       </>
     );
   }

@@ -9,6 +9,7 @@ module.exports = {
           150: "#c7edcc",
           light: "#4CAF50",
           dark: "#45a049",
+          viridity:"#76ff03"
         },
         blue: {
           gray: "#607d8b",
@@ -19,6 +20,9 @@ module.exports = {
   variants: {
     extend: {
       backgroundColor: ["prior"],
+      inset:["prior"],
+      textColor:["prior"],
+      cursor:["prior"],
       margin: ["first"],
     },
   },

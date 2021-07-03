@@ -1,7 +1,5 @@
-import React, { Key, ReactElement, useMemo, useState } from "react";
-
-import TabItem from "./TabItem";
-import { TabPane, Props as TabPaneProps } from "./TabPane";
+import React, { Key, ReactElement, useMemo, useState, ReactNode } from "react";
+import classnames from "classnames";
 
 export interface Props {
   activeTabPane: string;
@@ -51,6 +49,38 @@ function Tabs(props: Props) {
       })}
     </div>
   );
+}
+
+interface TabItemProps {
+  children: ReactNode;
+  checked: boolean;
+  onClick: () => void;
+}
+
+function TabItem(props: TabItemProps) {
+  const { children, checked, onClick } = props;
+  return (
+    <div
+      className={classnames(
+        "first:ml-0 mx-2 mt-1 px-2 text-base font-bold text-gray-600  cursor-pointer flex-shrink-0",
+        { "text-red-600 border-red-600 border-b-2": checked }
+      )}
+      onClick={onClick}
+    >
+      {children}
+    </div>
+  );
+}
+
+interface TabPaneProps {
+  tabItem: ReactNode;
+  children: ReactNode;
+  key: Key;
+}
+
+export function TabPane(props: TabPaneProps) {
+  const { children } = props;
+  return <>{children}</>;
 }
 
 export default Tabs;

@@ -24,5 +24,3 @@ export type {
   AddButtonState
 }from "./Shower"
 export {Status} from "./Shower"
-
-export type AnyFunction = (...args:any[]) => void

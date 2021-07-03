@@ -6,7 +6,6 @@ import { Cacher } from "../utils/index"
 import { getStorage, onMessage, onStorageChange, postFrontend, onCommand, setStorage } from "../extensions_API/index"
 
 import {
-  Storage,
   SendResponse,
   TranslationResult
 } from "../../types/index"
@@ -103,7 +102,7 @@ getStorage(["wordConfig", "phraseConfig", "sentenceConfig", "ankiConnectionURL"]
 })
 //初始化isOpen标识文本
 getStorage({
-  isOpen (value) {switchBadgeText(!!value)}
+  isOpen(value) { switchBadgeText(!!value) }
 })
 
 //监听用户配置更新
@@ -149,8 +148,8 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 
 
 //------------辅助函数-------------
-function switchBadgeText(isOpen:boolean) {
-  isOpen 
+function switchBadgeText(isOpen: boolean) {
+  isOpen
     ? chrome.browserAction.setBadgeText({ text: "" })
     : chrome.browserAction.setBadgeText({ text: "off" })
 }

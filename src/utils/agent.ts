@@ -1,12 +1,12 @@
 //该模块封装了window与window之间进行通信的方法
 //例如:window与iframe.contentWindow,iframe.contentWindow与window之间的通信
 
-import { AnkiCallback, TranslationResult, Handler, NoteData } from "../../types/index"
+import { AnkiCallback, TranslationResult, MessageHandler, NoteData } from "../../types/index"
 
 export type PostMessage = Agent["postMessage"]
 
 interface Options {
-  handler?: Handler
+  handler?: MessageHandler
   self?: Window
   target?: Window
 }

@@ -5,6 +5,8 @@ import { validateText } from "../utils/index"
 
 import { onStorageChange, getStorage, postBackend } from "../extensions_API/index"
 
+import { Storage } from "../../types"
+
 //添加获取鼠标位置的监听
 const mousePointWatcher = new MousePointWatcher()
 const { getClientPoint, getScreenPoint } = mousePointWatcher
@@ -33,12 +35,12 @@ function uninstallAll() {
 
 getStorage({
   isOpen: (value) => value ? installAll() : uninstallAll(),
-  hotKey: (value) => keyboardWatcher.updateHotKey(value),
+  hotKey: (value) => keyboardWatcher.updateHotKey(value as Storage["hotKey"]),
 })
 
 onStorageChange({
   isOpen: (_, value) => value ? installAll() : uninstallAll(),
-  hotKey: (_, value) => keyboardWatcher.updateHotKey(value),
+  hotKey: (_, value) => keyboardWatcher.updateHotKey(value as Storage["hotKey"]),
 })
 
 

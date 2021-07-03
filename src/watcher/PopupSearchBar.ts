@@ -79,7 +79,7 @@ export class PopupSearchBar {
     let searchInput = document.createElement("input")
     //为form设置必要的attribute
     form.autocomplete = "off"
-    form.id = "extension_searchBar"
+    form.id = "BrowserExtensions_searchBar"
     form.action = "#"
 
     searchInput.type = "text"

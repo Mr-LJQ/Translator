@@ -2,16 +2,6 @@ export { default as Agent } from "./agent"
 export type { PostMessage } from "./agent"
 export { Cacher, History } from "./cacher"
 
-export function throttle(callback: Function, await: number) {
-  let startTime = Date.now()
-  return function (this: unknown) {
-    let currentTime = Date.now()
-    if (currentTime - startTime < await) return
-    startTime = currentTime
-    return callback.apply(this, arguments)
-  }
-}
-
 /**
  * 纯函数，获取当前拖蓝选中的文本(已清除左右空格)
  * @returns string

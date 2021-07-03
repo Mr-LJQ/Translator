@@ -33,7 +33,7 @@ export class Shower {
     //此处的shower.html需要参考所生成文件的具体名称
     iframe.src = chrome.runtime.getURL("shower.html")
 
-    //通过蒙版点击监听来隐藏iframe，如果绑定在document上，有可能以为处于其它iframe而无效
+    //通过蒙版点击监听来隐藏iframe，如果绑定在document上，有可能因为处于其它iframe而无效
     const mask = this.mask = document.createElement("div")
     mask.id = "extensions-mask"
     mask.style.cssText = `

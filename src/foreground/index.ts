@@ -10,7 +10,7 @@ import { Shower } from "../shower/Shower"
 import { validateText } from "../utils/index"
 import { onMessage, postBackend, getStorage, onStorageChange } from "../extensions_API/index"
 
-import { Point, ShowData } from "../../types/index"
+import { Point, ShowData, Storage } from "../../types/index"
 
 class FrontEnd {
   private shower: Shower
@@ -22,13 +22,14 @@ class FrontEnd {
   constructor() {
     //必须绑定this
     this.handler = this.handler.bind(this)
-    this.showHostTranslated = this.showHostTranslated.bind(this)
+    this.showSelectionTranslated = this.showSelectionTranslated.bind(this)
+    this.showSearchTranslated = this.showSearchTranslated.bind(this)
 
     this.mousePointWatcher = new MousePointWatcher()
     const { getClientPoint } = this.mousePointWatcher
-    this.keyboardWatcher = new KeyboardWatcher(this.showHostTranslated, getClientPoint,)
-    this.popupSearchBar = new PopupSearchBar(this.showHostTranslated)
-    this.selectionWatcher = new SelectionWatcher(this.showHostTranslated)
+    this.keyboardWatcher = new KeyboardWatcher(this.showSelectionTranslated, getClientPoint,)
+    this.selectionWatcher = new SelectionWatcher(this.showSelectionTranslated)
+    this.popupSearchBar = new PopupSearchBar(this.showSearchTranslated)
 
     //监听展示模块传递的指令，并进行处理
     this.shower = new Shower(this.handler)
@@ -81,18 +82,30 @@ class FrontEnd {
     shower.uninstall()
     mousePointWatcher.uninstall()
   }
+
+
   /**
-   * 处理主页面内容脚本的翻译展示处理请求
-   * @param text 未经处理的数据，仍可能为空，为无需翻译的字符(例如：中文)
+   * 处理选中文本的翻译，其特别之处在于其只对英文起反应，且过滤掉输入框内的拖蓝查询
    */
-  private async showHostTranslated(text: string) {
+  private async showSelectionTranslated(text: string) {
     let translatedData
     const focusNode = document.activeElement?.nodeName || ""
     const filterNodeName = ["INPUT", "TEXTAREA"]
     //过滤掉输入框中的文本选中
-    if (filterNodeName.includes(focusNode)) return 
+    if (filterNodeName.includes(focusNode)) return
     const result = validateText(text)
     if (!result) return
+    translatedData = await postBackend("translateText", text)
+    const point = this.mousePointWatcher.getClientPoint()
+    this.previousPoint = { ...point }
+    this.shower.showTranslation({ translatedData, point })
+  }
+
+  /**
+   * 用于处理searchBar传递的数据，其特别之处在于其会对中文进行查询
+   */
+  private async showSearchTranslated(text: string) {
+    let translatedData
     translatedData = await postBackend("translateText", text)
     const point = this.mousePointWatcher.getClientPoint()
     this.previousPoint = { ...point }
@@ -112,8 +125,12 @@ class FrontEnd {
     const point = this.previousPoint as Point //必定有值
     this.shower.showTranslation({ translatedData, point })
   }
+  /**
+   * 用于处理注入脚本的翻译，其特别之处在于其point相对于浏览器窗口左上角而非视口左上角
+   */
   private showInjectTranslated(data: ShowData) {
     let point = data.point
+    //point是鼠标到浏览器窗口左上角位置，所以为了获得到视口左上角位置需要进行额外处理
     point.x -= window.outerWidth - window.innerWidth
     point.y -= window.outerHeight - window.innerHeight
     this.previousPoint = { ...point } //保证其独立
@@ -125,12 +142,12 @@ const frontEnd = new FrontEnd()
 
 getStorage({
   isOpen: (value) => value ? frontEnd.install() : frontEnd.uninstall(),
-  hotKey: (value) => frontEnd.keyboardWatcher.updateHotKey(value),
+  hotKey: (value) => frontEnd.keyboardWatcher.updateHotKey(value as Storage["hotKey"]),
 })
 
 onStorageChange({
   isOpen: (_, value) => value ? frontEnd.install() : frontEnd.uninstall(),
-  hotKey: (_, value) => frontEnd.keyboardWatcher.updateHotKey(value),
+  hotKey: (_, value) => frontEnd.keyboardWatcher.updateHotKey(value as Storage["hotKey"]),
 })
 
 

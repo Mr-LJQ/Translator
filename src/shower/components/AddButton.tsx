@@ -4,32 +4,32 @@ import { Status } from "../../../types/index";
 
 interface Props {
   status: Status;
-  loadingIcon?: ReactNode;
   statusText?: string;
+  loadingIcon?: ReactNode;
   statusIcons?: ReactNode[];
-  onClick: (...args: any[]) => void;
+  onClick: React.MouseEventHandler<HTMLSpanElement>;
 }
 
-const defaultIcons = ["➕", "✔", "×", "✄", "↻"];
+const defaultIcons = ["➕", "√", "×", "✄", "↻"];
+const { loading, success, error, disconnected, relearn } = Status;
 
 function AddButton(props: Props) {
   const {
     status,
+    loadingIcon = "...",
     statusText = "添加到Anki",
     statusIcons = defaultIcons,
-    loadingIcon = "...",
     onClick,
   } = props;
-  const { loading, success, error, disconnected, relearn } = Status;
   return (
     <span
       title={statusText}
       className={classnames(
         "hover:bg-green-700 hover:text-gray-100 indent-0 bg-green-600 cursor-pointer float-right rounded-full select-none text-base text-center text-white w-9",
         {
-          "cursor-auto": status === loading || status === success,
-          "bg-red-600": status === error || status === disconnected,
-          "bg-yellow-400": status === relearn,
+          "prior:cursor-auto": status === loading || status === success,
+          "prior:bg-red-700": status === error || status === disconnected,
+          "prior:bg-yellow-500": status === relearn,
         }
       )}
       onClick={onClick}
