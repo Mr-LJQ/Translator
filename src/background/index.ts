@@ -89,7 +89,8 @@ class BackEnd {
     let translated = cacher.get(text)
     if (translated) return translated
     let translatedData = await this.collins.translateText(text)
-    if (!("error" in translatedData)) this.cacher.set(text, translatedData)
+    if (("error" in translatedData) && !translatedData.isCache) return translatedData
+    this.cacher.set(text, translatedData)
     return translatedData
   }
 }

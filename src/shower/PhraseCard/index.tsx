@@ -4,7 +4,7 @@ import { AddButtonState, PhraseData } from "../../../types/index";
 
 import AddButton from "../components/AddButton";
 import AudioButton from "../components/AudioButton";
-import { translateBTag } from "../utils/index";
+import { translateBTag } from "../utils";
 
 interface Props extends PhraseData {
   addNote: () => void;

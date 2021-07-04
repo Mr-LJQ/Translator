@@ -36,21 +36,16 @@ export function getRangeFromPoint(x: number, y: number): Range | null {
 }
 
 /**
- * 去除驼峰、去除 -_ 连接符，使单词回归正常语法
- * @param text 进行去驼峰、去连接符的文本
- * @returns 标准化语句
+ * 纯函数，去除驼峰使单词回归正常语法
  */
-export function optimizeText(text: string) {
+export function removeHump(text: string) {
   //匹配驼峰
   let camel = /([a-z])([A-Z])([a-z])/g;
-  //匹配joinLine
-  let joinLine = /([a-z])[-_]([a-z])/gi;
 
   return text
-    .replace(camel, function (item, $1, $2, $3) {
+    .replace(camel, function (_, $1, $2, $3) {
       return $1 + " " + $2.toLowerCase() + $3;
     })
-    .replace(joinLine, "$1" + " " + "$2");
 }
 
 /**

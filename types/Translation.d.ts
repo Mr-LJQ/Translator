@@ -1,7 +1,9 @@
 export type TranslationResult = WordData | SentenceData | PhraseData | ErrorData
 
 export interface ErrorData {
-  error:string
+  error:string,
+  isCache:boolean
+  correct?:string[],
 }
 
 export interface WordData {
@@ -33,7 +35,6 @@ export interface ExampleSentence {
 }
 
 export interface TranslationUnit {
-  word:string
   part_of_speech: string //词性
   translation: string  //翻译
   definition: string  //定义

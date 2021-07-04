@@ -1,9 +1,12 @@
 import translateWord from "./translateWord"
 import translatePhrase from "./translatePhrase"
 import translateSentence from "./translateSentence"
-
+import { getCorrectSpelling } from "./utils"
 import { PhraseData, SentenceData, TranslationResult, ErrorData } from "../../types/index"
-
+import {removeHump} from "../utils/index"
+/**
+ * [...document.querySelectorAll("#results-contents .error-typo .typo-rel a")].map(item => item.textContent)
+ */
 
 export default class Collins_en_cn {
   /**
@@ -14,6 +17,9 @@ export default class Collins_en_cn {
     let result: TranslationResult
     try {
       const dom = await getPageDOM(text)
+      //去除驼峰
+      text = removeHump(text)
+      
       //如果存在空格，则认为其为多个单词组合的句子、词组
       if (/\s/g.test(text)) {
         result = await this.translateWords(dom)
@@ -24,7 +30,7 @@ export default class Collins_en_cn {
       //捕获语法错误
       if (error.message) error = error.message
       //捕获自定义错误
-      result = { error }
+      result = { error, isCache: false }
     }
     return result
   }
@@ -37,8 +43,12 @@ export default class Collins_en_cn {
     const translatedSentence = translateSentence(dom)
     if (translatedSentence) return translatedSentence
 
+    let correct = getCorrectSpelling(dom)
+    if (correct) {
+      return { isCache: true, correct,error:"拼写存在错误" }
+    }
     //情况三：无任何翻译
-    return { error: "没有查找到任何翻译。" }
+    return { error: "没有查找到任何翻译", isCache: false }
   }
 
 }

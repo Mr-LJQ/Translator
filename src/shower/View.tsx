@@ -1,5 +1,5 @@
 import React from "react";
-import { getNoteWordData_Top, getNoteWordData } from "./utils/index";
+import { getNoteWordData_Top, getNoteWordData } from "./utils";
 import { Agent, PostMessage, loopJudgment, History } from "../utils/index";
 import { SelectionWatcher } from "../watcher/SelectionWatcher";
 
@@ -47,8 +47,8 @@ class View extends React.Component<{}, State> {
     this.addPhraseNote = this.addPhraseNote.bind(this);
     this.addSentenceNote = this.addSentenceNote.bind(this);
     this.addWordNote_Top = this.addWordNote_Top.bind(this);
-    this.forward = this.forward.bind(this)
-    this.backward = this.backward.bind(this)
+    this.forward = this.forward.bind(this);
+    this.backward = this.backward.bind(this);
   }
 
   render() {
@@ -57,7 +57,37 @@ class View extends React.Component<{}, State> {
       this;
     let component;
     if (!data) return <></>;
-    if ("error" in data) return <p>{data.error}</p>;
+    if ("error" in data) {
+      const { correct, error } = data;
+      if (correct) {
+        component = (
+          <div className="bg-green-150">
+            <p className="font-bold text-gray-700 text-lg">你要找的是否是：</p>
+            <ul>
+              {correct.map((text) => {
+                return (
+                  <li
+                    key={text}
+                    className="my-1.5 pl-8 cursor-pointer text-base text-blue-600"
+                    onClick={() => {
+                      this?.postMessage?.("showTranslated", text);
+                    }}
+                  >
+                    {text}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        );
+      } else {
+        component = (
+          <p className="bg-green-150 fixed flex inset-2 justify-center pt-20 text-2xl text-center">
+            {error}
+          </p>
+        );
+      }
+    }
     if ("word" in data) {
       component = (
         <WordCard
@@ -159,7 +189,8 @@ class View extends React.Component<{}, State> {
   }
   whetherUpdateHistory() {
     const { data } = this.state;
-    if (!data) return false
+    if (!data) return false;
+    if ("error" in data && !data.isCache) return false;
     return true;
   }
   updateHistory() {
@@ -179,7 +210,7 @@ class View extends React.Component<{}, State> {
    * 无副作用的函数，通过status判断是否存在异步操作处于 ... 状态之中
    */
   hasAwait() {
-    const { addButtonStates,data} = this.state;
+    const { addButtonStates, data } = this.state;
     if (!data) return false;
     return addButtonStates?.some(({ status }) => status === -1);
   }
@@ -200,7 +231,7 @@ class View extends React.Component<{}, State> {
   pauseAudio() {
     try {
       this.audio.pause();
-    }catch {}
+    } catch {}
   }
   disableState(buttonState: AddButtonState) {
     const { status } = buttonState;
@@ -301,7 +332,11 @@ class View extends React.Component<{}, State> {
   showTranslation(data: TranslationResult, callback: () => void) {
     //更新当次展示状态到其 history 之中
     if (this.whetherUpdateHistory()) this.updateHistory();
-    //如果是错误则直接展现
+    //如果是无需缓存的错误则直接展现
+    if ("error" in data && !data.isCache) {
+      this.scrollTop = 0;
+      return this.setState({ data }, callback);
+    }
     const history = this.appendHistory(data);
     return this.renderHistory(history, callback);
   }

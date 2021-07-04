@@ -1,6 +1,6 @@
 import React from "react";
 
-import { translateBTag } from "../utils/index";
+import { translateBTag } from "../utils";
 import AddButton from "../components/AddButton";
 import { AddButtonState } from "../../../types/index";
 

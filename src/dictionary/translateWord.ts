@@ -1,19 +1,21 @@
 import { ErrorData, ExampleSentence, Phonetic, TranslationUnit, WordData } from "../../types/index";
+import {getCorrectSpelling} from "./utils"
 
-export default async function translateWord(word:string,dom:Document): Promise<WordData | ErrorData>  {
+export default async function translateWord(word: string, dom: Document): Promise<WordData | ErrorData> {
   //单词大写开头与小写开头查询到的内容不一致，统一转换为全小写
   word = word.toLowerCase()
   word = getOriginText(dom)
   let starAmount = Number(dom.querySelector(".star")?.className?.match(/star(\d)/)?.[1]) || 0
-
-  if (!word) return {error:"单词不存在。"}
+  const correctWords = getCorrectSpelling(dom)
+  if (correctWords) return {isCache:true,correct:correctWords,error:"拼写存在错误"}
+  if (!word) return { error: "没有找到所查询的单词",isCache:false}
 
   return {
     word, //单词本体
     starAmount,//单词出现的频率
     translations: getTranslation(dom),
     phonetic: getPhonetic(dom, word),//单词音标与音频
-    translationUnits: getTranslationUnits(dom,word) //单词的翻译单元
+    translationUnits: getTranslationUnits(dom, word) //单词的翻译单元
   }
 }
 
@@ -22,7 +24,7 @@ export default async function translateWord(word:string,dom:Document): Promise<W
  * @param dom 
  * @returns 
  */
- function getOriginText(dom: Document): string {
+function getOriginText(dom: Document): string {
   return (
     dom.querySelector(".wordbook-js")?.firstElementChild?.textContent?.trim() ||
     ""
@@ -34,7 +36,7 @@ export default async function translateWord(word:string,dom:Document): Promise<W
  * @param dom 具有翻译内容的页面DOM
  * @returns 
  */
- function getTranslation(dom: Document): string[] | undefined {
+function getTranslation(dom: Document): string[] | undefined {
   const ul = dom.querySelector("#phrsListTab .trans-container > ul")
   if (!ul) return
   const liNodes = ul.children
@@ -53,7 +55,7 @@ export default async function translateWord(word:string,dom:Document): Promise<W
  * @param word 翻译的目标单词
  * @returns 单词音标与音频对象
  */
- function getPhonetic(dom: Document, word: string): Phonetic {
+function getPhonetic(dom: Document, word: string): Phonetic {
   let en = dom.querySelectorAll(".pronounce")?.[0]?.textContent?.replace(/\s*|\r|\n/g, "")
   let am = dom.querySelectorAll(".pronounce")?.[1]?.textContent?.replace(/\s*|\r|\n/g, "")
   let am_audio, en_audio
@@ -81,7 +83,7 @@ export default async function translateWord(word:string,dom:Document): Promise<W
  * @param word 查询的单词
  * @returns 获取单词例句相关的数据数组
  */
-function getTranslationUnits(dom: Document,word:string): Array<TranslationUnit> | undefined {
+function getTranslationUnits(dom: Document, word: string): Array<TranslationUnit> | undefined {
   //获取所有翻译项
   let lis = dom.querySelectorAll("#collinsResult .ol li")
   let result = Array.from(lis).reduce((result, li) => {
@@ -94,9 +96,8 @@ function getTranslationUnits(dom: Document,word:string): Array<TranslationUnit> 
     let [text, index] = textResult
     const definition = text.slice(0, index).trim()
     //清除<b></b>避免影响音频获取
-    const definition_origin = definition.replace(/\<b\>|\<\/b\>/g,"")
+    const definition_origin = definition.replace(/\<b\>|\<\/b\>/g, "")
     result.push({
-      word:dom.querySelector("#collinsResult .wt-container h4 span.title")?.textContent?.trim() || word,
       part_of_speech: getPartOfSpeech(li), //词性
       definition, //定义
       definition_audio: `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(definition_origin)}&le=eng`,
@@ -115,7 +116,7 @@ function getTranslationUnits(dom: Document,word:string): Array<TranslationUnit> 
  * @param li 需要处理的其中一条翻译条目所对应的li元素节点
  * @returns 返回该释义对应单词的词性，例如：n-count
  */
- function getPartOfSpeech(li: Element): string {
+function getPartOfSpeech(li: Element): string {
   let targetNode = li.querySelector(".collinsMajorTrans p .additional")
   return (targetNode && targetNode.textContent?.trim()) || ""
 }
@@ -125,7 +126,7 @@ function getTranslationUnits(dom: Document,word:string): Array<TranslationUnit> 
  * @param li 需要处理的其中一条翻译条目所对应的li元素节点
  * @returns [text,index] 返回翻译文本 text ，以及用于截取英文释义与中文翻译的下标 index 
  */
- function getTranslationText(li: Element): [string, number] | null {
+function getTranslationText(li: Element): [string, number] | null {
   let pNode = li.querySelector(".collinsMajorTrans p")
   if (!pNode) return null //不存在释义项
   //过滤掉干扰项
@@ -163,7 +164,7 @@ function getTranslationUnits(dom: Document,word:string): Array<TranslationUnit> 
  * @param li 需要处理的其中一条翻译条目所对应的li元素节点
  * @returns 返回例句相关数据
  */
- function getExampleSentences(li: Element): ExampleSentence[] | undefined {
+function getExampleSentences(li: Element): ExampleSentence[] | undefined {
   let div_example_s = li.querySelectorAll(".exampleLists .examples")
   let exampleSentences = Array.from(div_example_s).reduce((acc, div) => {
     let children = div.children

@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import { WordFieldData, WordData } from "../../../types/index";
+import { WordFieldData, WordData } from "../../types/index";
 
 export function translateBTag(text: string): ReactNode[] {
   const reg = new RegExp(`(<b>.+?)</b>`, "gi");
@@ -19,13 +19,12 @@ export function translateBTag(text: string): ReactNode[] {
  * @returns NoteWordData
  */
 export function getNoteWordData(wordData: WordData, index: number) {
-  const { starAmount, translationUnits, phonetic } = wordData;
+  const { starAmount, translationUnits, phonetic,word } = wordData;
   const { am, en, am_audio, en_audio } = phonetic;
   if (!translationUnits) return;
   const {
     part_of_speech,
     translation,
-    word,
     definition,
     definition_audio,
     exampleSentences,
