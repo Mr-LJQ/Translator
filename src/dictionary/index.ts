@@ -3,10 +3,7 @@ import translatePhrase from "./translatePhrase"
 import translateSentence from "./translateSentence"
 import { getCorrectSpelling } from "./utils"
 import { PhraseData, SentenceData, TranslationResult, ErrorData } from "../../types/index"
-import {removeHump} from "../utils/index"
-/**
- * [...document.querySelectorAll("#results-contents .error-typo .typo-rel a")].map(item => item.textContent)
- */
+import { removeHump } from "../utils/index"
 
 export default class Collins_en_cn {
   /**
@@ -16,10 +13,10 @@ export default class Collins_en_cn {
   async translateText(text: string): Promise<TranslationResult> {
     let result: TranslationResult
     try {
-      const dom = await getPageDOM(text)
       //去除驼峰
       text = removeHump(text)
-      
+      const dom = await getPageDOM(text)
+
       //如果存在空格，则认为其为多个单词组合的句子、词组
       if (/\s/g.test(text)) {
         result = await this.translateWords(dom)
@@ -45,7 +42,7 @@ export default class Collins_en_cn {
 
     let correct = getCorrectSpelling(dom)
     if (correct) {
-      return { isCache: true, correct,error:"拼写存在错误" }
+      return { isCache: true, correct, error: "拼写存在错误" }
     }
     //情况三：无任何翻译
     return { error: "没有查找到任何翻译", isCache: false }
@@ -58,26 +55,24 @@ export default class Collins_en_cn {
  * @param input 需要进行翻译的内容
  * @returns 翻译内容对应的DOM文档
  */
-const getPageDOM = (function () {
+const getPageDOM = async function (input: string): Promise<Document> {
   let xhr = new XMLHttpRequest()
   //词典基于有道网页版
   let BASE_URL = "https://dict.youdao.com/w/"
-  return async function (input: string): Promise<Document> {
-    return new Promise((resolve, reject) => {
-      let searchURL = BASE_URL + encodeURIComponent(input)
-      xhr.open("GET", searchURL)
-      xhr.responseType = "document"
-      xhr.timeout = 6000
-      xhr.addEventListener("load", function () {
-        resolve(xhr.response)
-      })
-      xhr.addEventListener("error", function () {
-        reject("翻译请求错误，请检查网络")
-      })
-      xhr.addEventListener("timeout", function () {
-        reject("翻译请求超时,请检查网络")
-      })
-      xhr.send(null)
+  return new Promise((resolve, reject) => {
+    let searchURL = BASE_URL + encodeURIComponent(input)
+    xhr.open("GET", searchURL)
+    xhr.responseType = "document"
+    xhr.timeout = 6000
+    xhr.addEventListener("load", function () {
+      resolve(xhr.response)
     })
-  }
-})()
+    xhr.addEventListener("error", function () {
+      reject("翻译请求错误，请检查网络")
+    })
+    xhr.addEventListener("timeout", function () {
+      reject("翻译请求超时,请检查网络")
+    })
+    xhr.send(null)
+  })
+}
