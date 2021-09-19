@@ -48,16 +48,16 @@ export class History<T> {
     this.maxAmount = maxAmount
   }
   prev() {
-    const { head, index } = this
+    const { head, index ,maxAmount} = this
     if (index <= head) return
     this.index--
-    return this.cacheSpace[this.index]
+    return this.cacheSpace[this.index % maxAmount]
   }
   next() {
-    const { tail, index } = this
+    const { tail, index ,maxAmount} = this
     if (index >= tail) return
     this.index++
-    return this.cacheSpace[this.index]
+    return this.cacheSpace[this.index % maxAmount]
   }
   append(value: T) {
     this.index++
