@@ -179,14 +179,12 @@ class View extends React.Component<{}, State> {
     if (this.hasAwait()) return;
     if (this.whetherUpdateHistory()) this.updateHistory();
     const history = this.history.next();
-    console.log(history,this.history)
     if (history) this.renderHistory(history);
   }
   backward() {
     if (this.hasAwait()) return;
     if (this.whetherUpdateHistory()) this.updateHistory();
     const history = this.history.prev();
-    console.log(history,this.history)
     if (history) this.renderHistory(history);
   }
   whetherUpdateHistory() {

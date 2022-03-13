@@ -1,7 +1,7 @@
 {
   "name": "translator-extensions",
   "version": "1.0.0",
-  "description": "开发浏览器拓展，该拓展用于为浏览器提供便捷的选词翻译能力，且具有将翻译添加到anki中的功能",
+  "description": "浏览器拓展，该拓展用于为浏览器提供便捷的选词翻译能力，且具有将翻译添加到anki中的功能",
   "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
