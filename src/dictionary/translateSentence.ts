@@ -1,15 +1,14 @@
-import { SentenceData } from "../../types/index";
-
-export default function translateSentence(dom: Document): SentenceData | undefined {
-  let sentence = dom.querySelectorAll('#ydTrans .trans-container p')[0]
+export default function translateSentence(dom: Document){
+  let sentenceNode = dom.querySelectorAll('#ydTrans .trans-container p')[0]
   let transNode = dom.querySelectorAll('#ydTrans .trans-container p')[1];
-  const sentenceText = sentence?.textContent?.trim()
-  const sentenceTextTranslation = transNode?.textContent?.trim()
-  if (!sentenceText) return
-  if (!sentenceTextTranslation) return
+  const sentence = sentenceNode?.textContent?.trim()
+  const sentenceTranslation = transNode?.textContent?.trim()
+  if (!sentence || !sentenceTranslation) return
   return {
-    sentence: sentenceText,
-    sentenceTranslation: sentenceTextTranslation,
-    sentence_audio: `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(sentenceText)}&le=eng`,
+    sentence,
+    sentenceTranslation,
+    sentence_audio: `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(sentence)}&le=eng`,
   }
 }
+
+export type SentenceData = NonNullable<ReturnType<typeof translateSentence>>

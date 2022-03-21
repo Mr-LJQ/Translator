@@ -1,14 +1,50 @@
-import { ErrorData, ExampleSentence, Phonetic, TranslationUnit, WordData } from "../../types/index";
-import {getCorrectSpelling} from "./utils"
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//声明
+export interface WordData {
+  word: string  //单词本体
+  starAmount: number //单词出现的频率
+  phonetic: Phonetic //单词音标与音频
+  translations?: string[] //简略翻译
+  translationUnits?: Array<TranslationUnit>//单词的翻译单元
+}
+export interface ExampleSentence {
+  example_sentence: string //英语例句
+  example_sentence_translation: string //中文例句
+  example_audio: string //例句音频URI
+}
 
-export default async function translateWord(word: string, dom: Document): Promise<WordData | ErrorData> {
-  //单词大写开头与小写开头查询到的内容不一致，统一转换为全小写
-  word = word.toLowerCase()
-  word = getOriginText(dom)
+export interface TranslationUnit {
+  part_of_speech: string //词性
+  translation: string  //翻译
+  definition: string  //定义
+  definition_audio: string //定义音频
+  exampleSentences?: Array<ExampleSentence> //例句数组
+}
+
+export interface Phonetic {
+  am?: string  //美国发音
+  en?: string  //英国发音
+  am_audio?: string //美国发音音频URI
+  en_audio?: string //英国发音音频URI
+}
+
+export interface ErrorData {
+  isCache:boolean
+  possibleSpelling?:string[],
+  errorMessage:string,
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//具体实现
+
+export default async function translateWord(dom: Document): Promise<WordData | ErrorData> {
+  let word = getOriginText(dom)
   let starAmount = Number(dom.querySelector(".star")?.className?.match(/star(\d)/)?.[1]) || 0
   const correctWords = getCorrectSpelling(dom)
-  if (correctWords) return {isCache:true,correct:correctWords,error:"拼写存在错误"}
-  if (!word) return { error: "没有找到所查询的单词",isCache:false}
+  if (correctWords) return {isCache:true,possibleSpelling:correctWords,errorMessage:"拼写存在错误"}
+  if (!word) return { errorMessage: "没有找到所查询的单词",isCache:false}
 
   return {
     word, //单词本体
@@ -17,6 +53,18 @@ export default async function translateWord(word: string, dom: Document): Promis
     phonetic: getPhonetic(dom, word),//单词音标与音频
     translationUnits: getTranslationUnits(dom, word) //单词的翻译单元
   }
+}
+
+/**
+ * 获取页面的中关于拼写错误部分的正确推断
+ */
+ export function getCorrectSpelling(dom: Document) {
+  const inferCorrects = [...dom.querySelectorAll("#results-contents .error-typo .typo-rel a")].reduce((acc, node) => {
+    const text = node.textContent
+    if (text) acc.push(text)
+    return acc
+  }, [] as string[])
+  if (inferCorrects.length) return inferCorrects
 }
 
 /**
@@ -55,7 +103,7 @@ function getTranslation(dom: Document): string[] | undefined {
  * @param word 翻译的目标单词
  * @returns 单词音标与音频对象
  */
-function getPhonetic(dom: Document, word: string): Phonetic {
+function getPhonetic(dom: Document, word: string) {
   let en = dom.querySelectorAll(".pronounce")?.[0]?.textContent?.replace(/\s*|\r|\n/g, "")
   let am = dom.querySelectorAll(".pronounce")?.[1]?.textContent?.replace(/\s*|\r|\n/g, "")
   let am_audio, en_audio

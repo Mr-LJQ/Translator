@@ -1,6 +1,12 @@
-import { ExampleSentence, PhraseData } from "../../types/index"
+export interface ExampleSentence {
+  example_sentence: string //英语例句
+  example_sentence_translation: string //中文例句
+  example_audio: string //例句音频URI
+}
 
-export default function translatePhrase(dom: Document): PhraseData | undefined {
+export type PhraseData = NonNullable<ReturnType<typeof translatePhrase>>
+
+export default function translatePhrase(dom: Document) {
   const phrase = getOriginText(dom)
   if (!phrase) return
   let translation = dom.querySelectorAll('#ydTrans .trans-container p')[1]?.textContent?.trim()

@@ -1,11 +1,66 @@
-import translateWord from "./translateWord"
 import translatePhrase from "./translatePhrase"
 import translateSentence from "./translateSentence"
-import { getCorrectSpelling } from "./utils"
-import { PhraseData, SentenceData, TranslationResult, ErrorData } from "../../types/index"
+import { TranslationResult } from "../types/index"
+import translateWord, { getCorrectSpelling } from "./translateWord"
 import { removeHump } from "../utils/index"
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//声明引入
+import type { ErrorData, WordData } from "./translateWord"
+import type { PhraseData } from "./translatePhrase"
+import type { SentenceData } from "./translateSentence"
+
+//声明导出
+export type TranslationResult = WordData | SentenceData | PhraseData | ErrorData
+export type { WordData, SentenceData, PhraseData, ErrorData }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//具体实现
+
 export default class Collins_en_cn {
+  promise: Promise<Document> | null
+  xhr: XMLHttpRequest
+
+  constructor() {
+    this.promise = null
+    this.xhr = new XMLHttpRequest()
+  }
+  /**
+   * 词典基于有道翻译网页版，因此需要获取特定的网页DOM
+   */
+  private async getPageDOM(input:string) {
+    let {xhr,promise} = this
+    //词典基于有道网页版
+    let BASE_URL = "https://dict.youdao.com/w/";
+    let searchURL = BASE_URL + encodeURIComponent(input)
+    xhr.open("GET", searchURL);
+    if (promise) {
+      xhr.send(null);
+      return promise;
+    }
+    return (promise = new Promise((resolve, reject) => {
+      xhr.responseType = "document";
+      xhr.timeout = 6000;
+      xhr.addEventListener("load", () => {
+        if (xhr.status >= 400) reject(`错误:${xhr.status} ${xhr.statusText}`);
+        resolve(xhr.response);
+        this.promise = null;
+      });
+      xhr.addEventListener("error", () => {
+        reject(`未知错误`);
+        this.promise = null;
+      });
+      xhr.addEventListener("timeout", () => {
+        reject("请求超时,请再次尝试或查看网络状态");
+        this.promise = null;
+      });
+      xhr.send(null);
+    }));
+  }
   /**
      * 向外暴露的接口，是对翻译word与sentence函数的封装
      * @param text 需要进行翻译的文本
@@ -15,19 +70,21 @@ export default class Collins_en_cn {
     try {
       //去除驼峰
       text = removeHump(text)
-      const dom = await getPageDOM(text)
+      const dom = await this.getPageDOM(text)
 
       //如果存在空格，则认为其为多个单词组合的句子、词组
       if (/\s/g.test(text)) {
         result = await this.translateWords(dom)
       } else {
-        result = await translateWord(text, dom)
+        result = await translateWord(dom)
       }
-    } catch (error) {
+    } catch (err) {
+      let error = err as Error
+      let errorMessage
       //捕获语法错误
-      if (error.message) error = error.message
-      //捕获自定义错误
-      result = { error, isCache: false }
+      if ("message" in error) errorMessage = error.message
+      //该为自定义的错误格式
+      result = { errorMessage, isCache: false }
     }
     return result
   }
@@ -40,39 +97,13 @@ export default class Collins_en_cn {
     const translatedSentence = translateSentence(dom)
     if (translatedSentence) return translatedSentence
 
-    let correct = getCorrectSpelling(dom)
-    if (correct) {
-      return { isCache: true, correct, error: "拼写存在错误" }
+    let inference = getCorrectSpelling(dom)
+    if (inference) {
+      return { isCache: true, possibleSpelling: inference, errorMessage: "拼写存在错误" }
     }
     //情况三：无任何翻译
-    return { error: "没有查找到任何翻译", isCache: false }
+    return { errorMessage: "没有查找到任何翻译", isCache: false }
   }
-
 }
 
-/**
- * 获取有道翻译HTML文件的DOM
- * @param input 需要进行翻译的内容
- * @returns 翻译内容对应的DOM文档
- */
-const getPageDOM = async function (input: string): Promise<Document> {
-  let xhr = new XMLHttpRequest()
-  //词典基于有道网页版
-  let BASE_URL = "https://dict.youdao.com/w/"
-  return new Promise((resolve, reject) => {
-    let searchURL = BASE_URL + encodeURIComponent(input)
-    xhr.open("GET", searchURL)
-    xhr.responseType = "document"
-    xhr.timeout = 6000
-    xhr.addEventListener("load", function () {
-      resolve(xhr.response)
-    })
-    xhr.addEventListener("error", function () {
-      reject("翻译请求错误，请检查网络")
-    })
-    xhr.addEventListener("timeout", function () {
-      reject("翻译请求超时,请检查网络")
-    })
-    xhr.send(null)
-  })
-}
+

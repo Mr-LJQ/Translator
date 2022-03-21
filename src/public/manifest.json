@@ -1,7 +1,7 @@
 {
   "name":"Anki划词助手",
   "manifest_version":2,
-  "version":"1.3.5",
+  "version":"1.4.0",
   "description":"便捷的翻译器，提供了拖蓝选中、热键自动选中、搜索栏查询等多种查询翻译的能力，并且可以很方便的将翻译添加到Anki中进行学习！",
   "icons": {
     "48": "logo_48.png"
