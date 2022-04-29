@@ -14,7 +14,7 @@ module.exports = {
       dependOn: "shared",
     },
     shower: {
-      import: "./src/shower/index",
+      import: "./src/shower/view/index",
       dependOn: "shared",
     },
     options: {
@@ -79,7 +79,7 @@ module.exports = {
       title: "Shower",
       template: "./src/index.html",
       chunks: ["shower", "shared"],
-      filename: "shower.html", //此处必须与"./src/shower/Shower.ts中chrome.runtime.getURL(path)对应"
+      filename: "shower.html", //此处必须与"./src/shower/agent.ts中的getURL(path)对应"
     }),
     new CopyPlugin({
       patterns: [
