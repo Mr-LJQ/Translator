@@ -1,12 +1,17 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { PhraseConfig, SentenceConfig, Storage, WordConfig, BasisConfig } from '../../../types'
-import { getStorageItems } from '../../extensions_API/storage'
+import { getStorageItems, TabPaneKey } from '../../utils/extensions-api'
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//类型
+import type {SentenceConfig,Storage,WordConfig,PhraseConfig} from "../../utils/extensions-api"
+import type {AnkiConnectionFields} from "../field"
 
 const name = "storage"
 
 const initialState: Storage = {}
 
-const fetchStorage = createAsyncThunk(name + "/fetchStorage", async () => {
+export const fetchStorage = createAsyncThunk(name + "/fetchStorage", async () => {
   return getStorageItems([
     "wordConfig",
     "phraseConfig",
@@ -36,9 +41,12 @@ const storageSlice = createSlice({
       if (!state.sentenceConfig) state.sentenceConfig = {}
       state.sentenceConfig[name] = value
     },
-    updateBasisConfig(state, action: PayloadAction<{ name: keyof BasisConfig, value: string }>) {
+    updateBasisConfig(state, action: PayloadAction<{ name: keyof AnkiConnectionFields, value: string }>) {
       const { name, value } = action.payload
       state[name] = value
+    },
+    updateActiveTabPane(state,action: PayloadAction<TabPaneKey>) {
+      state["activeTabPane"] = action.payload
     }
   },
   extraReducers: builder => {
@@ -48,12 +56,5 @@ const storageSlice = createSlice({
   }
 })
 
-const { updateBasisConfig, updatePhraseConfig, updateSentenceConfig, updateWordConfig } = storageSlice.actions
+export const { updateBasisConfig, updatePhraseConfig, updateSentenceConfig, updateWordConfig,updateActiveTabPane } = storageSlice.actions
 export default storageSlice.reducer
-export {
-  fetchStorage,
-  updateWordConfig,
-  updateBasisConfig,
-  updatePhraseConfig,
-  updateSentenceConfig,
-}

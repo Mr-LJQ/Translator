@@ -1,6 +1,11 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 
-import { postBackend } from "../../extensions_API/index"
+import { postBackend } from "../../utils/extensions-api"
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//类型
+import { Command } from "../../utils/command"
 
 const name = "anki"
 
@@ -22,12 +27,13 @@ const initialState: State = {
 
 const fetchAnki = createAsyncThunk(name + "/fetchAnki", async () => {
   const [deckNames, modelNames, ankiConnectionVersion] = await Promise.all([
-    postBackend("getDeckNames"),
-    postBackend("getModelNames"),
-    postBackend("getVersion")])
+    postBackend(Command.GetDeckNames),
+    postBackend(Command.GetModelNames),
+    postBackend(Command.GetVersion)
+  ])
   const modelFieldNames: State["modelFieldNames"] = {};
   (await Promise.all(modelNames.map((model) => {
-    return postBackend("getModelFieldNames", model)
+    return postBackend(Command.GetModelFieldNames, model)
   }))).forEach((fieldNames, index) => {
     return modelFieldNames[modelNames[index]] = fieldNames
   })

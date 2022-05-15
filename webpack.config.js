@@ -14,7 +14,7 @@ module.exports = {
       dependOn: "shared",
     },
     shower: {
-      import: "./src/shower/view/index",
+      import: "./src/iframe/view/index",
       dependOn: "shared",
     },
     options: {

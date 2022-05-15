@@ -1,12 +1,12 @@
-import { setStorage, openOptionsPage } from "../extensions-api/index"
+import { setStorage, openOptionsPage } from "../utils/extensions-api"
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //声明
 
 import type { SentenceFields, PhraseFields, WordFields } from "../options/field"
-import type { NoteData } from "../shower/view/View"
-import type { Storage, WordConfig, PhraseConfig, SentenceConfig } from "../extensions-api/index"
-import { TabPaneKey } from "../extensions-api/index"
+import type { NoteData } from "../iframe/view/View"
+import type { Storage, WordConfig, PhraseConfig, SentenceConfig } from "../utils/extensions-api"
+import { TabPaneKey } from "../utils/extensions-api"
 
 export enum CardState {
   Add = "➕",

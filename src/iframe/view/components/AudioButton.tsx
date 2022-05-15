@@ -5,7 +5,7 @@ import React, {
 } from "react";
 import classnames from "classnames";
 
-import AudioContext from "../Context/AudioContext";
+import { AudioContext } from "../context";
 
 interface Props {
   audioURL?: string;
@@ -17,11 +17,11 @@ function AudioButton(props: Props, ref: Ref<{ playAudio: () => void }>) {
   const audioElement = useContext(AudioContext);
   const playAudio = () => {
     try {
-    if (!audioURL) return;
-    //避免重复加载
-    if (audioElement.src !== audioURL) {
-      audioElement.src = audioURL;
-    }
+      if (!audioURL) return;
+      //避免重复加载
+      if (audioElement.src !== audioURL) {
+        audioElement.src = audioURL;
+      }
       //重头开始播放
       audioElement.currentTime = 0;
       audioElement.play();

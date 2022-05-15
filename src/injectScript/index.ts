@@ -1,46 +1,48 @@
-import { MousePointWatcher } from "../watcher/MousePointWatcher"
-import { KeyboardWatcher } from "../watcher/KeyboardWatcher"
-import { SelectionWatcher } from "../watcher/SelectionWatcher"
-import { validateText } from "../utils/index"
+import { CursorListener,HotKeyListener,SelectionListener } from "../events/event-listener"
+import { validateText } from "../utils/tools"
 
-import { onStorageChange, getStorage, postBackend } from "../extensions_API/index"
+import { onStorageChange, getStorage, postBackend } from "../utils/extensions-api"
 
-import { Storage } from "../../types"
+
+import type {Storage} from "../utils/extensions-api"
+
+import {Command} from "../utils/command"
+
 
 //添加获取鼠标位置的监听
-const mousePointWatcher = new MousePointWatcher()
-const { getClientPoint, getScreenPoint } = mousePointWatcher
+const cursorListener = new CursorListener()
+const { getCursorPosition } = cursorListener
 
 async function showTranslated(text: string) {
   const result = validateText(text)
   if (!result) return
-  const point = getScreenPoint()
-  postBackend("showInjectTranslated", { text, point })
+  const point = getCursorPosition()
+  postBackend(Command.TranslateInjectText, { text, point })
 }
 
-const selectionWatcher = new SelectionWatcher(showTranslated)
-const keyboardWatcher = new KeyboardWatcher(showTranslated, getClientPoint,)
+const selectionListener = new SelectionListener(showTranslated)
+const hotKeyListener = new HotKeyListener(showTranslated, getCursorPosition,)
 
 function installAll() {
-  keyboardWatcher.install()
-  selectionWatcher.install()
-  mousePointWatcher.install()
+  hotKeyListener.install()
+  selectionListener.install()
+  cursorListener.install()
 }
 
 function uninstallAll() {
-  keyboardWatcher.uninstall()
-  selectionWatcher.uninstall()
-  mousePointWatcher.uninstall()
+  hotKeyListener.uninstall()
+  selectionListener.uninstall()
+  cursorListener.uninstall()
 }
 
 getStorage({
   isOpen: (value) => value ? installAll() : uninstallAll(),
-  hotKey: (value) => keyboardWatcher.updateHotKey(value as Storage["hotKey"]),
+  hotKey: (value) => hotKeyListener.updateHotKey(value as Storage["hotKey"]),
 })
 
 onStorageChange({
   isOpen: (_, value) => value ? installAll() : uninstallAll(),
-  hotKey: (_, value) => keyboardWatcher.updateHotKey(value as Storage["hotKey"]),
+  hotKey: (_, value) => hotKeyListener.updateHotKey(value as Storage["hotKey"]),
 })
 
 

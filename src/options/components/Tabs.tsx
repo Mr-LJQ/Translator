@@ -1,55 +1,13 @@
-import React, { Key, ReactElement, useMemo, useState, ReactNode } from "react";
+import React, {
+  useMemo,
+  useState,
+  useImperativeHandle,
+  ReactNode,
+  forwardRef,
+  ReactElement,
+} from "react";
 import classnames from "classnames";
-
-export interface Props {
-  activeTabPane: string;
-  children:
-    | ReactElement<TabPaneProps, typeof TabPane>
-    | ReactElement<TabPaneProps, typeof TabPane>[];
-}
-
-function Tabs(props: Props) {
-  const { children, activeTabPane } = props;
-  const [activeKey, setActiveKey] = useState<Key | null>(".$" + activeTabPane);
-
-  const tabs = useMemo(() => {
-    return React.Children.toArray(children).map((child) => {
-      const element = child as ReactElement<TabPaneProps, typeof TabPane>;
-      return {
-        item: element.props.tabItem,
-        pane: element.props.children,
-        key: element.key,
-      };
-    });
-  }, [children]);
-
-  return (
-    <div className="flex-1">
-      <div className="flex border-b mb-0">
-        {tabs.map((tabItem) => {
-          const { key, item } = tabItem;
-          return (
-            <TabItem
-              key={key}
-              checked={key === activeKey}
-              onClick={() => setActiveKey(key)}
-            >
-              {item}
-            </TabItem>
-          );
-        })}
-      </div>
-      {tabs.map((tab) => {
-        const { key, pane } = tab;
-        return (
-          <div key={key} className={activeKey === key ? "black" : "hidden"}>
-            {pane}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
+import { TabPaneKey } from "../../utils/extensions-api";
 
 interface TabItemProps {
   children: ReactNode;
@@ -75,7 +33,7 @@ function TabItem(props: TabItemProps) {
 interface TabPaneProps {
   tabItem: ReactNode;
   children: ReactNode;
-  key: Key;
+  key: TabPaneKey;
 }
 
 export function TabPane(props: TabPaneProps) {
@@ -83,4 +41,51 @@ export function TabPane(props: TabPaneProps) {
   return <>{children}</>;
 }
 
-export default Tabs;
+interface Props {
+  activeKey: TabPaneKey;
+  changeActiveKey: (activeKey: TabPaneKey) => void;
+  children:
+    | ReactElement<TabPaneProps, typeof TabPane>
+    | ReactElement<TabPaneProps, typeof TabPane>[];
+}
+
+export default function Tabs(props: Props) {
+  const { children, activeKey, changeActiveKey } = props;
+  const tabs = useMemo(() => {
+    return React.Children.map(children, (child) => {
+      const element = child;
+      return {
+        item: element.props.tabItem,
+        pane: element.props.children,
+        key: element.key as TabPaneKey,
+      };
+    });
+  }, [children]);
+
+  return (
+    <div className="flex-1">
+      <div className="flex border-b mb-0">
+        {tabs.map((tabItem) => {
+          const { key, item } = tabItem;
+          return (
+            <TabItem
+              key={key}
+              checked={key === activeKey}
+              onClick={() => changeActiveKey(key)}
+            >
+              {item}
+            </TabItem>
+          );
+        })}
+      </div>
+      {tabs.map((tab) => {
+        const { key, pane } = tab;
+        return (
+          <div key={key} className={activeKey === key ? "black" : "hidden"}>
+            {pane}
+          </div>
+        );
+      })}
+    </div>
+  );
+}

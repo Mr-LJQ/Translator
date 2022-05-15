@@ -1,25 +1,22 @@
-//依赖
 import React from "react";
-import { extractEntry } from "../../utils/index";
-
-//类型
-import {
-  SentenceFieldData,
-  PhraseFieldData,
-  WordFieldData,
-  SentenceConfig,
-  PhraseConfig,
-  OtherConfig,
-  WordConfig,
-} from "../../../types/index";
+import { pickEntry } from "../../utils/tools";
 
 //组件
-import { H3 } from "../components/H3";
-import { Select } from "../components/Select";
-import { Span } from "../components/Span";
-import { Options } from "../components/Options";
-import { Input } from "../components/Input";
+import { H3 } from "./H3";
+import { Select } from "./Select";
+import { Span } from "./Span";
+import { Options } from "./Options";
+import { Input } from "./Input";
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//类型
+import type {SentenceFields,PhraseFields,WordFields,CardInfoFields} from "../field"
+import type {WordConfig,PhraseConfig,SentenceConfig,} from "../../utils/extensions-api"
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//组件实现
 interface Props<C, T> {
   config: C;
   title: string;
@@ -27,21 +24,21 @@ interface Props<C, T> {
   deckNames: string[];
   modelNames: string[];
   modelFieldNames: string[];
-  otherMappingTable: Required<OtherConfig>;
-  fieldMappingTable: T;
+  CardInfoFields: CardInfoFields;
+  fields: T;
   updateConfig: (name: keyof C, value: string) => void;
 }
 
-type FieldData = Required<WordFieldData> | Required<PhraseFieldData> | Required<SentenceFieldData>
+type FieldData = Required<WordFields> | Required<PhraseFields> | Required<SentenceFields>
 type Config = WordConfig | PhraseConfig | SentenceConfig
 
 /**
  * 受控组件
  */
-function AnkiConfig(props: Props<PhraseConfig,Required<PhraseFieldData>>): JSX.Element;
-function AnkiConfig(props: Props<WordConfig,Required<WordFieldData>>): JSX.Element;
-function AnkiConfig(props: Props<SentenceConfig,Required<SentenceFieldData>>): JSX.Element 
-function AnkiConfig(props: Props<Config,FieldData>): JSX.Element {
+function AnkiConfig<C extends SentenceConfig,T extends Required<SentenceFields>>(props: Props<C,T>): JSX.Element 
+function AnkiConfig<C extends PhraseConfig,T extends Required<PhraseFields>>(props: Props<C,T>): JSX.Element 
+function AnkiConfig<C extends WordConfig,T extends Required<WordFields>>(props: Props<C,T>): JSX.Element 
+function AnkiConfig<C extends Config,T extends FieldData>(props: Props<Config,FieldData>): JSX.Element {
   const {
     title,
     config,
@@ -49,19 +46,20 @@ function AnkiConfig(props: Props<Config,FieldData>): JSX.Element {
     deckNames,
     modelNames,
     modelFieldNames,
-    otherMappingTable,
-    fieldMappingTable,
+    CardInfoFields,
+    fields,
     updateConfig,
   } = props;
+
   const {
     tags: tagsValue,
     deckName: deckValue,
     modelName: modelValue,
   } = config;
 
-  const [deckName, deckTitle] = extractEntry(otherMappingTable, "deckName");
-  const [modelName, modelTitle] = extractEntry(otherMappingTable, "modelName");
-  const [tagsName, tagsTitle] = extractEntry(otherMappingTable, "tags");
+  const [deckName, deckTitle] = pickEntry(CardInfoFields, "deckName");
+  const [modelName, modelTitle] = pickEntry(CardInfoFields, "modelName");
+  const [tagsName, tagsTitle] = pickEntry(CardInfoFields, "tags");
 
   return (
     <fieldset
@@ -97,7 +95,7 @@ function AnkiConfig(props: Props<Config,FieldData>): JSX.Element {
           updateConfig(tagsName, event.target.value);
         }}
       />
-      {Object.entries(fieldMappingTable).map(([name, title]) => {
+      {Object.entries(fields).map(([name, title]) => {
         return (
           <SelectItem
             key={name}

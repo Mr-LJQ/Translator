@@ -1,26 +1,31 @@
-//依赖
 import React from "react";
-import { extractEntry } from "../../utils";
-
-//数据
-import initialStorage from "../../extensions_API/initialStorage";
-
-//类型
-import { BasisConfig as BasisConfigType } from "../../../types";
+import { pickEntry } from "../../utils/tools";
 
 //组件
-import { H3 } from "../components/H3";
-import { Span } from "../components/Span";
-import { Input } from "../components/Input";
-import { Select } from "../components/Select";
-import { Options } from "../components/Options";
+import { H3 } from "./H3";
+import { Span } from "./Span";
+import { Input } from "./Input";
+import { Select } from "./Select";
+import { Options } from "./Options";
+//数据
+import {initialStorage} from "../../utils/extensions-api";
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//类型
+
+import type {AnkiConnectionFields} from "../field"
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//组件实现
 
 interface Props {
   title: string;
   disabled: boolean;
-  config: BasisConfigType;
-  mappingTable: Required<BasisConfigType>;
-  updateConfig: (name: keyof BasisConfigType, value: string) => void;
+  config: AnkiConnectionFields;
+  fields: Required<AnkiConnectionFields>;
+  updateConfig: (name: keyof AnkiConnectionFields, value: string) => void;
 }
 
 //默认的 anki connection url
@@ -31,14 +36,14 @@ const defaultMethod = initialStorage.ankiConnectionMethod || "";
  * 受控组件
  */
 function BasisConfig(props: Props) {
-  const { updateConfig, mappingTable, disabled, title, config } = props;
+  const { updateConfig, fields, disabled, title, config } = props;
   const { ankiConnectionURL, ankiConnectionMethod } = config;
 
-  const [methodName, methodTitle] = extractEntry(
-    mappingTable,
+  const [methodName, methodTitle] = pickEntry(
+    fields,
     "ankiConnectionMethod"
   );
-  const [urlName, urlTitle] = extractEntry(mappingTable, "ankiConnectionURL");
+  const [urlName, urlTitle] = pickEntry(fields, "ankiConnectionURL");
 
   return (
     <fieldset

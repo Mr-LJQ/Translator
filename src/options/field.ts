@@ -1,6 +1,4 @@
-import { BasisConfig, OtherConfig, PhraseFieldData, SentenceFieldData, WordFieldData } from "../../types/index";
-
-const wordMappingTable: Required<WordFieldData> = {
+const WORD_FIELDS = {
   definition: "定义",
   word: "单词",
   translation: "翻译",
@@ -10,13 +8,13 @@ const wordMappingTable: Required<WordFieldData> = {
   en: "英国音标",
   am_audio: "美国音频",
   en_audio: "英国音频",
-  starAmount: "出现频率",
+  star_amount: "出现频率",
   example_audio: "例句音频",
   example_sentence: "例句原文",
   example_sentence_translation: "例句翻译",
 };
 
-const phraseMappingTable: Required<PhraseFieldData> = {
+const PHRASE_FIELDS = {
   phrase: "短语词组",
   phrase_audio: "短语音频",
   translations: "短语翻译",
@@ -31,27 +29,45 @@ const phraseMappingTable: Required<PhraseFieldData> = {
   example_sentence_translation_3: "例句3翻译",
 };
 
-const sentenceMappingTable: Required<SentenceFieldData> = {
+const SENTENCE_FIELDS = {
   sentence: "句子原文",
-  sentenceTranslation: "句子翻译",
   sentence_audio: "句子音频",
+  sentence_translation: "句子翻译",
 };
 
-const otherMappingTable: Required<OtherConfig> = {
+const CARD_INFO_FIELDS = {
   deckName: "牌组名称",
   modelName: "模型名称",
   tags: "卡片标签",
 };
 
-const basisMappingTable: Required<BasisConfig> = {
+const ANKI_CONNECTION_FIELDS = {
   ankiConnectionMethod: '连接方法',
   ankiConnectionURL: "连接URL"
 }
 
-export {
-  wordMappingTable,
-  otherMappingTable,
-  basisMappingTable,
-  phraseMappingTable,
-  sentenceMappingTable,
+if (process.env.NODE_ENV === "development") {
+  Object.freeze(WORD_FIELDS)
+  Object.freeze(PHRASE_FIELDS)
+  Object.freeze(SENTENCE_FIELDS)
+  Object.freeze(CARD_INFO_FIELDS)
+  Object.freeze(ANKI_CONNECTION_FIELDS)
 }
+
+export {
+  WORD_FIELDS,
+  PHRASE_FIELDS,
+  SENTENCE_FIELDS,
+  CARD_INFO_FIELDS,
+  ANKI_CONNECTION_FIELDS
+}
+
+type SomeRequired<T extends keyof O,O> =  {
+  [P in T]:O[P]
+} & Partial<O>
+
+export type WordFields = SomeRequired<"word" | "translation",typeof WORD_FIELDS>
+export type PhraseFields = SomeRequired<"phrase" | "translations" | "phrase_audio",typeof PHRASE_FIELDS>
+export type SentenceFields = typeof SENTENCE_FIELDS
+export type CardInfoFields = typeof CARD_INFO_FIELDS
+export type AnkiConnectionFields = typeof ANKI_CONNECTION_FIELDS

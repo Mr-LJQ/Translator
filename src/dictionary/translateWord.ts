@@ -1,12 +1,13 @@
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //声明
 export interface WordData {
   word: string  //单词本体
-  starAmount: number //单词出现的频率
+  star_amount: number //单词出现的频率
   phonetic: Phonetic //单词音标与音频
   translations?: string[] //简略翻译
-  translationUnits?: Array<TranslationUnit>//单词的翻译单元
+  translationList?: Array<TranslationItem>//单词的翻译单元
 }
 export interface ExampleSentence {
   example_sentence: string //英语例句
@@ -14,12 +15,12 @@ export interface ExampleSentence {
   example_audio: string //例句音频URI
 }
 
-export interface TranslationUnit {
+export interface TranslationItem {
   part_of_speech: string //词性
   translation: string  //翻译
   definition: string  //定义
   definition_audio: string //定义音频
-  exampleSentences?: Array<ExampleSentence> //例句数组
+  example_sentences?: Array<ExampleSentence> //例句数组
 }
 
 export interface Phonetic {
@@ -30,35 +31,35 @@ export interface Phonetic {
 }
 
 export interface ErrorData {
-  isCache:boolean
-  possibleSpelling?:string[],
-  errorMessage:string,
+  cache: boolean
+  possibleSpelling?: string[],
+  errorMessage: string,
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//具体实现
+//单词翻译
 
-export default async function translateWord(dom: Document): Promise<WordData | ErrorData> {
+export default function translateWord(dom: Document): WordData | ErrorData {
   let word = getOriginText(dom)
-  let starAmount = Number(dom.querySelector(".star")?.className?.match(/star(\d)/)?.[1]) || 0
+  let star_amount = Number(dom.querySelector(".star")?.className?.match(/star(\d)/)?.[1]) || 0
   const correctWords = getCorrectSpelling(dom)
-  if (correctWords) return {isCache:true,possibleSpelling:correctWords,errorMessage:"拼写存在错误"}
-  if (!word) return { errorMessage: "没有找到所查询的单词",isCache:false}
+  if (correctWords) return { cache: true, possibleSpelling: correctWords, errorMessage: "拼写存在错误" }
+  if (!word) return { errorMessage: "没有找到所查询的单词", cache: false }
 
   return {
     word, //单词本体
-    starAmount,//单词出现的频率
+    star_amount,//单词出现的频率
     translations: getTranslation(dom),
     phonetic: getPhonetic(dom, word),//单词音标与音频
-    translationUnits: getTranslationUnits(dom, word) //单词的翻译单元
+    translationList: getTranslationList(dom, word) //单词的翻译单元
   }
 }
 
 /**
  * 获取页面的中关于拼写错误部分的正确推断
  */
- export function getCorrectSpelling(dom: Document) {
+export function getCorrectSpelling(dom: Document) {
   const inferCorrects = [...dom.querySelectorAll("#results-contents .error-typo .typo-rel a")].reduce((acc, node) => {
     const text = node.textContent
     if (text) acc.push(text)
@@ -95,8 +96,10 @@ function getTranslation(dom: Document): string[] | undefined {
     return result
   }, [] as string[])
   if (!result.length) return
+
   return result
 }
+
 
 /**
  * @param dom 有道翻译页面文档DOM
@@ -131,7 +134,7 @@ function getPhonetic(dom: Document, word: string) {
  * @param word 查询的单词
  * @returns 获取单词例句相关的数据数组
  */
-function getTranslationUnits(dom: Document, word: string): Array<TranslationUnit> | undefined {
+function getTranslationList(dom: Document, word: string): Array<TranslationItem> | undefined {
   //获取所有翻译项
   let lis = dom.querySelectorAll("#collinsResult .ol li")
   let result = Array.from(lis).reduce((result, li) => {
@@ -150,10 +153,10 @@ function getTranslationUnits(dom: Document, word: string): Array<TranslationUnit
       definition, //定义
       definition_audio: `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(definition_origin)}&le=eng`,
       translation: text.slice(index).trim(), //翻译
-      exampleSentences: getExampleSentences(li),//例句数组 
+      example_sentences: getExampleSentences(li),//例句数组 
     })
     return result
-  }, [] as Array<TranslationUnit>)
+  }, [] as Array<TranslationItem>)
   //避免出现空数组的情况
   if (!result.length) return
   return result
@@ -198,12 +201,11 @@ function getTranslationText(li: Element): [string, number] | null {
   let index = text.search(/[\u4e00-\u9fa5]+/i)
   //没有中文，则判断这并不是一个存放释义与翻译的标签
   if (index === -1) return null
-
-  //可能存在以：(说的) 话 [强调]，结尾的情况，因此单纯的寻找第一个中文并不稳定。
-  //如果句子以 . 结尾，则可以寻找点，但如果点不存在，则不应该更新index
-  const pointIndex = text.lastIndexOf(".", index)
-  index = pointIndex === -1 ? index : pointIndex + 1
-
+  let reg = /[a-z.)]/i
+  while (index >= 0) {
+    if (reg.test(text[index - 1])) break
+    index--
+  }
   return [text, index]
 }
 

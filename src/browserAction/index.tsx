@@ -1,15 +1,19 @@
 import React, { ChangeEvent } from "react";
 import ReactDOM from "react-dom";
 import {
-  onStorageChange,
   setStorage,
   getStorage,
-} from "../extensions_API/storage";
+  onStorageChange,
+} from "../utils/extensions-api";
 import "../index.css";
 
-import SwitchButton from "./SwitchButton";
+import {SwitchButton} from "./SwitchButton";
+import { TabPaneKey,openOptionsPage } from "../utils/extensions-api";
 
-import { Storage } from "../../types/index";
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//声明
+import type { Storage } from "../utils/extensions-api";
 
 type State = Pick<Storage, "hotKey" | "isOpen">;
 
@@ -35,14 +39,14 @@ class Popup extends React.Component<{}, State> {
     });
     onStorageChange({
       isOpen: (_, isOpen) =>
-        this.setState({ isOpen: isOpen as Storage["isOpen"] }),
+        this.setState({ isOpen: isOpen}),
       hotKey: (_, hotKey) =>
-        this.setState({ hotKey: hotKey as Storage["hotKey"] }),
+        this.setState({ hotKey: hotKey}),
     });
   }
   openOptionsPage() {
-    setStorage({ activeTabPane: "basis" }, () => {
-      chrome.runtime.openOptionsPage();
+    setStorage({ activeTabPane: TabPaneKey.Home }, () => {
+      openOptionsPage();
     });
   }
   handleSwitchOpen() {

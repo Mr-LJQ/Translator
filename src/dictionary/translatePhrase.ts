@@ -1,3 +1,7 @@
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//声明
 export interface ExampleSentence {
   example_sentence: string //英语例句
   example_sentence_translation: string //中文例句
@@ -6,6 +10,9 @@ export interface ExampleSentence {
 
 export type PhraseData = NonNullable<ReturnType<typeof translatePhrase>>
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//短语翻译
 export default function translatePhrase(dom: Document) {
   const phrase = getOriginText(dom)
   if (!phrase) return
@@ -14,13 +21,13 @@ export default function translatePhrase(dom: Document) {
   if (!translations) return
 
   const phrase_audio = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(phrase)}`
-  const exampleSentences = getPhraseExamples(dom)
-  if (!exampleSentences) return
+  const example_sentences = getPhraseExamples(dom)
+  if (!example_sentences) return
   return {
     phrase,
     translations,
     phrase_audio,
-    exampleSentences
+    example_sentences
   }
 }
 
@@ -96,3 +103,4 @@ function getPhraseExamples(dom: Document): ExampleSentence[] | undefined {
   if (!result.length) return
   return result
 }
+

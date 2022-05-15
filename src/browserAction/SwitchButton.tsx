@@ -1,4 +1,4 @@
-import React,{Key} from "react";
+import React from "react";
 import classnames from "classnames";
 
 interface Props {
@@ -6,16 +6,11 @@ interface Props {
   isOpen: boolean;
 }
 
-export default class SwitchButton extends React.Component<Props> {
-  constructor(props: Props) {
-    super(props);
-  }
-
-  render() {
-    const { isOpen, onClick } = this.props;
-    return (
-      <div
-        className="
+export function SwitchButton(props: Props) {
+  const { isOpen, onClick } = props;
+  return (
+    <div
+      className="
         relative 
         flex 
         h-8 
@@ -28,24 +23,23 @@ export default class SwitchButton extends React.Component<Props> {
         cursor-pointer 
         bg-gray-700 
         "
-        onClick={onClick}
+      onClick={onClick}
+    >
+      <span
+        className={classnames(
+          "float-left pl-3 text-gray-50 duration-500 transition-colors",
+          { "prior:text-green-viridity": isOpen }
+        )}
       >
-        <span
-          className={classnames(
-            "float-left pl-3 text-gray-50 duration-500 transition-colors",
-            { "prior:text-green-viridity": isOpen }
-          )}
-        >
-          开
-        </span>
-        <span className="float-right pr-3 text-gray-50 ">关</span>
-        <span
-          className={classnames(
-            "absolute left-0 top-0 transition-all duration-500 m-1 w-10 h-6 rounded-full bg-gray-50 ",
-            { "prior:bg-green-viridity prior:left-8": isOpen }
-          )}
-        ></span>
-      </div>
-    );
-  }
+        开
+      </span>
+      <span className="float-right pr-3 text-gray-50 ">关</span>
+      <span
+        className={classnames(
+          "absolute left-0 top-0 transition-all duration-500 m-1 w-10 h-6 rounded-full bg-gray-50 ",
+          { "prior:bg-green-viridity prior:left-8": isOpen }
+        )}
+      ></span>
+    </div>
+  );
 }

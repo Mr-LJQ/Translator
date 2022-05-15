@@ -1,24 +1,29 @@
 import React from "react";
+import { decodeBTag } from "../utils";
 
-import { AddButtonState, PhraseData } from "../../../types/index";
+//组件
+import {CardStateButton} from "./CardStateButton"
+import AudioButton from "./AudioButton";
 
-import AddButton from "../components/AddButton";
-import AudioButton from "../components/AudioButton";
-import { translateBTag } from "../utils";
+//声明
+import type {CardsStatus} from "../View"
+import type {PhraseData} from "../../../dictionary"
+
+
 
 interface Props extends PhraseData {
-  addNote: () => void;
-  addButtonState?: AddButtonState;
+  updateAnki: () => void;
+  cardsStatus?: CardsStatus;
 }
 
-function PhraseCard(props: Props) {
+export function Phrase(props: Props) {
   const {
     phrase,
     translations,
     phrase_audio,
-    exampleSentences,
-    addButtonState,
-    addNote,
+    example_sentences,
+    cardsStatus,
+    updateAnki,
   } = props;
   return (
     <div>
@@ -28,17 +33,17 @@ function PhraseCard(props: Props) {
           <AudioButton audioURL={phrase_audio} />
         </div>
         <p className="text-base">
-          {addButtonState && (
-            <AddButton {...addButtonState} onClick={addNote} />
+          {cardsStatus && (
+            <CardStateButton {...cardsStatus} onClick={updateAnki} />
           )}
           {translations.reduce((acc, cur) => {
             return acc + " ; " + cur;
           })}
         </p>
       </header>
-      {exampleSentences && (
+      {example_sentences && (
         <ul className="mt-2">
-          {exampleSentences.map((item, index) => {
+          {example_sentences.map((item, index) => {
             return (
               <li
                 key={index}
@@ -48,7 +53,7 @@ function PhraseCard(props: Props) {
                   audioURL={item.example_audio}
                   className="float-right"
                 />
-                <p>{translateBTag(item.example_sentence)}</p>
+                <p>{decodeBTag(item.example_sentence)}</p>
                 <p className="text-blue-800">
                   {item.example_sentence_translation}
                 </p>
@@ -61,4 +66,3 @@ function PhraseCard(props: Props) {
   );
 }
 
-export default PhraseCard;

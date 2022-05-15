@@ -1,16 +1,16 @@
-import { Storage } from "../types/index"
+import type { Storage } from "../utils/extensions-api"
 
 //搜索栏ID
 const SEARCH_BAR_ID = "ANKI_BROWSER_EXTENSIONS_SEARCHBAR"
 
 export interface Point {
-  x:number,
-  y:number
+  x: number,
+  y: number
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //双击选中翻译事件
-export class SelectionListener{
+export class SelectionListener {
   selectionChanged = false
   constructor(public showTranslation: (text: string) => void) {
     this.onMouseUp = this.onMouseUp.bind(this)
@@ -53,9 +53,9 @@ export class SelectionListener{
 //允许用户通过搜索栏主动输入单词，而后对单词进行查询
 
 export class SearchListener {
-
   private searchBar
   private closed = true
+  private installed = false
   showTranslation
 
   constructor(showTranslation: (text: string) => void) {
@@ -66,18 +66,21 @@ export class SearchListener {
     this.clearSearchBar = this.clearSearchBar.bind(this)
   }
 
-  install () {
+  install() {
+    this.installed = true
     document.body.append(this.searchBar)
   }
 
-  uninstall () {
+  uninstall() {
+    this.installed = false
     this.clearSearchBar()
     this.searchBar.remove()
   }
 
   toggleSearchBar() {
-    let { searchBar, closed } = this
-
+    let { searchBar, closed,installed } = this
+    //只在已安装的情况下，才能够切换其显示状态
+    if (!installed) return
     //查询导航条是否存在，反复触发时切换其开关状态
     if (closed) {
       this.closed = false
@@ -165,7 +168,7 @@ export class SearchListener {
 //因为浏览器并没有提供一个属性以直接获取鼠标位置,所以需要通过监听实现
 export class CursorListener {
   cursorPosition: Point
-  isTop:boolean
+  isTop: boolean
   constructor() {
     this.isTop = window === top
     this.cursorPosition = { x: 0, y: 0 }
@@ -215,7 +218,7 @@ export class HotKeyListener {
 
   private getCursorPosition: () => Point
   private showTranslation: (text: string) => void
-  private hotKey: Storage["hotKey"]
+  private hotKey?: "shiftKey" | "ctrlKey" | "altKey"
   private checkout: RegExp
   private searchBar: HTMLElement | null
   constructor(showTranslation: (text: string) => void, getCursorPosition: () => Point) {
@@ -250,7 +253,7 @@ export class HotKeyListener {
       this.searchBar = document.getElementById(SEARCH_BAR_ID)
     }
     //这意味着，如果搜索栏启用，则无法进行热键选词操作
-    if (this.searchBar?.hidden) return
+    if (!this.searchBar?.hidden) return
     if (hotKey && event[hotKey]) {
       this.autoSelectText(x, y)
       let selectedText = getSelectionText()
@@ -281,7 +284,6 @@ export class HotKeyListener {
 
     //并非文本节点，退出
     if (node.nodeType !== 3) return
-
     range = this.extendRange(range)
 
     //用拖蓝形式展现被选中的单词
