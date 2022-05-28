@@ -1,24 +1,28 @@
 import React, { ChangeEvent } from "react";
-import ReactDOM from "react-dom";
-import {
-  setStorage,
-  getStorage,
-  onStorageChange,
-} from "../utils/extensions-api";
+import { createRoot } from "react-dom/client";
 import "../index.css";
 
-import {SwitchButton} from "./SwitchButton";
-import { TabPaneKey,openOptionsPage } from "../utils/extensions-api";
+import {
+  TabPaneKey,
+  setStorage,
+  getStorage,
+  openOptionsPage,
+  onStorageChange,
+} from "../utils/extensions-api";
+
+import { SwitchButton } from "./SwitchButton";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //声明
 import type { Storage } from "../utils/extensions-api";
-
 type State = Pick<Storage, "hotKey" | "isOpen">;
 
 class Popup extends React.Component<{}, State> {
-  state: State = {};
+  state: State = {
+    isOpen:true,
+    hotKey:"shiftKey"
+  };
 
   hotkeys: Array<Storage["hotKey"]> = [
     undefined,
@@ -38,10 +42,8 @@ class Popup extends React.Component<{}, State> {
       this.setState({ isOpen, hotKey });
     });
     onStorageChange({
-      isOpen: (_, isOpen) =>
-        this.setState({ isOpen: isOpen}),
-      hotKey: (_, hotKey) =>
-        this.setState({ hotKey: hotKey}),
+      isOpen: (_, isOpen) => this.setState({ isOpen: isOpen }),
+      hotKey: (_, hotKey) => this.setState({ hotKey: hotKey }),
     });
   }
   openOptionsPage() {
@@ -64,21 +66,54 @@ class Popup extends React.Component<{}, State> {
     const { hotKey, isOpen } = this.state;
     return (
       <>
-        <header className="font-bold text-xl p-1 border rounded-tr-sm bg-blue-gray text-white">
+        <header
+          className="
+            font-bold
+            text-xl 
+            text-white
+            p-1
+            border
+            rounded-tr-sm
+            bg-blue-gray
+          "
+        >
           Options
           <span
-            className="float-right mr-1 cursor-pointer"
+            className="
+              float-right
+              mr-1
+              cursor-pointer
+            "
             onClick={this.openOptionsPage}
           >
             ...
           </span>
         </header>
-        <main className="bg-gray-200 rounded-tl-sm ">
-          <div className="flex justify-between p-1 items-center">
+        <main
+          className="
+            bg-gray-200 
+            rounded-tl-sm
+         "
+        >
+          <div
+            className="
+              flex
+              items-center
+              justify-between
+              p-1 
+            "
+          >
             <span className="text-lg">开关插件</span>
             <SwitchButton isOpen={!!isOpen} onClick={this.handleSwitchOpen} />
           </div>
-          <div className="flex justify-between p-1 items-center">
+          <div
+            className="
+              flex
+              items-center
+              justify-between
+              p-1 
+            "
+          >
             <span className="text-lg">取词热键</span>
             <select
               className="rounded h-8 w-20"
@@ -103,6 +138,6 @@ class Popup extends React.Component<{}, State> {
   }
 }
 
-const root = document.getElementById("root") as HTMLElement;
+const root = document.getElementById("root")!;
 root.classList.add("w-44", "m-1", "text-sm");
-ReactDOM.render(<Popup />, root);
+createRoot(root).render(<Popup />);

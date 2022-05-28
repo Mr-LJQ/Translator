@@ -1,47 +1,45 @@
-import { CursorListener,HotKeyListener,SelectionListener } from "../events/event-listener"
-import { validateText } from "../utils/tools"
+import { CursorListener, HotKeyListener, SelectionListener } from "../events/event-listener"
 
+import { Command } from "../utils/command"
+import { validateText } from "../utils/tools"
 import { onStorageChange, getStorage, postBackend } from "../utils/extensions-api"
 
-
-import type {Storage} from "../utils/extensions-api"
-
-import {Command} from "../utils/command"
-
+import type { Storage } from "../utils/extensions-api"
 
 //添加获取鼠标位置的监听
 const cursorListener = new CursorListener()
-const { getCursorPosition } = cursorListener
+const { getCursorPosition,getScreenPosition } = cursorListener
+const selectionListener = new SelectionListener(translateText)
+const hotKeyListener = new HotKeyListener(translateText, getCursorPosition,)
 
-async function showTranslated(text: string) {
+cursorListener.install()
+
+async function translateText(text: string) {
+  //过滤掉非英文
   const result = validateText(text)
   if (!result) return
-  const point = getCursorPosition()
+
+  const point = getScreenPosition()
   postBackend(Command.TranslateInjectText, { text, point })
 }
 
-const selectionListener = new SelectionListener(showTranslated)
-const hotKeyListener = new HotKeyListener(showTranslated, getCursorPosition,)
-
-function installAll() {
+function openSelectionAndHotKeyListener() {
   hotKeyListener.install()
   selectionListener.install()
-  cursorListener.install()
 }
 
-function uninstallAll() {
+function closeSelectionAndHotKeyListener() {
   hotKeyListener.uninstall()
   selectionListener.uninstall()
-  cursorListener.uninstall()
 }
 
 getStorage({
-  isOpen: (value) => value ? installAll() : uninstallAll(),
+  isOpen: (value) => value ? openSelectionAndHotKeyListener() : closeSelectionAndHotKeyListener(),
   hotKey: (value) => hotKeyListener.updateHotKey(value as Storage["hotKey"]),
 })
 
 onStorageChange({
-  isOpen: (_, value) => value ? installAll() : uninstallAll(),
+  isOpen: (_, value) => value ? openSelectionAndHotKeyListener() : closeSelectionAndHotKeyListener(),
   hotKey: (_, value) => hotKeyListener.updateHotKey(value as Storage["hotKey"]),
 })
 

@@ -1,8 +1,7 @@
-import type { Storage } from "../utils/extensions-api"
-
 //搜索栏ID
 const SEARCH_BAR_ID = "ANKI_BROWSER_EXTENSIONS_SEARCHBAR"
 
+import type { Storage } from "../utils/extensions-api"
 export interface Point {
   x: number,
   y: number
@@ -12,7 +11,9 @@ export interface Point {
 //双击选中翻译事件
 export class SelectionListener {
   selectionChanged = false
-  constructor(public showTranslation: (text: string) => void) {
+  constructor(public translateAndShowText: (text: string) => void) {
+    this.install = this.install.bind(this)
+    this.uninstall = this.uninstall.bind(this)
     this.onMouseUp = this.onMouseUp.bind(this)
     this.onMouseDown = this.onMouseDown.bind(this)
     this.onSelectionChange = this.onSelectionChange.bind(this)
@@ -45,7 +46,13 @@ export class SelectionListener {
     this.selectionChanged = false
     let selectedText = getSelectionText()
     if (!selectedText) return
-    this.showTranslation(selectedText)
+    
+    //不对输入框中的文本进行选中翻译
+    const focusNode = document.activeElement?.nodeName || ""
+    const filterNodeName = ["INPUT", "TEXTAREA"]
+    if (filterNodeName.includes(focusNode)) return
+
+    this.translateAndShowText(selectedText)
   }
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -56,16 +63,17 @@ export class SearchListener {
   private searchBar
   private closed = true
   private installed = false
-  showTranslation
+  translateAndShowText
 
-  constructor(showTranslation: (text: string) => void) {
+  constructor(translateAndShowText: (text: string) => void) {
     this.searchBar = this.createSearchBar()
     this.searchBar.hidden = true
-    this.showTranslation = showTranslation
-    this.toggleSearchBar = this.toggleSearchBar.bind(this)
+    this.install = this.install.bind(this)
+    this.uninstall = this.uninstall.bind(this)
+    this.translateAndShowText = translateAndShowText
     this.clearSearchBar = this.clearSearchBar.bind(this)
+    this.toggleSearchBar = this.toggleSearchBar.bind(this)
   }
-
   install() {
     this.installed = true
     document.body.append(this.searchBar)
@@ -78,9 +86,11 @@ export class SearchListener {
   }
 
   toggleSearchBar() {
-    let { searchBar, closed,installed } = this
+    let { searchBar, closed, installed } = this
+
     //只在已安装的情况下，才能够切换其显示状态
     if (!installed) return
+
     //查询导航条是否存在，反复触发时切换其开关状态
     if (closed) {
       this.closed = false
@@ -155,7 +165,7 @@ export class SearchListener {
       let text = searchInput.value.trim()
       if (text) {
         //进行查询
-        this.showTranslation(text)
+        this.translateAndShowText(text)
       }
     })
     return form
@@ -168,12 +178,13 @@ export class SearchListener {
 //因为浏览器并没有提供一个属性以直接获取鼠标位置,所以需要通过监听实现
 export class CursorListener {
   cursorPosition: Point
-  isTop: boolean
+  screenPosition: Point
   constructor() {
-    this.isTop = window === top
     this.cursorPosition = { x: 0, y: 0 }
+    this.screenPosition = { x: 0, y: 0 }
     this.onMouseMove = this.onMouseMove.bind(this)
     this.getCursorPosition = this.getCursorPosition.bind(this)
+    this.getScreenPosition = this.getScreenPosition.bind(this)
   }
   install() {
     document.addEventListener("mousemove", this.onMouseMove, true)//避免被阻止冒泡导致失效
@@ -181,26 +192,30 @@ export class CursorListener {
   uninstall() {
     document.removeEventListener("mousemove", this.onMouseMove, true)
   }
+  /**
+   * 返回鼠标当前相对视口的位置，this已绑定
+   * @returns {x:number,y:number}
+   */
   getCursorPosition() {
     return this.cursorPosition
   }
+  /**
+   * 返回鼠标当前相对视口的位置，this已绑定
+   * @returns 
+   */
+  getScreenPosition() {
+    return this.screenPosition
+  }
   private onMouseMove(event: MouseEvent) {
-    const { clientX, clientY, screenX, screenY } = event
-    if (this.isTop) {
-      this.cursorPosition = {
-        x: clientX,
-        y: clientY
-      }
-    } else {
-      //因为clientX/Y在iframe中时，参考的是iframe的视口，所以使用它们会导致问题
-      //而screenX/Y在iframe与顶层窗口视口中所返回的坐标都是一致的，所以使用
-      //此时的相对位置是参考浏览器左上角，与position参考viewport左上角还存在差距
-      //这个差距可以通过再减去outerHeight-innerHeight弥补，受同源策略限制，该差值无法在这里减去
-      //实际上，就算进行了这样的处理，在用户打开devtools时，依旧会导致位置不准确。
-      this.cursorPosition = {
-        x: screenX - window.screenX,//减去浏览器相对屏幕的位移
-        y: screenY - window.screenY
-      }
+    const { clientX, clientY, screenY, screenX } = event
+    this.cursorPosition = {
+      x: clientX,
+      y: clientY
+    }
+    if (window === window.top) return
+    this.screenPosition = {
+      x: screenX,
+      y: screenY
     }
   }
 }
@@ -217,15 +232,13 @@ export class CursorListener {
 export class HotKeyListener {
 
   private getCursorPosition: () => Point
-  private showTranslation: (text: string) => void
+  private translateAndShowText: (text: string) => void
   private hotKey?: "shiftKey" | "ctrlKey" | "altKey"
   private checkout: RegExp
-  private searchBar: HTMLElement | null
-  constructor(showTranslation: (text: string) => void, getCursorPosition: () => Point) {
+  constructor(translateAndShowText: (text: string) => void, getCursorPosition: () => Point) {
     this.getCursorPosition = getCursorPosition
-    this.showTranslation = showTranslation
+    this.translateAndShowText = translateAndShowText
     this.hotKey
-    this.searchBar = null
     this.checkout = /[a-z_]/i
 
     //所有向外暴露的方法的this都是绑定的
@@ -249,16 +262,17 @@ export class HotKeyListener {
   private onKeyDown(event: KeyboardEvent) {
     const { hotKey } = this
     const { x, y } = this.getCursorPosition()
-    if (this.searchBar == null) {
-      this.searchBar = document.getElementById(SEARCH_BAR_ID)
-    }
-    //这意味着，如果搜索栏启用，则无法进行热键选词操作
-    if (!this.searchBar?.hidden) return
+
+    //当焦点在输入框中，不进行热键选词
+    const focusNode = document.activeElement?.nodeName || ""
+    const filterNodeName = ["INPUT", "TEXTAREA"]
+    if (filterNodeName.includes(focusNode)) return
+
     if (hotKey && event[hotKey]) {
       this.autoSelectText(x, y)
       let selectedText = getSelectionText()
       if (!selectedText) return
-      this.showTranslation(selectedText)
+      this.translateAndShowText(selectedText)
     }
   }
 
@@ -377,6 +391,8 @@ function getRangeFromPoint(x: number, y: number): Range | null {
     range.setStart(offsetNode, offset)
     return range
   }
-  console.warn("Property 'caretPositionFromPoint' or 'caretRangeFromPoint' does not exist on the document")
+  if (process.env.NODE_ENV === "development") {
+    throw new Error("没有找到 'caretPositionFromPoint' 或者 'caretRangeFromPoint'")
+  }
   return null
 }
