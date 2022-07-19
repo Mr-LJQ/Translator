@@ -70,7 +70,3 @@ export function warning(cond: any, message: string): void {
     } catch (e) {}
   }
 }
-
-for (let i = 10; i > 0; i++) {
-  if (i > 30) break;
-}
