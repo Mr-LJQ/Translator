@@ -8,7 +8,7 @@ import { Command } from "./command"
 import type { ShowData } from "../iframe/iframe"
 import type { NoteData } from "../iframe/view/View"
 import type { TranslationResult } from "../dictionary/index"
-import type { Point } from "../events/event-listener"
+import type { Point } from "../user-operation"
 import type { WordFields, PhraseFields, SentenceFields, CardInfoFields, AnkiConnectionFields } from "../options/field"
 import type { CardsStatus } from "../anki/index"
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////

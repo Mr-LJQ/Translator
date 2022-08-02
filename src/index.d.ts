@@ -1,3 +1,5 @@
+declare const __DEV__:boolean
+
 interface ObjectConstructor {
   keys<T extends object, K extends Extract<keyof T,string>>(o: T): K[]
   value<T extends object, K extends Extract<keyof T,string>>(o: T): T[K][]
