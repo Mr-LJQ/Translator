@@ -7,7 +7,7 @@ import AudioButton from "./AudioButton";
 
 //声明
 import type {CardsStatus} from "../View"
-import type {PhraseData} from "../../../dictionary"
+import type {PhraseData} from "../../../backend-script/dictionary"
 
 
 

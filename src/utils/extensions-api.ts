@@ -7,7 +7,7 @@ import { Command } from "./command"
 //声明引入
 import type { ShowData } from "../iframe/iframe"
 import type { NoteData } from "../iframe/view/View"
-import type { TranslationResult } from "../dictionary/index"
+import type { TranslationResult } from "../backend-script/dictionary/index"
 import type { Point } from "../user-operation"
 import type { WordFields, PhraseFields, SentenceFields, CardInfoFields, AnkiConnectionFields } from "../options/field"
 import type { CardsStatus } from "../anki/index"

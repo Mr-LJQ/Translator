@@ -1,18 +1,6 @@
 @tailwind base;
-@tailwind components;
 @tailwind utilities;
-
-@layer utilities {
-  .indent-2 {
-    text-indent: 2em;
-  }
-  .indent-0 {
-    text-indent: 0em;/*用于修复text-indent继承导致的问题*/
-  }
-  .h-100 {
-    height: 25rem; /*400px*/
-  }
-}
+@tailwind components;
 
 @layer components {
   @variants group-hover, hover {
@@ -21,7 +9,7 @@
       vertical-align: text-top;
     }
   }
-
+  
   .audio:after {
     content: "\1f509";/*🔉*/
     vertical-align: text-top;

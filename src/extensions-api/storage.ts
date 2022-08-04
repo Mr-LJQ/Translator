@@ -1,105 +1,185 @@
-
-export enum TabPaneKey {
-  Home = "HOME",
-  Word = "WORD",
-  Phrase = "PHRASE",
-  Sentence = "SENTENCE"
-}
-
-export type WordConfig = Partial<CardInfoFields & WordFields>
-export type PhraseConfig = Partial<CardInfoFields & PhraseFields>
-export type SentenceConfig = Partial<CardInfoFields & SentenceFields>
-export interface Storage extends Partial<AnkiConnectionFields> {
-  wordConfig?: WordConfig,
-  phraseConfig?: PhraseConfig,
-  sentenceConfig?: SentenceConfig,
-  isOpen?: boolean, //是否启用插件
-  hotKey?: "shiftKey" | "ctrlKey" | "altKey"  //自动选词热键,必须与KeyboardEvent的属性一样
-  activeTabPane?: TabPaneKey //打开options后，首先展示的选项卡
-  openSelection?: boolean
-  hiddenChinese?: boolean
-}
-
-type StorageHandlers<T extends any> = {
-  [P in keyof T]: (value: T[P]) => void;
-};
-type StorageKeys = keyof Storage
+import pick from "lodash.pick";
+import { Storage, TabPanelName, PartialStorage } from "./types";
 
 //缓存默认值对象，用于在用户刚刚加载拓展，没有进行任何配置时作为初始配置。
-export const initialStorage: Required<Storage> = {
+//确保 Storage 中的缓存无论何时都是符合要求的，不存在刚刚加载插件时因为 Storage 为空而导致的问题。
+const defaultStorage: Storage = {
   isOpen: true,
   hotKey: "shiftKey",
-  activeTabPane: TabPaneKey.Home,
-  ankiConnectionURL: "http://127.0.0.1:8765",
-  ankiConnectionMethod: "AnkiConnection",
-  wordConfig: {},
-  phraseConfig: {},
-  sentenceConfig: {},
-  hiddenChinese: false,
   openSelection: true,
-}
+  hiddenChinese: false,
+  checkedTabPanel: TabPanelName.Home,
+  ankiConnectionMethod: "AnkiConnection",
+  ankiConnectionURL: "http://127.0.0.1:8765",
+  openStrengthenSelectionByPressedCtrl: true,
+  wordConfig: {
+    am: "",
+    en: "",
+    tags: "",
+    word: "",
+    am_audio: "",
+    en_audio: "",
+    deckName: "",
+    modelName: "",
+    definition: "",
+    translation: "",
+    star_amount: "",
+    example_audio: "",
+    part_of_speech: "",
+    definition_audio: "",
+    example_sentence: "",
+    example_sentence_translation: "",
+  },
+  checkWordDuplicate: {
+    word: true,
+    deckName: true,
+    definition: true,
+    translation: true,
+    am: false,
+    en: false,
+    am_audio: false,
+    en_audio: false,
+    modelName: false,
+    star_amount: false,
+    example_audio: false,
+    part_of_speech: false,
+    definition_audio: false,
+    example_sentence: false,
+    example_sentence_translation: false,
+  },
+  phraseConfig: {
+    tags: "",
+    deckName: "",
+    modelName: "",
+    phrase: "",
+    phrase_audio: "",
+    translations: "",
+    example_audio_1: "",
+    example_audio_2: "",
+    example_audio_3: "",
+    example_sentence_1: "",
+    example_sentence_2: "",
+    example_sentence_3: "",
+    example_sentence_translation_1: "",
+    example_sentence_translation_2: "",
+    example_sentence_translation_3: "",
+  },
+  checkPhraseDuplicate: {
+    phrase: true,
+    deckName: true,
+    modelName: false,
+    phrase_audio: false,
+    translations: false,
+    example_audio_1: false,
+    example_audio_2: false,
+    example_audio_3: false,
+    example_sentence_1: false,
+    example_sentence_2: false,
+    example_sentence_3: false,
+    example_sentence_translation_1: false,
+    example_sentence_translation_2: false,
+    example_sentence_translation_3: false,
+  },
+  sentenceConfig: {
+    tags: "",
+    deckName: "",
+    modelName: "",
+    sentence: "",
+    sentence_audio: "",
+    sentence_translation: "",
+  },
+  checkSentenceDuplicate: {
+    deckName: true,
+    sentence: true,
+    modelName: false,
+    sentence_audio: false,
+    sentence_translation: false,
+  },
+};
 
-function handlersIsArray(handlers: StorageHandlers<Storage> | StorageKeys[]): handlers is StorageKeys[] {
-  return Array.isArray(handlers)
-}
+type StorageKeys = keyof Storage;
 
-/**
- * 当handlers是一个对象
- *  注意：仅在其键存在相应的缓存/初始值时，回调才会调用
- *  注意：不保证调用顺序
- * @param handlers object / array
- */
-export function getStorage(handlers: StorageKeys[], callback: (item: Partial<Storage>) => void): void
-export function getStorage(handlers: StorageHandlers<Storage>, callback?: (item: Partial<Storage>) => void): void
-export function getStorage(handlers: StorageHandlers<Storage> | StorageKeys[], callback?: (item: Partial<Storage>) => void): void {
-  let storageKeys = handlersIsArray(handlers) ? handlers : Object.keys(handlers)
-  const storage = pick(initialStorage, storageKeys)
-  chrome.storage.local.get(storage, (storage) => {
-    if (!handlersIsArray(handlers)) {
-      (Object.keys(storage)).forEach((key) => {
-        const handler = handlers[key as keyof Storage]
-        const cacheValue = storage[key]
-        if (handler) {
-          handler(cacheValue)
-        }
-      })
-    }
-    callback && callback(storage)
-  })
-}
+type StorageHandlers<T extends PartialStorage> = {
+  [P in keyof T]: (value: T[P]) => void;
+};
 
-/**
- * 根据名称数组获取其对应的缓存对象
- * @param names array,需要获取的缓存项的名称数组
- * @returns object,对应的缓存对象
- */
-export function getStorageItems<K extends StorageKeys>(names: K[]): Promise<Partial<Storage>> {
-  return new Promise((resolve) => {
-    getStorage(names, resolve)
-  })
-}
-
-type StorageToCallback<T extends any> = {
+type StorageToCallback<T extends PartialStorage> = {
   [P in keyof T]: (oldVal: T[P], newVal: T[P]) => void;
 };
 
-export function onStorageChange(handlers: StorageToCallback<Storage>) {
-  let listener: Parameters<typeof chrome.storage.onChanged.addListener>[0] = (changes) => {
+type GetStorageCallback = (storage: PartialStorage) => void;
+
+function handlersIsArray(
+  handlers: StorageHandlers<PartialStorage> | StorageKeys[]
+): handlers is StorageKeys[] {
+  return Array.isArray(handlers);
+}
+
+function getStorage(
+  handlers: StorageKeys[],
+  callback: GetStorageCallback
+): void;
+function getStorage(
+  handlers: StorageHandlers<PartialStorage>,
+  callback: GetStorageCallback
+): void;
+function getStorage(
+  handlers: StorageHandlers<PartialStorage> | StorageKeys[],
+  callback: GetStorageCallback
+) {
+  const storageKeys = handlersIsArray(handlers)
+    ? handlers
+    : (Object.keys(handlers) as StorageKeys[]);
+  const storage = pick(defaultStorage, storageKeys);
+  chrome.storage.local.get(storage, (storage: PartialStorage) => {
+    if (!handlersIsArray(handlers)) {
+      Object.keys(storage).forEach((key) => {
+        const handler = handlers[key as StorageKeys];
+        const cacheValue = storage[key as StorageKeys];
+        //@ts-ignore 是匹配的值
+        handler?.(cacheValue);
+      });
+    }
+    callback?.(storage);
+  });
+}
+
+export function getStorageByArray<K>(
+  names: K,
+  callback: (storage: PartialStorage) => void
+) {
+  getStorage(names, callback);
+}
+
+export function getStorageByObject(
+  handlers: StorageHandlers<PartialStorage>,
+  callback: GetStorageCallback
+) {
+  getStorage(handlers, callback);
+}
+
+export function onStorageChange(handlers: StorageToCallback<PartialStorage>) {
+  const listener: Parameters<typeof chrome.storage.onChanged.addListener>[0] = (
+    changes
+  ) => {
     Object.keys(changes).forEach((key) => {
-      const handler = handlers[key as StorageKeys]
+      const handler = handlers[key as StorageKeys];
       if (handler) {
-        const { oldValue, newValue } = changes[key]
-        handler(oldValue, newValue)
+        const { oldValue, newValue } = changes[key];
+        //@ts-ignore 是正确匹配的
+        handler(oldValue, newValue);
       }
-    })
-  }
-  chrome.storage.onChanged.addListener(listener)
+    });
+  };
+  chrome.storage.onChanged.addListener(listener);
   return () => {
-    chrome.storage.onChanged.removeListener(listener)
-  }
+    chrome.storage.onChanged.removeListener(listener);
+  };
 }
 
-export function setStorage(items: Partial<Storage>, callback?: () => void) {
-  chrome.storage.local.set(items, callback)
+export function setStorage(
+  partialStorage: PartialStorage,
+  callback: () => void
+) {
+  chrome.storage.local.set(partialStorage, callback);
 }
-

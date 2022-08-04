@@ -3,7 +3,7 @@ import React from "react";
 import AudioButton from "./AudioButton";
 import { CardStateButton } from "./CardStateButton";
 
-import type { SentenceData} from "../../../dictionary/index"
+import type { SentenceData} from "../../../backend-script/dictionary/index"
 import type { CardsStatus } from "../View";
 
 interface Props extends SentenceData {

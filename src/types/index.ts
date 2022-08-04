@@ -9,4 +9,5 @@ export type HotKey = Extract<
 >;
 
 export type GetPoint = () => Point;
+
 export type TranslateAndDisplayText = (text: string) => void;

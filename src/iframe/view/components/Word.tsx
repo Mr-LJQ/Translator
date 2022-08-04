@@ -7,7 +7,7 @@ import AudioButton from "./AudioButton";
 import { CardStateButton } from "./CardStateButton";
 
 //类型
-import type { WordData, ExampleSentence } from "../../../dictionary/index";
+import type { WordData, ExampleSentence } from "../../../backend-script/dictionary/index";
 import type { CardsStatus } from "../View";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
