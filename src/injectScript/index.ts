@@ -1,4 +1,4 @@
-import { CursorListener, HotKeyListener, SelectionListener } from "../events/event-listener"
+import { CursorListener, HotKeyListener, SelectionListener } from "../user-operation"
 
 import { Command } from "../utils/command"
 import { validateText } from "../utils/tools"
@@ -8,9 +8,9 @@ import type { Storage } from "../utils/extensions-api"
 
 //添加获取鼠标位置的监听
 const cursorListener = new CursorListener()
-const { getCursorPosition,getScreenPosition } = cursorListener
+const { getClientPoint,getScreenPoint } = cursorListener
 const selectionListener = new SelectionListener(translateText)
-const hotKeyListener = new HotKeyListener(translateText, getCursorPosition,)
+const hotKeyListener = new HotKeyListener(translateText, getClientPoint,)
 
 cursorListener.install()
 
@@ -19,7 +19,7 @@ async function translateText(text: string) {
   const result = validateText(text)
   if (!result) return
 
-  const point = getScreenPosition()
+  const point = getScreenPoint()
   postBackend(Command.TranslateInjectText, { text, point })
 }
 

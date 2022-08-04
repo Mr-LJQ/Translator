@@ -7,7 +7,7 @@ import { getURL, setStorage, getStorage } from "../utils/extensions-api";
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //声明引入
 import type { PostMessage } from "./messenger";
-import type { Point } from "../events/event-listener";
+import type { Point } from "../user-operation";
 import type { TranslationResult } from "../dictionary/index";
 
 export interface ShowData {

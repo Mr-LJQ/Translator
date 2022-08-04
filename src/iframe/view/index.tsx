@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import { Messenger } from "../messenger";
 import { Command } from "../../utils/command";
 import { MessengerContext, AudioContext } from "./context";
-import { SelectionListener } from "../../events/event-listener";
+import { SelectionListener } from "../../user-operation";
 
 import "../../index.css";
 
