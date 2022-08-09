@@ -1,5 +1,5 @@
 import { AnkiConnection } from "../anki/index"
-import Collins_en_cn from "../backend-script/dictionary/index"
+import Collins_en_cn from "../dictionary/index"
 
 import {
   onMessage,

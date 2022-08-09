@@ -5,39 +5,44 @@ export enum NoteType {
 }
 
 export interface AddNoteParams {
-  deckName: string,
-  modelName: string,
+  deckName: string;
+  modelName: string;
   fields: {
-    [key: string]: string
-  },
+    [key: string]: string;
+  };
   options: {
-    allowDuplicate: boolean,
-    duplicateScope: "deck",
+    allowDuplicate: boolean;
+    duplicateScope: "deck";
     duplicateScopeOptions: {
-      deckName: string,
-      checkChildren: boolean,
-      checkAllModels: boolean
-    }
-  },
-  tags?: string[],
-  audio?: MediaField,
-  video?: MediaField,
-  picture?: MediaField
+      deckName: string;
+      checkChildren: boolean;
+      checkAllModels: boolean;
+    };
+  };
+  tags?: string[];
+  audio?: MediaField;
+  video?: MediaField;
+  picture?: MediaField;
 }
 
 export type MediaField = Array<{
-  url: string,
-  filename: string,
-  skipHash?: string,
-  fields: string[]
-}>
+  url: string;
+  filename: string;
+  skipHash?: string;
+  fields: string[];
+}>;
 
 export enum AnkiResponseStatus {
   Success,
+  Forgotten,
   Disconnect,
+  Duplicate,
+  FirstAddSuccess,
+  ConfigError,
 }
 
 export interface AnkiResponse<T> {
-  data?:T,
-  status:AnkiResponseStatus
+  data?: T;
+  message?: string;
+  status: AnkiResponseStatus;
 }

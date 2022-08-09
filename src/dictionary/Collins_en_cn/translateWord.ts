@@ -1,23 +1,19 @@
-import type {
-  WordData,
-  ExampleSentence,
-  TranslationItem,
-} from "../types";
+import type { WordData, ExampleSentence, TranslationItem } from "../types";
 
 //单词翻译
 export function translateWord(dom: Document): WordData | void {
-  let word = getOriginText(dom);
-  let star_amount =
+  const word = getOriginText(dom);
+  const star_amount =
     Number(dom.querySelector(".star")?.className?.match(/star(\d)/)?.[1]) || 0;
   if (!word) return;
 
   return {
     word,
-    type: "WORD",
     star_amount,
-    translations: getTranslation(dom),
+    type: "WORD",
     phonetic: getPhonetic(dom, word),
     translationList: getTranslationList(dom),
+    translations: formatTranslations(getTranslation(dom)),
   };
 }
 
@@ -42,8 +38,8 @@ function getTranslation(dom: Document): string[] | undefined {
   const ul = dom.querySelector("#phrsListTab .trans-container > ul");
   if (!ul) return;
   const liNodes = ul.children;
-  let result = Array.from(liNodes).reduce((result, li) => {
-    let text = li.textContent;
+  const result = Array.from(liNodes).reduce((result, li) => {
+    const text = li.textContent;
     if (!text) return result;
     result.push(text);
     return result;
@@ -65,9 +61,8 @@ function getPhonetic(dom: Document, word: string) {
   let am = dom
     .querySelectorAll(".pronounce")?.[1]
     ?.textContent?.replace(/\s*|\r|\n/g, "");
-  let am_audio, en_audio;
-  en_audio = `https://dict.youdao.com/dictvoice?audio=${word}&type=1`;
-  am_audio = `https://dict.youdao.com/dictvoice?audio=${word}&type=2`;
+  const en_audio = `https://dict.youdao.com/dictvoice?audio=${word}&type=1`;
+  const am_audio = `https://dict.youdao.com/dictvoice?audio=${word}&type=2`;
 
   let phonetic = dom
     .querySelector("#collinsResult .wt-container .phonetic")
@@ -91,22 +86,20 @@ function getPhonetic(dom: Document, word: string) {
  * @param word 查询的单词
  * @returns 获取单词例句相关的数据数组
  */
-function getTranslationList(
-  dom: Document,
-): Array<TranslationItem> | undefined {
+function getTranslationList(dom: Document): Array<TranslationItem> | undefined {
   //获取所有翻译项
-  let lis = dom.querySelectorAll("#collinsResult .ol li");
-  let result = Array.from(lis).reduce((result, li) => {
+  const lis = dom.querySelectorAll("#collinsResult .ol li");
+  const result = Array.from(lis).reduce((result, li) => {
     //处理释义与对应的翻译的逻辑
-    let textResult = getTranslationText(li);
+    const textResult = getTranslationText(li);
     //过滤无效项
     if (!textResult) {
       return result;
     }
-    let [text, index] = textResult;
+    const [text, index] = textResult;
     const definition = text.slice(0, index).trim();
     //清除<b></b>避免影响音频获取
-    const definition_origin = definition.replace(/\<b\>|\<\/b\>/g, "");
+    const definition_origin = definition.replace(/<b>|<\/b>/g, "");
     result.push({
       part_of_speech: getPartOfSpeech(li), //词性
       definition, //定义
@@ -129,7 +122,7 @@ function getTranslationList(
  * @returns 返回该释义对应单词的词性，例如：n-count
  */
 function getPartOfSpeech(li: Element): string {
-  let targetNode = li.querySelector(".collinsMajorTrans p .additional");
+  const targetNode = li.querySelector(".collinsMajorTrans p .additional");
   return (targetNode && targetNode.textContent?.trim()) || "";
 }
 
@@ -138,10 +131,10 @@ function getPartOfSpeech(li: Element): string {
  * @returns [text,index] 返回翻译文本 text ，以及用于截取英文释义与中文翻译的下标 index
  */
 function getTranslationText(li: Element): [string, number] | null {
-  let pNode = li.querySelector(".collinsMajorTrans p");
+  const pNode = li.querySelector(".collinsMajorTrans p");
   if (!pNode) return null; //不存在释义项
   //过滤掉干扰项
-  let nodes = Array.from(pNode.childNodes).filter((node) => {
+  const nodes = Array.from(pNode.childNodes).filter((node) => {
     //过滤展示词性的节点
     if (
       node.nodeType === 1 &&
@@ -167,7 +160,7 @@ function getTranslationText(li: Element): [string, number] | null {
   if (index === -1) return null;
 
   //避免 中文翻译 被括号包裹起来的情况，而导致的 ()残留
-  let reg = /[a-z.)]/i;
+  const reg = /[a-z.)]/i;
   while (index >= 0) {
     if (reg.test(text[index - 1])) break;
     index--;
@@ -181,11 +174,11 @@ function getTranslationText(li: Element): [string, number] | null {
  * @returns 返回例句相关数据
  */
 function getExampleSentences(li: Element): ExampleSentence[] | undefined {
-  let div_example_s = li.querySelectorAll(".exampleLists .examples");
-  let exampleSentences = Array.from(div_example_s).reduce((acc, div) => {
-    let children = div.children;
-    let example_sentence = children[0]?.textContent?.trim() || "";
-    let example_sentence_translation = children[1]?.textContent?.trim() || "";
+  const div_example_s = li.querySelectorAll(".exampleLists .examples");
+  const exampleSentences = Array.from(div_example_s).reduce((acc, div) => {
+    const children = div.children;
+    const example_sentence = children[0]?.textContent?.trim() || "";
+    const example_sentence_translation = children[1]?.textContent?.trim() || "";
 
     //如果例句存在才添加，否则应该过滤掉
     if (example_sentence) {
@@ -202,4 +195,27 @@ function getExampleSentences(li: Element): ExampleSentence[] | undefined {
   }, [] as ExampleSentence[]);
   if (!exampleSentences.length) return;
   return exampleSentences;
+}
+
+/**
+ * 纯函数，格式化translations的结构
+ */
+function formatTranslations(translations: string[] | undefined) {
+  if (translations == null) return;
+  const formated = translations.reduce(function (acc, cur) {
+    const point = cur.indexOf(".") + 1;
+    const part_of_speech = point === -1 ? "" : cur.slice(0, point);
+    const oldArray = acc[part_of_speech];
+    const newArray = cur.slice(point).split("；");
+
+    if (oldArray == null) {
+      acc[part_of_speech] = newArray;
+    } else {
+      oldArray.push(...newArray);
+      acc[part_of_speech] = oldArray;
+    }
+
+    return acc;
+  }, {} as { [key: string]: string[] });
+  return formated;
 }

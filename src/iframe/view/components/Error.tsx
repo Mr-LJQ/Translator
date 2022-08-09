@@ -2,7 +2,7 @@ import React,{useContext} from 'react'
 import {MessengerContext} from "../context"
 
 //声明
-import type {ErrorData} from "../../../backend-script/dictionary"
+import type {ErrorData} from "../../../dictionary"
 import {Command} from "../../../utils/command"
 
 export function Error(props: ErrorData) {

@@ -8,7 +8,7 @@ import { getURL, setStorage, getStorage } from "../utils/extensions-api";
 //声明引入
 import type { PostMessage } from "./messenger";
 import type { Point } from "../user-operation";
-import type { TranslationResult } from "../backend-script/dictionary/index";
+import type { TranslationResult } from "../dictionary/index";
 
 export interface ShowData {
   translatedData: TranslationResult;

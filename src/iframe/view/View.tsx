@@ -28,7 +28,7 @@ import type {
   PhraseData,
   SentenceData,
   TranslationResult,
-} from "../../backend-script/dictionary/index";
+} from "../../dictionary/index";
 
 import type {
   WordFields,

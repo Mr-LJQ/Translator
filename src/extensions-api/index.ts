@@ -7,4 +7,6 @@ export {
 
 export {
   Storage,
+  AnkiConfig,
+  TabPanelName,
 } from "./types";
