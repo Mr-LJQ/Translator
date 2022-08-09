@@ -6,7 +6,11 @@ export {
 } from "./storage";
 
 export {
+  CommonConfig,
+  WordFields,
+  PhraseFields,
+  SentenceFields,
   Storage,
-  AnkiConfig,
+  ModelFields,
   TabPanelName,
 } from "./types";

@@ -5,10 +5,23 @@ export {
   createDuplicateResponse,
   createFirstAddSuccessResponse,
   createConfigErrorResponse,
+  createOldVersionResponse,
+  createAnkiErrorResponse,
+  isAnkiResponse
 } from "./createAnkiResponse";
 
-import { AnkiConfig } from "@/extensions-api";
+import {
+  ModelFields,
+  PhraseFields,
+  SentenceFields,
+  WordFields,
+} from "@/extensions-api";
 import { NoteData } from "@/translation-page";
+import {
+  WordNoteData,
+  PhraseNoteData,
+  SentenceNoteData,
+} from "@/translation-page";
 import { MediaField, NoteType, AnkiResponse } from "../types";
 
 //纯函数
@@ -30,21 +43,23 @@ export function getDuplicateConfigName(type: NoteType) {
   return configNames[type];
 }
 
-//纯函数
+/**
+ * 纯函数，获取特定类型的代表音频媒体的 key 的集合
+ */
 function getMediaNames(type: NoteType) {
-  const sentenceMedia = ["sentence_audio"] as const;
-  const phraseMedia = [
-    "phrase_audio",
-    "example_audio_1",
-    "example_audio_2",
-    "example_audio_3",
-  ] as const;
-  const wordMedia = [
+  const wordMedia: Array<keyof WordFields> = [
     "am_audio",
     "en_audio",
     "example_audio",
     "definition_audio",
-  ] as const;
+  ];
+  const phraseMedia: Array<keyof PhraseFields> = [
+    "phrase_audio",
+    "example_audio_1",
+    "example_audio_2",
+    "example_audio_3",
+  ];
+  const sentenceMedia: Array<keyof SentenceFields> = ["sentence_audio"];
   const mediaNames = {
     [NoteType.Word]: wordMedia,
     [NoteType.Phrase]: phraseMedia,
@@ -53,49 +68,53 @@ function getMediaNames(type: NoteType) {
   return mediaNames;
 }
 
-//纯函数
-function getMediaFields(type: NoteType, data: NoteData, config: AnkiConfig) {
-  let mediaNames = getMediaNames(type);
-  return Object.entries(config).reduce((audio, val) => {
-    const {key,field} = val
-
+/**
+ * 获取媒体部分的域
+ */
+export function getMediaFields(
+  type: NoteType,
+  data: NoteData,
+  matchedFields: ModelFields
+): MediaField {
+  const mediaNames = getMediaNames(type);
+  return Object.entries(matchedFields).reduce((audio, [key, field]) => {
+    //@ts-ignore 是能够正确匹配的
     if (!mediaNames.includes(key)) return audio;
-    /**
-     * NoteData 是基于 ModelFieldNames 的，因此 ModelFieldNames 上存在的 key，在 NoteData上也存在
-     * 因此使用 @ts-ignore 来消除检测
-     */
-    //@ts-ignore
-
-    let url = data[key];
+    //@ts-ignore 是能够正确匹配的
+    const url = data[key];
     if (!url || !field) return audio;
     audio.push({
-      url: url,
+      url,
       fields: [field],
-      filename: "".concat(encodeURIComponent(url), ".mp3"),
+      filename: `${encodeURIComponent(url)}.mp3`,
     });
     return audio;
-  }, []);
+  }, [] as MediaField);
 }
+
 /**
- * 纯函数
+ * 获取非媒体部分的域
  */
-function getNotMediaFields(type, data, matchedFields) {
-  let mediaNames = getMediaNames(type);
-  return Object.entries(matchedFields).reduce(function (fields, _ref3) {
-    let _ref4 = _slicedToArray(_ref3, 2),
-      key = _ref4[0],
-      fieldKey = _ref4[1];
-
-    if (mediaNames.includes(key)) return fields;
-    /**
-     * NoteData 是基于 MoDelFieldNames 的，因此 MoDelFieldNames 上存在的 key，在 NoteData上也存在
-     * 因此使用 @ts-ignore 来消除检测
-     */
-    //@ts-ignore
-
-    let fieldValue = data[key];
-    if (!fieldKey || !fieldValue) return fields;
-    fields[fieldKey] = fieldValue;
-    return fields;
-  }, {});
+export function getNotMediaFields(
+  type: NoteType,
+  data: NoteData,
+  matchedFields: ModelFields
+): {
+  [key: string]: string;
+} {
+  const mediaNames = getMediaNames(type);
+  return Object.entries(matchedFields).reduce(
+    (fields, [key, fieldKey]) => {
+      //@ts-ignore 是可以正确匹配的
+      if (mediaNames.includes(key)) return fields;
+      //@ts-ignore 是可以正确匹配的
+      const fieldValue = data[key];
+      if (!fieldKey || !fieldValue) return fields;
+      fields[fieldKey] = fieldValue;
+      return fields;
+    },
+    {} as {
+      [key: string]: string;
+    }
+  );
 }

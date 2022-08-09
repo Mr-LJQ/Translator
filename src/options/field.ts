@@ -1,4 +1,10 @@
-const WORD_FIELDS = {
+import {
+  WordFields,
+  PhraseFields,
+  SentenceFields,
+  CommonConfig,
+} from "@/extensions-api";
+const WORD_FIELDS: WordFields = {
   definition: "定义",
   word: "单词",
   translation: "翻译",
@@ -14,7 +20,7 @@ const WORD_FIELDS = {
   example_sentence_translation: "例句翻译",
 };
 
-const PHRASE_FIELDS = {
+const PHRASE_FIELDS: PhraseFields = {
   phrase: "短语词组",
   phrase_audio: "短语音频",
   translations: "短语翻译",
@@ -29,29 +35,29 @@ const PHRASE_FIELDS = {
   example_sentence_translation_3: "例句3翻译",
 };
 
-const SENTENCE_FIELDS = {
+const SENTENCE_FIELDS: SentenceFields = {
   sentence: "句子原文",
   sentence_audio: "句子音频",
   sentence_translation: "句子翻译",
 };
 
-const CARD_INFO_FIELDS = {
+const CARD_INFO_FIELDS: CommonConfig = {
   deckName: "牌组名称",
   modelName: "模型名称",
   tags: "卡片标签",
 };
 
 const ANKI_CONNECTION_FIELDS = {
-  ankiConnectionMethod: '连接方法',
-  ankiConnectionURL: "连接URL"
-}
+  ankiConnectionMethod: "连接方法",
+  ankiConnectionURL: "连接URL",
+};
 
 if (process.env.NODE_ENV === "development") {
-  Object.freeze(WORD_FIELDS)
-  Object.freeze(PHRASE_FIELDS)
-  Object.freeze(SENTENCE_FIELDS)
-  Object.freeze(CARD_INFO_FIELDS)
-  Object.freeze(ANKI_CONNECTION_FIELDS)
+  Object.freeze(WORD_FIELDS);
+  Object.freeze(PHRASE_FIELDS);
+  Object.freeze(SENTENCE_FIELDS);
+  Object.freeze(CARD_INFO_FIELDS);
+  Object.freeze(ANKI_CONNECTION_FIELDS);
 }
 
 export {
@@ -59,15 +65,5 @@ export {
   PHRASE_FIELDS,
   SENTENCE_FIELDS,
   CARD_INFO_FIELDS,
-  ANKI_CONNECTION_FIELDS
-}
-
-type SomeRequired<T extends keyof O,O> =  {
-  [P in T]:O[P]
-} & Partial<O>
-
-export type WordFields = SomeRequired<"word" | "translation",typeof WORD_FIELDS>
-export type PhraseFields = SomeRequired<"phrase" | "translations" | "phrase_audio",typeof PHRASE_FIELDS>
-export type SentenceFields = typeof SENTENCE_FIELDS
-export type CardInfoFields = typeof CARD_INFO_FIELDS
-export type AnkiConnectionFields = typeof ANKI_CONNECTION_FIELDS
+  ANKI_CONNECTION_FIELDS,
+};

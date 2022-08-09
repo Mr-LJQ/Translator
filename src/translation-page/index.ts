@@ -1,1 +1,6 @@
-export { NoteData } from "./types";
+export {
+  NoteData,
+  WordNoteData,
+  PhraseNoteData,
+  SentenceNoteData,
+} from "./types";

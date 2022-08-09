@@ -39,6 +39,8 @@ export enum AnkiResponseStatus {
   Duplicate,
   FirstAddSuccess,
   ConfigError,
+  OldVersion,
+  Error,
 }
 
 export interface AnkiResponse<T> {

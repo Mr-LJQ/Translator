@@ -1,6 +1,6 @@
 import { HotKey } from "@/types";
 
-interface CommonConfig {
+export interface CommonConfig {
   tags: string;
   deckName: string;
   modelName: string;
@@ -50,15 +50,23 @@ export enum TabPanelName {
   Sentence,
 }
 
-export type WordConfig = WordFields & CommonConfig;
-export type PhraseConfig = PhraseFields & CommonConfig;
-export type SentenceConfig = SentenceFields & CommonConfig;
+export type WordConfig = Partial<WordFields & CommonConfig>;
+export type PhraseConfig = Partial<PhraseFields & CommonConfig>;
+export type SentenceConfig = Partial<SentenceFields & CommonConfig>;
 
-type CheckWordDuplicate = Record<keyof Omit<WordConfig, "tags">, boolean>;
-type CheckPhraseDuplicate = Record<keyof Omit<PhraseConfig, "tags">, boolean>;
-type CheckSentenceDuplicate = Record<
-  keyof Omit<SentenceConfig, "tags">,
-  boolean
+export type ModelFields =
+  | Partial<WordFields>
+  | Partial<PhraseFields>
+  | Partial<SentenceFields>;
+
+type CheckWordDuplicate = Partial<
+  Record<keyof Omit<WordConfig, "tags">, boolean>
+>;
+type CheckPhraseDuplicate = Partial<
+  Record<keyof Omit<PhraseConfig, "tags">, boolean>
+>;
+type CheckSentenceDuplicate = Partial<
+  Record<keyof Omit<SentenceConfig, "tags">, boolean>
 >;
 
 export interface Storage {
