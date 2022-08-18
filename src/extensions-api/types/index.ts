@@ -43,7 +43,7 @@ export interface SentenceFields {
   sentence_translation: string;
 }
 
-export enum TabPanelName {
+export const enum TabPanelName {
   Home,
   Word,
   Phrase,

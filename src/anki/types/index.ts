@@ -1,4 +1,4 @@
-export enum NoteType {
+export const enum NoteType {
   Word = 0,
   Phrase = 1,
   Sentence = 2,
@@ -33,14 +33,15 @@ export type MediaField = Array<{
 }>;
 
 export enum AnkiResponseStatus {
+  Error,
   Success,
   Forgotten,
-  Disconnect,
   Duplicate,
-  FirstAddSuccess,
-  ConfigError,
+  Disconnect,
   OldVersion,
-  Error,
+  ConfigError,
+  FirstAddSuccess,
+  UnexpectedError,
 }
 
 export interface AnkiResponse<T> {
