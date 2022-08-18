@@ -161,8 +161,8 @@ function getTranslationText(li: Element): [string, number] | null {
 
   //避免 中文翻译 被括号包裹起来的情况，而导致的 ()残留
   const reg = /[a-z.)]/i;
-  while (index >= 0) {
-    if (reg.test(text[index - 1])) break;
+  while (index > 0) {
+    if (reg.test(text[index - 1] || "")) break;
     index--;
   }
   return [text, index];

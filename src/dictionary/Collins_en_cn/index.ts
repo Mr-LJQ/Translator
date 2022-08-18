@@ -36,9 +36,9 @@ export class Collins_en_cn {
    */
   async translate(text: string): Promise<TranslationResult> {
     const { cache } = this;
-    let translation = cache.get(text);
+    const translation = cache.get(text);
     if (translation) return translation;
-    let translationResult = await this.translateText(text);
+    const translationResult = await this.translateText(text);
     if (isErrorData(translationResult) && !translationResult.cache)
       return translationResult;
     this.cache.set(text, translationResult);
@@ -53,8 +53,9 @@ export class Collins_en_cn {
     if (this.xhr) this.xhr.abort();
     return new Promise((resolve, reject) => {
       //词典基于有道网页版
-      let searchURL = "https://dict.youdao.com/w/" + encodeURIComponent(input);
-      let xhr = new XMLHttpRequest();
+      const searchURL =
+        "https://dict.youdao.com/w/" + encodeURIComponent(input);
+      const xhr = new XMLHttpRequest();
       this.xhr = xhr;
       xhr.open("GET", searchURL);
       xhr.responseType = "document";
@@ -86,7 +87,6 @@ export class Collins_en_cn {
    * @param text 需要进行翻译的文本
    */
   private async translateText(text: string): Promise<TranslationResult> {
-    let result: TranslationResult;
     try {
       //将 驼峰、-、_ 等写法连接的文本转换为由空格分隔的文本
       text = lowerCase(text);
@@ -101,12 +101,11 @@ export class Collins_en_cn {
 
       if (!translation) handleNotFound(dom, text);
       //上面的判断决定了其必定不为空，因此可以使用 !进行断言
-      result = translation!
+      return translation!;
     } catch (err: any) {
-      if (isErrorData(err)) result = err;
-      result = createNoCacheError(err?.message);
+      if (isErrorData(err)) return err;
+      return createNoCacheError(err?.message);
     }
-    return result;
   }
 }
 
@@ -130,7 +129,7 @@ function translatePhraseAndSentence(
  */
 function handleNotFound(dom: Document, text: string) {
   //可能是用户拼写出错，推测正确的拼写给用户参考
-  let possibleSpelling = getCorrectSpelling(dom);
+  const possibleSpelling = getCorrectSpelling(dom);
   if (possibleSpelling) {
     throw createCacography(possibleSpelling);
   }

@@ -3,7 +3,7 @@ import type { ExampleSentence, PhraseData } from "../types";
 export function translatePhrase(dom: Document): PhraseData | void {
   const phrase = getOriginText(dom);
   if (!phrase) return;
-  let translation = dom
+  const translation = dom
     .querySelectorAll("#ydTrans .trans-container p")[1]
     ?.textContent?.trim();
   const translations = getTranslation(dom) || (translation && [translation]);
@@ -41,8 +41,8 @@ function getTranslation(dom: Document) {
   const ul = dom.querySelector("#phrsListTab .trans-container > ul");
   if (!ul) return;
   const liNodes = ul.children;
-  let result = Array.from(liNodes).reduce((result, li) => {
-    let text = li.textContent?.trim();
+  const result = Array.from(liNodes).reduce((result, li) => {
+    const text = li.textContent?.trim();
     if (!text) return result;
     result.push(text);
     return result;
@@ -56,9 +56,9 @@ function getTranslation(dom: Document) {
  * @returns
  */
 function getPhraseExamples(dom: Document) {
-  let liNodes = dom.querySelectorAll("#bilingual .ol li");
-  let result = Array.from(liNodes).reduce((result, li) => {
-    let pNodes = li.querySelectorAll("p");
+  const liNodes = dom.querySelectorAll("#bilingual .ol li");
+  const result = Array.from(liNodes).reduce((result, li) => {
+    const pNodes = li.querySelectorAll("p");
     if (!pNodes[0] || !pNodes[1]) return result;
     //用于获取音频
     const example_sentence_origin = pNodes[0]?.textContent?.trim() || "";
@@ -94,4 +94,3 @@ function getPhraseExamples(dom: Document) {
   if (!result.length) return;
   return result;
 }
-
