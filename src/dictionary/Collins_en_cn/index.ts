@@ -25,9 +25,9 @@ export class Collins_en_cn {
   xhr: XMLHttpRequest | null;
   cache: Cache<string, TranslationResult>;
 
-  constructor() {
+  constructor(cacheAmount = 20) {
     this.xhr = null;
-    this.cache = new Cache(20);
+    this.cache = new Cache(cacheAmount);
   }
 
   /**

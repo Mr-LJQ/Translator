@@ -1,65 +1,142 @@
+import { Command } from "@/configuration";
+import { ShowData, Point } from "@/types";
+import { NoteData } from "@/translation-page";
+import {
+  AddNoteReturnType,
+  GetVersionReturnType,
+  RelearnCardsReturnType,
+  GetDeckNamesReturnType,
+  GetModelNamesReturnType,
+  GetModelFieldNamesReturnType,
+} from "@/anki";
+import { TranslationResult } from "@/dictionary";
 export function getURL(name: string) {
-  return chrome.runtime.getURL(name)
+  return chrome.runtime.getURL(name);
 }
 
 export function openOptionsPage() {
-  chrome.runtime.openOptionsPage()
+  chrome.runtime.openOptionsPage();
 }
 
-
-export type SendResponse = Parameters<Parameters<typeof chrome.runtime.onMessage.addListener>["0"]>["2"]
+export type SendResponse = Parameters<
+  Parameters<typeof chrome.runtime.onMessage.addListener>["0"]
+>["2"];
 
 //向后端发送消息的函数
-export async function postBackend(command: Command.GetDeckNames): Promise<string[]>
-export async function postBackend(command: Command.GetModelNames): Promise<string[]>
-export async function postBackend(command: Command.GetVersion): Promise<number | null>
-export async function postBackend(command: Command.GetModelFieldNames, data: string): Promise<string[]>
-export async function postBackend(command: Command.AddNote, data: NoteData): Promise<CardsStatus>
-export async function postBackend(command: Command.RelearnNote, data: number[]): Promise<CardsStatus>
-export async function postBackend(command: Command.TranslateText, data: string): Promise<TranslationResult>
-export async function postBackend(command: Command.TranslateInjectText, data: { text: string, point: Point }): Promise<void>
+export async function postBackend(
+  command: Command.GetDeckNames
+): Promise<GetDeckNamesReturnType>;
+export async function postBackend(
+  command: Command.GetModelNames
+): Promise<GetModelNamesReturnType>;
+export async function postBackend(
+  command: Command.GetVersion
+): Promise<GetVersionReturnType>;
+export async function postBackend(
+  command: Command.GetModelFieldNames,
+  data: string
+): Promise<GetModelFieldNamesReturnType>;
+export async function postBackend(
+  command: Command.AddNote,
+  data: NoteData
+): Promise<AddNoteReturnType>;
+export async function postBackend(
+  command: Command.RelearnNote,
+  data: number[]
+): Promise<RelearnCardsReturnType>;
+export async function postBackend(
+  command: Command.TranslateText,
+  data: string
+): Promise<TranslationResult>;
+export async function postBackend(
+  command: Command.TranslateInjectText,
+  data: { text: string; point: Point }
+): Promise<void>;
 export async function postBackend(command: Command, data?: any): Promise<any> {
   return new Promise((resolve) => {
     chrome.runtime.sendMessage({ command, data }, function (response) {
-      resolve(response)
-    })
-  })
-}
-
-//向前端发送消息的函数
-export async function postFrontend(command: Command.ShowIframe): Promise<void>
-export async function postFrontend(command: Command.SwitchSearchBar): Promise<void>
-export async function postFrontend(command: Command.ShowInjectTranslation, data: ShowData): Promise<void>
-export async function postFrontend(command: Command, data?: any): Promise<void> {
-  return new Promise(resolve => {
-    chrome.tabs.query({ active: true }, function (tabs) {
-      tabs.forEach(tab => {
-        if (!tab.id) return
-        chrome.tabs.sendMessage(tab.id, { command, data }, function (response) {
-          resolve(response)
-        })
-      })
-    })
-  })
+      resolve(response);
+    });
+  });
 }
 
 interface Handler {
-  (message: { command: Command.ShowInjectTranslation, data: ShowData }, callback: () => void): void,
-  (message: { command: Command.TranslateInjectText, data: { text: string, point: Point } }, callback: () => void): void,
-  (message: { command: Command.SwitchSearchBar, data: undefined }, callback: () => void): void,
-  (message: { command: Command.ShowIframe, data: undefined }, callback: () => void): void,
-  (message: { command: Command.GetVersion, data: undefined }, callback: (data?: number | null) => void): void,
-  (message: { command: Command.GetDeckNames, data: undefined }, callback: (data?: string[]) => void): void,
-  (message: { command: Command.GetModelNames, data: undefined }, callback: (data?: string[]) => void): void,
-  (message: { command: Command.GetModelFieldNames, data: string }, callback: (data?: string[]) => void): void,
-  (message: { command: Command.AddNote, data: NoteData }, callback: (data?: CardsStatus) => void): void,
-  (message: { command: Command.RelearnNote, data: number[] }, callback: (data?: CardsStatus) => void): void,
-  (message: { command: Command.TranslateText, data: string }, callback: (data?: TranslationResult) => void): void,
+  (args: {
+    command: Command.ShowInjectTranslation;
+    data: ShowData;
+    sendResponse: () => void;
+  }): Promise<void>;
+  (args: {
+    command: Command.TranslateInjectText;
+    data: { text: string; point: Point };
+    sendResponse: () => void;
+  }): Promise<void>;
+  (args: {
+    command: Command.OpenSearchBar;
+    data: undefined;
+    sendResponse: () => void;
+  }): Promise<void>;
+  (args: {
+    command: Command.ShowIframe;
+    data: undefined;
+    sendResponse: () => void;
+  }): Promise<void>;
+  (args: {
+    command: Command.GetVersion;
+    data: undefined;
+    sendResponse: (data: GetVersionReturnType) => void;
+  }): Promise<void>;
+  (args: {
+    command: Command.GetDeckNames;
+    data: undefined;
+    sendResponse: (data: GetDeckNamesReturnType) => void;
+  }): Promise<void>;
+  (args: {
+    command: Command.GetModelNames;
+    data: undefined;
+    sendResponse: (data: GetModelNamesReturnType) => void;
+  }): Promise<void>;
+  (args: {
+    command: Command.GetModelFieldNames;
+    data: string;
+    sendResponse: (data: GetModelFieldNamesReturnType) => void;
+  }): Promise<void>;
+  (args: {
+    command: Command.AddNote;
+    data: NoteData;
+    sendResponse: (data: AddNoteReturnType) => void;
+  }): Promise<void>;
+  (args: {
+    command: Command.RelearnNote;
+    data: number[];
+    sendResponse: (data: RelearnCardsReturnType) => void;
+  }): Promise<void>;
+  (args: {
+    command: Command.TranslateText;
+    data: string;
+    sendResponse: (data: TranslationResult) => void;
+  }): Promise<void>;
 }
 //监听拓展不同模块间消息传递的函数
-export function onMessage(handler: Handler): void {
-  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    handler(message, sendResponse)
-    return true//为了使sendResponse可以异步调用，这是必须的
-  })
+export function onMessage(handler: Handler) {
+  chrome.runtime.onMessage.addListener(function (
+    message,
+    sender,
+    _sendResponse
+  ) {
+    //主要用于消除因为 return true,但却没有调用 sendResponse 而造成的报错。
+    let called = false;
+    handler({
+      ...message,
+      sendResponse(...args: any[]) {
+        called = true;
+        return _sendResponse(...args);
+      },
+    }).then(function () {
+      if (called) return;
+
+      _sendResponse();
+    });
+    return true; //为了使sendResponse可以异步调用，这是必须的
+  });
 }

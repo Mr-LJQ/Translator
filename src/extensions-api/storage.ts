@@ -35,17 +35,17 @@ const defaultStorage: Storage = {
 type StorageKeys = keyof Storage;
 
 type StorageHandlers<T extends PartialStorage> = {
-  [P in keyof T]: (value: T[P]) => void;
+  [P in keyof T]?: (value: T[P]) => void;
 };
 
 type StorageToCallback<T extends PartialStorage> = {
-  [P in keyof T]: (oldVal: T[P], newVal: T[P]) => void;
+  [P in keyof T]?: (oldVal: T[P], newVal: T[P]) => void;
 };
 
 type GetStorageCallback = (storage: PartialStorage) => void;
 
 function handlersIsArray(
-  handlers: StorageHandlers<PartialStorage> | StorageKeys[]
+  handlers: StorageHandlers<Storage> | StorageKeys[]
 ): handlers is StorageKeys[] {
   return Array.isArray(handlers);
 }
@@ -55,12 +55,12 @@ function getStorage(
   callback: GetStorageCallback
 ): void;
 function getStorage(
-  handlers: StorageHandlers<PartialStorage>,
-  callback: GetStorageCallback
+  handlers: StorageHandlers<Storage>,
+  callback?: GetStorageCallback
 ): void;
 function getStorage(
-  handlers: StorageHandlers<PartialStorage> | StorageKeys[],
-  callback: GetStorageCallback
+  handlers: StorageHandlers<Storage> | StorageKeys[],
+  callback?: GetStorageCallback
 ) {
   const storageKeys = handlersIsArray(handlers)
     ? handlers
@@ -79,21 +79,21 @@ function getStorage(
   });
 }
 
-export function getStorageByArray<K>(
-  names: K,
+export function getStorageByArray(
+  names: StorageKeys[],
   callback: (storage: PartialStorage) => void
 ) {
   getStorage(names, callback);
 }
 
 export function getStorageByObject(
-  handlers: StorageHandlers<PartialStorage>,
-  callback: GetStorageCallback
+  handlers: StorageHandlers<Storage>,
+  callback?: GetStorageCallback
 ) {
   getStorage(handlers, callback);
 }
 
-export function onStorageChange(handlers: StorageToCallback<PartialStorage>) {
+export function onStorageChange(handlers: StorageToCallback<Storage>) {
   const listener: Parameters<typeof chrome.storage.onChanged.addListener>[0] = (
     changes
   ) => {
@@ -114,7 +114,7 @@ export function onStorageChange(handlers: StorageToCallback<PartialStorage>) {
 
 export function setStorage(
   partialStorage: PartialStorage,
-  callback: () => void
+  callback?: () => void
 ) {
   chrome.storage.local.set(partialStorage, callback);
 }

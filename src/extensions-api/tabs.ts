@@ -1,9 +1,10 @@
-import { Command } from "@/utils";
 import { ShowData } from "@/types";
+import { Command } from "@/configuration";
+
 //向前端发送消息的函数
 export async function postFrontend(command: Command.ShowIframe): Promise<void>;
 export async function postFrontend(
-  command: Command.SwitchSearchBar
+  command: Command.OpenSearchBar
 ): Promise<void>;
 export async function postFrontend(
   command: Command.ShowInjectTranslation,
@@ -24,6 +25,7 @@ export async function postFrontend(
     });
   });
 }
+
 export function executeScript(
   details: chrome.tabs.InjectDetails,
   callback?: ((result: any[]) => void) | undefined

@@ -5,3 +5,5 @@ export {
   SENTENCE_FIELDS_MAP,
   ANKI_CONNECTION_MAP,
 } from "./modelFieldNameMap";
+
+export { Command } from "./command";
