@@ -4,14 +4,14 @@ import { Storage, TabPanelName, PartialStorage } from "./types";
 //缓存默认值对象，用于在用户刚刚加载拓展，没有进行任何配置时作为初始配置。
 //确保 Storage 中的缓存无论何时都是符合要求的，不存在刚刚加载插件时因为 Storage 为空而导致的问题。
 const defaultStorage: Storage = {
-  isOpen: true,
+  switchHotkeyAndSelectionListener: true,
   hotKey: "shiftKey",
   openSelection: true,
   hiddenChinese: false,
   checkedTabPanel: TabPanelName.Home,
   ankiConnectionMethod: "AnkiConnection",
   ankiConnectionURL: "http://127.0.0.1:8765",
-  openStrengthenSelectionByPressedCtrl: true,
+  switchStrengthenSelectionByPressedCtrl: true,
   wordConfig: {},
   phraseConfig: {},
   sentenceConfig: {},

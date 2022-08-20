@@ -4,11 +4,11 @@ import { Command } from "@/configuration";
 //向前端发送消息的函数
 export async function postFrontend(command: Command.ShowIframe): Promise<void>;
 export async function postFrontend(
-  command: Command.OpenSearchBar
+  command: Command.OpenSearchBox
 ): Promise<void>;
 export async function postFrontend(
   command: Command.ShowInjectTranslation,
-  data: ShowData
+  data: Required<ShowData>
 ): Promise<void>;
 export async function postFrontend(
   command: Command,

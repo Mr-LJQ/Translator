@@ -30,7 +30,7 @@ export class SelectionListener {
   /**
    * @param value true,使得用户能够在按住 Ctrl键进行选取时，可以翻译 可输入元素内部的文本，false则是不可以
    */
-  openStrengthenSelectionByPressedCtrl = (value: boolean) =>{
+  switchStrengthenSelectionByPressedCtrl = (value: boolean) =>{
     this.enableCtrl = value;
   }
 

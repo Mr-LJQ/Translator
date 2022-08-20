@@ -3,7 +3,7 @@
  *  具体可看："https://www.npmjs.com/package/babel-plugin-dev-expression"
  */
 
-export function invariant(cond: boolean, message: string) {
+export function invariant(cond: boolean, message: string): asserts cond {
   if (!cond) throw new Error(message);
 }
 

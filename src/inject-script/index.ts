@@ -44,7 +44,7 @@ function closeSelectionAndHotKeyListener() {
 }
 
 getStorageByObject({
-  isOpen(value) {
+  switchHotkeyAndSelectionListener(value) {
     return value
       ? openSelectionAndHotKeyListener()
       : closeSelectionAndHotKeyListener();
@@ -52,13 +52,13 @@ getStorageByObject({
   hotKey(value) {
     return hotKeyListener.updateHotKey(value);
   },
-  openStrengthenSelectionByPressedCtrl(value) {
-    return selectionListener.openStrengthenSelectionByPressedCtrl(value);
+  switchStrengthenSelectionByPressedCtrl(value) {
+    return selectionListener.switchStrengthenSelectionByPressedCtrl(value);
   },
 });
 
 onStorageChange({
-  isOpen(_, value) {
+  switchHotkeyAndSelectionListener(_, value) {
     return value
       ? openSelectionAndHotKeyListener()
       : closeSelectionAndHotKeyListener();
@@ -66,7 +66,7 @@ onStorageChange({
   hotKey(_, value) {
     return hotKeyListener.updateHotKey(value);
   },
-  openStrengthenSelectionByPressedCtrl(_, value) {
-    return selectionListener.openStrengthenSelectionByPressedCtrl(value);
+  switchStrengthenSelectionByPressedCtrl(_, value) {
+    return selectionListener.switchStrengthenSelectionByPressedCtrl(value);
   },
 });

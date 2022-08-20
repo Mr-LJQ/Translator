@@ -70,7 +70,7 @@ type CheckSentenceDuplicate = Partial<
 >;
 
 export interface Storage {
-  isOpen: boolean;
+  switchHotkeyAndSelectionListener: boolean;
   openSelection: boolean;
   hiddenChinese: boolean;
   ankiConnectionURL: string;
@@ -83,7 +83,7 @@ export interface Storage {
   checkWordDuplicate: CheckWordDuplicate;
   checkPhraseDuplicate: CheckPhraseDuplicate;
   checkSentenceDuplicate: CheckSentenceDuplicate;
-  openStrengthenSelectionByPressedCtrl: boolean;
+  switchStrengthenSelectionByPressedCtrl: boolean;
 }
 
 export type PartialStorage = Partial<Storage>;

@@ -21,12 +21,12 @@ const anki = new AnkiConnection();
 
 //初始化isOpen标识文本
 getStorageByObject({
-  isOpen(value) {
+  switchHotkeyAndSelectionListener(value) {
     switchBadgeText(value);
   },
 });
 onStorageChange({
-  isOpen(_, value) {
+  switchHotkeyAndSelectionListener(_, value) {
     return switchBadgeText(value);
   },
 });
@@ -35,9 +35,9 @@ onStorageChange({
 onCommand({
   openHotkeyAndSelection() {
     getStorageByObject({
-      isOpen: function isOpen(_isOpen) {
+      switchHotkeyAndSelectionListener: function isOpen(_isOpen) {
         return setStorage({
-          isOpen: !_isOpen,
+          switchHotkeyAndSelectionListener: !_isOpen,
         });
       },
     });
@@ -46,7 +46,7 @@ onCommand({
     postFrontend(Command.ShowIframe);
   },
   openSearchBar() {
-    return postFrontend(Command.OpenSearchBar);
+    return postFrontend(Command.OpenSearchBox);
   },
 });
 

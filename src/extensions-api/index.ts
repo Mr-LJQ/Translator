@@ -6,7 +6,7 @@ export {
 } from "./storage";
 
 export { onCommand } from "./commands";
-export { postBackend, onMessage } from "./runtime";
+export { postBackend, onMessage, getURL, openOptionsPage } from "./runtime";
 export { executeScript, postFrontend } from "./tabs";
 export { setBadgeText } from "./browserAction";
 export { addContextMenuItem, onContextMenuClick } from "./contextMenus";

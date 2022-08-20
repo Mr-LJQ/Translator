@@ -12,7 +12,7 @@ export enum Command {
   BackHistory,
   ForwardHistory,
   Callback,
-  OpenSearchBar,
+  OpenSearchBox,
   ShowInjectTranslation,
   ShowIframe,
 

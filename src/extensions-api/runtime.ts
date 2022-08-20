@@ -63,7 +63,7 @@ export async function postBackend(command: Command, data?: any): Promise<any> {
 interface Handler {
   (args: {
     command: Command.ShowInjectTranslation;
-    data: ShowData;
+    data: Required<ShowData>;
     sendResponse: () => void;
   }): Promise<void>;
   (args: {
@@ -72,7 +72,7 @@ interface Handler {
     sendResponse: () => void;
   }): Promise<void>;
   (args: {
-    command: Command.OpenSearchBar;
+    command: Command.OpenSearchBox;
     data: undefined;
     sendResponse: () => void;
   }): Promise<void>;
