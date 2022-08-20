@@ -39,8 +39,10 @@ export class Collins_en_cn {
     const translation = cache.get(text);
     if (translation) return translation;
     const translationResult = await this.translateText(text);
-    if (isErrorData(translationResult) && !translationResult.cache)
+    if (isErrorData(translationResult) && !translationResult.cache) {
+      translationResult.queryText = text;
       return translationResult;
+    }
     this.cache.set(text, translationResult);
     return translationResult;
   }

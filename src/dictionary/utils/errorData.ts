@@ -12,7 +12,7 @@ export function createCacography(possibleSpelling: string[]) {
   });
 }
 
-export function createNoCacheError(message:string) {
+export function createNoCacheError(message: string) {
   return createErrorData({
     cache: false,
     message,

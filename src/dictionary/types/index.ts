@@ -29,6 +29,7 @@ export interface ErrorData {
   cache: boolean;
   message?: string;
   possibleSpelling?: string[];
+  queryText?: string;
 }
 export type TranslationResult =
   | WordData
