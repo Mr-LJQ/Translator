@@ -74,7 +74,7 @@ export interface Storage {
   openSelection: boolean;
   hiddenChinese: boolean;
   ankiConnectionURL: string;
-  hotKey: HotKey | undefined;
+  hotKey: HotKey;
   ankiConnectionMethod: string;
   checkedTabPanel: TabPanelName;
   wordConfig: WordConfig;

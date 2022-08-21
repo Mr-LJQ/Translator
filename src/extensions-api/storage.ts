@@ -50,17 +50,17 @@ function handlersIsArray(
   return Array.isArray(handlers);
 }
 
-function getStorage(
-  handlers: StorageKeys[],
-  callback: GetStorageCallback
+function getStorage<K extends StorageKeys>(
+  handlers: K[],
+  callback: (storage: Pick<Storage, K>) => void
 ): void;
 function getStorage(
   handlers: StorageHandlers<Storage>,
   callback?: GetStorageCallback
 ): void;
-function getStorage(
-  handlers: StorageHandlers<Storage> | StorageKeys[],
-  callback?: GetStorageCallback
+function getStorage<K extends StorageKeys>(
+  handlers: StorageHandlers<Storage> | K[],
+  callback?: (storage: Pick<Storage, K>) => void
 ) {
   const storageKeys = handlersIsArray(handlers)
     ? handlers
@@ -75,13 +75,13 @@ function getStorage(
         handler?.(cacheValue);
       });
     }
-    callback?.(storage);
+    callback?.(storage as Pick<Storage, K>);
   });
 }
 
-export function getStorageByArray(
-  names: StorageKeys[],
-  callback: (storage: PartialStorage) => void
+export function getStorageByArray<K extends StorageKeys>(
+  names: K[],
+  callback: (storage: Pick<Storage, K>) => void
 ) {
   getStorage(names, callback);
 }
