@@ -9,21 +9,19 @@ import { useMessenger } from "../hooks";
 import { ErrorData } from "@/dictionary";
 import { Command } from "@/configuration";
 
-export class ErrorComponent {
-  constructor(props: ErrorData) {
-    const { possibleSpelling, message, queryText } = props;
+export function ErrorComponent(props: ErrorData) {
+  const { possibleSpelling, message, queryText } = props;
 
-    if (possibleSpelling) {
-      return <PossibleSpelling possibleSpelling={possibleSpelling} />;
-    }
-
-    return (
-      <TranslationAgain
-        queryText={queryText}
-        message={message}
-      ></TranslationAgain>
-    );
+  if (possibleSpelling) {
+    return <PossibleSpelling possibleSpelling={possibleSpelling} />;
   }
+
+  return (
+    <TranslationAgain
+      queryText={queryText}
+      message={message}
+    ></TranslationAgain>
+  );
 }
 function PossibleSpelling(props: { possibleSpelling: string[] }) {
   const { possibleSpelling } = props;

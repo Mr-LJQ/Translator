@@ -46,6 +46,6 @@ export enum AnkiResponseStatus {
 
 export interface AnkiResponse<T> {
   data?: T;
-  message?: string;
+  message: string;
   status: AnkiResponseStatus;
 }

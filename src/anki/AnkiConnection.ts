@@ -245,7 +245,7 @@ export class AnkiConnection {
       case 0: {
         //卡片不存在，作为新卡片添加
         const cardId = await this._request(Action.AddNote, { note });
-        return createFirstAddSuccessResponse(cardId);
+        return createFirstAddSuccessResponse([cardId]);
       }
       case 1: //卡片已添加，是否立刻复习/学习
         return createForgottenResponse(cardIds);

@@ -14,8 +14,8 @@ export function getURL(name: string) {
   return chrome.runtime.getURL(name);
 }
 
-export function openOptionsPage() {
-  chrome.runtime.openOptionsPage();
+export function openOptionsPage(callback?: () => void) {
+  chrome.runtime.openOptionsPage(callback);
 }
 
 export type SendResponse = Parameters<

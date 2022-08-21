@@ -4,6 +4,7 @@ export type {
   PhraseData,
   SentenceData,
   ExampleSentence,
+  TranslationItem,
   TranslationResult,
 } from "./types";
 

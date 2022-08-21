@@ -6,8 +6,8 @@ import classJoin from "classnames";
 import { useAudio } from "../hooks";
 
 interface Props {
-  audioURL: string;
-  className: string;
+  audioURL?: string;
+  className?: string;
 }
 
 export const AudioButton = React.forwardRef<{ playAudio: () => void }, Props>(

@@ -16,7 +16,11 @@ export function isAnkiResponse(target: any) {
 }
 
 export function createSuccessAnkiResponse<T>(data: T) {
-  return createAnkiResponse({ data, status: AnkiResponseStatus.Success });
+  return createAnkiResponse({
+    data,
+    message: "ok",
+    status: AnkiResponseStatus.Success,
+  });
 }
 
 export function createDisconnectionResponse(message: string) {
@@ -25,17 +29,11 @@ export function createDisconnectionResponse(message: string) {
     message,
   });
 }
-
-export function createRelearnSuccessResponse() {
-  return createAnkiResponse({
-    status: AnkiResponseStatus.Success,
-  });
-}
-
 export function createForgottenResponse(cardIds: number[]) {
   return createAnkiResponse({
     data: cardIds,
     status: AnkiResponseStatus.Forgotten,
+    message: "曾经添加过该卡片，是否做遗忘处理？(立刻将其添加到学习列表中)",
   });
 }
 
@@ -43,13 +41,16 @@ export function createDuplicateResponse(cardIds: number[]) {
   return createAnkiResponse({
     data: cardIds,
     status: AnkiResponseStatus.Duplicate,
+    message:
+      "该卡片出现重复项，请自行在Anki上处理重复项，单击复制重复卡片的ID，以在Anki Browser上快速定位。",
   });
 }
 
-export function createFirstAddSuccessResponse(cardIds: number) {
+export function createFirstAddSuccessResponse(cardIds: number[]) {
   return createAnkiResponse({
     data: cardIds,
     status: AnkiResponseStatus.FirstAddSuccess,
+    message:"已成功添加到Anki，是否需要立刻开始学习？(用于在待学习列表很长的时候，使其无需等待，立刻开始学习)",
   });
 }
 
