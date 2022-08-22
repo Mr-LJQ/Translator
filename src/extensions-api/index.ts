@@ -18,4 +18,12 @@ export {
   Storage,
   ModelFields,
   TabPanelName,
+  WordConfig,
+  PhraseConfig,
+  SentenceConfig,
+  ConfigKeys,
+  CheckWordDuplicate,
+  CheckPhraseDuplicate,
+  CheckSentenceDuplicate,
+  DuplicateConfigKeys,
 } from "./types";

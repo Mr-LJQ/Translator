@@ -4,6 +4,7 @@ import {
   CommonConfig,
   SentenceFields,
 } from "@/extensions-api";
+
 const WORD_FIELDS_MAP: WordFields = {
   definition: "定义",
   word: "单词",

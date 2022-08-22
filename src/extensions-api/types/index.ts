@@ -53,21 +53,30 @@ export const enum TabPanelName {
 export type WordConfig = Partial<WordFields & CommonConfig>;
 export type PhraseConfig = Partial<PhraseFields & CommonConfig>;
 export type SentenceConfig = Partial<SentenceFields & CommonConfig>;
+export type ConfigKeys =
+  | keyof WordConfig
+  | keyof PhraseConfig
+  | keyof SentenceConfig;
+
+export type CheckWordDuplicate = Partial<
+  Record<keyof Omit<WordConfig, "tags">, boolean>
+>;
+export type CheckPhraseDuplicate = Partial<
+  Record<keyof Omit<PhraseConfig, "tags">, boolean>
+>;
+export type CheckSentenceDuplicate = Partial<
+  Record<keyof Omit<SentenceConfig, "tags">, boolean>
+>;
+
+export type DuplicateConfigKeys =
+  | keyof CheckWordDuplicate
+  | keyof CheckPhraseDuplicate
+  | keyof CheckSentenceDuplicate;
 
 export type ModelFields =
   | Partial<WordFields>
   | Partial<PhraseFields>
   | Partial<SentenceFields>;
-
-type CheckWordDuplicate = Partial<
-  Record<keyof Omit<WordConfig, "tags">, boolean>
->;
-type CheckPhraseDuplicate = Partial<
-  Record<keyof Omit<PhraseConfig, "tags">, boolean>
->;
-type CheckSentenceDuplicate = Partial<
-  Record<keyof Omit<SentenceConfig, "tags">, boolean>
->;
 
 export interface Storage {
   switchHotkeyAndSelectionListener: boolean;

@@ -42,6 +42,7 @@ specifiers:
   typescript: ^4.7.4
   webpack: ^5.74.0
   webpack-cli: ^4.10.0
+  zustand: ^4.1.0
 
 dependencies:
   '@headlessui/react': registry.npmmirror.com/@headlessui/react/1.6.6_biqbaboplfbrettd7655fr4n2y
@@ -54,6 +55,7 @@ dependencies:
   react: registry.npmmirror.com/react/18.2.0
   react-dom: registry.npmmirror.com/react-dom/18.2.0_react@18.2.0
   react-redux: registry.npmmirror.com/react-redux/8.0.2_v7vsrdtui4d36prbwvdnlb7tpq
+  zustand: registry.npmmirror.com/zustand/4.1.0_react@18.2.0
 
 devDependencies:
   '@babel/core': registry.npmmirror.com/@babel/core/7.18.10
@@ -5832,3 +5834,22 @@ packages:
     version: 0.1.0
     engines: {node: '>=10'}
     dev: true
+
+  registry.npmmirror.com/zustand/4.1.0_react@18.2.0:
+    resolution: {integrity: sha512-ba39yDM90wFHiCO5AuoP2Tr1vSY5Eggduk0ou91mWL/qKnz2sBq8AcdFoticOftt7AfIHRBENI7WfjkUrqB3vA==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/zustand/-/zustand-4.1.0.tgz}
+    id: registry.npmmirror.com/zustand/4.1.0
+    name: zustand
+    version: 4.1.0
+    engines: {node: '>=12.7.0'}
+    peerDependencies:
+      immer: '>=9.0'
+      react: '>=16.8'
+    peerDependenciesMeta:
+      immer:
+        optional: true
+      react:
+        optional: true
+    dependencies:
+      react: registry.npmmirror.com/react/18.2.0
+      use-sync-external-store: registry.npmmirror.com/use-sync-external-store/1.2.0_react@18.2.0
+    dev: false
