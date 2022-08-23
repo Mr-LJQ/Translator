@@ -50,12 +50,12 @@ onCommand({
   },
 });
 
-//在鼠标右键菜单中添加一项 “注入Anki划词助手” 的选项，
+//在鼠标右键菜单中添加一项 “注入翻译助手” 的选项，
 //并在其点击后注入相应脚本，使其能够通过划词进行翻译
 addContextMenuItem(
   {
     contexts: ["frame"],
-    title: "注入Anki划词助手",
+    title: "注入翻译助手",
   },
   function () {
     //避免重复注入脚本
@@ -71,7 +71,7 @@ addContextMenuItem(
       injectedFrames.push(frameId);
       executeScript({
         frameId: info.frameId,
-        file: "/addonScript.js",//待处理：将其修改为自动设置的路径
+        file: "/injectScript.js",
       });
     });
   }

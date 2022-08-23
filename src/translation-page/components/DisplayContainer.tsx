@@ -2,7 +2,7 @@
  * 实现与Anki交互相关逻辑的模块,并对翻译数据进行渲染
  */
 import React, { useCallback } from "react";
-import update from "immutability-helper";
+import produce from "immer";
 import { Command } from "@/configuration";
 import {
   WordData,
@@ -122,17 +122,10 @@ function useAnki(props: Omit<DisplayContainerProps, "data">) {
       if (disableState(ankiButtonInfo)) return;
       setAnkiButtonInfoObject(function (ankiButtonInfoObject) {
         loadingSet.add(symbol);
-        return update(ankiButtonInfoObject, {
-          key: {
-            idx: {
-              status: {
-                $set: Status.Loading,
-              },
-              message: {
-                $set: "请等待...",
-              },
-            },
-          },
+        return produce(ankiButtonInfoObject, (draft) => {
+          //先有相应的数据可以被用户看到，用户的操作才会触发该函数，因此可以断言非空。
+          draft[key]![idx]!.status = Status.Loading;
+          draft[key]![idx]!.message = "请等待...";
         });
       });
       //处理重置学习进度的逻辑
@@ -146,20 +139,10 @@ function useAnki(props: Omit<DisplayContainerProps, "data">) {
             const { status, message, data } = ankiResponse;
             setAnkiButtonInfoObject(function (ankiButtonInfoObject) {
               loadingSet.delete(symbol);
-              return update(ankiButtonInfoObject, {
-                key: {
-                  idx: {
-                    message: {
-                      $set: message,
-                    },
-                    cardIds: {
-                      $set: data || ankiButtonInfo.cardIds,
-                    },
-                    status: {
-                      $set: transformAnkiResponseStatus(status),
-                    },
-                  },
-                },
+              return produce(ankiButtonInfoObject, (draft) => {
+                draft[key]![idx]!.message = message;
+                draft[key]![idx]!.cardIds = data || ankiButtonInfo.cardIds;
+                draft[key]![idx]!.status = transformAnkiResponseStatus(status);
               });
             });
           }
@@ -170,20 +153,10 @@ function useAnki(props: Omit<DisplayContainerProps, "data">) {
         const { message, status, data } = ankiResponse;
         setAnkiButtonInfoObject(function (ankiButtonInfoObject) {
           loadingSet.delete(symbol);
-          return update(ankiButtonInfoObject, {
-            key: {
-              idx: {
-                message: {
-                  $set: message,
-                },
-                cardIds: {
-                  $set: data || ankiButtonInfo.cardIds,
-                },
-                status: {
-                  $set: transformAnkiResponseStatus(status),
-                },
-              },
-            },
+          return produce(ankiButtonInfoObject, (draft) => {
+            draft[key]![idx]!.message = message;
+            draft[key]![idx]!.cardIds = data || ankiButtonInfo.cardIds;
+            draft[key]![idx]!.status = transformAnkiResponseStatus(status);
           });
         });
       });
