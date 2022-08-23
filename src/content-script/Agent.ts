@@ -215,15 +215,15 @@ export class Agent {
     const width = rect.width;
     const height = rect.height;
     let left = point?.x || rect.left;
-    let top = point?.y || rect.top; 
+    let top = point?.y || rect.top;
     //用于判断是否超出视口
     const clientWidth = document.documentElement.clientWidth;
-    const clientHeight = document.documentElement.clientHeight; 
+    const clientHeight = document.documentElement.clientHeight;
     //对越界位置进行修正
     left = Math.min(Math.max(0, left), clientWidth - width);
     top = Math.min(Math.max(0, top), clientHeight - height);
-
-    this.mask!.isConnected && document.body.append(this.mask!);
+    console.log(this.mask!.isConnected);
+    !this.mask!.isConnected && document.body.append(this.mask!);
     this.translationContainer.style.cssText = `
       visibility:visible;
       left:${left}px;
@@ -262,7 +262,7 @@ function createMask(cssText: string) {
 function createTranslationView() {
   const width = 400;
   const height = 300;
-  const wrapper = document.createElement("div"); 
+  const wrapper = document.createElement("div");
   //创建幽灵节点
   wrapper.style.setProperty("display", "contents", "important");
   const shadowRoot = wrapper.attachShadow({
