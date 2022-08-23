@@ -6,8 +6,8 @@ import {
   onStorageChange,
   getStorageByArray,
 } from "@/extensions-api";
-import { HotKey } from "@/types";
 import Switch from "./Switch";
+import { HotKey } from "@/types";
 import { HotKeySelect } from "./HotKeySelect";
 
 interface State {
@@ -22,7 +22,7 @@ export class Popup extends React.Component<Record<string, never>, State> {
     switchStrengthenSelectionByPressedCtrl: true,
   };
 
-  openOptionsPage = () => {
+  handleOpenOptionsPage = () => {
     setStorage({ checkedTabPanel: TabPanelName.Home }, openOptionsPage);
   };
 
@@ -97,11 +97,12 @@ export class Popup extends React.Component<Record<string, never>, State> {
     const {
       handleChange,
       handleSwitchOpen,
+      handleOpenOptionsPage,
       handleStrengthenSelectionByPressedCtrl,
     } = this;
     return (
       <>
-        <Header openOptionsPage={openOptionsPage}></Header>
+        <Header openOptionsPage={handleOpenOptionsPage}></Header>
         <main className=" bg-gray-200  rounded-tl-sm ">
           <Switch
             enabled={switchHotkeyAndSelectionListener}

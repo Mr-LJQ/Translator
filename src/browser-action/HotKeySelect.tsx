@@ -1,6 +1,7 @@
 import React from "react";
 import { HotKey } from "@/types";
 const hotkeys: HotKey[] = ["altKey", "shiftKey", "ctrlKey"];
+
 export const HotKeySelect = React.memo(function HotKeySelect(props: {
   hotKey: HotKey;
   handleChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
@@ -15,13 +16,16 @@ export const HotKeySelect = React.memo(function HotKeySelect(props: {
         取词热键
       </label>
       <select
-        name="selectionHotkey"
-        id="selectionHotkey"
         value={hotKey}
+        id="selectionHotkey"
+        name="selectionHotkey"
         onChange={handleChange}
         className=" 
-          rounded
+          rounded-full
           h-8 w-20  
+          bg-gray-600
+          text-white
+          pl-2
           cursor-pointer  
           focus:outline-none  
           focus:ring-2  
