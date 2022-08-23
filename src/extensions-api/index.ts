@@ -6,24 +6,24 @@ export {
 } from "./storage";
 
 export { onCommand } from "./commands";
-export { postBackend, onMessage, getURL, openOptionsPage } from "./runtime";
-export { executeScript, postFrontend } from "./tabs";
 export { setBadgeText } from "./browserAction";
+export { executeScript, postFrontend } from "./tabs";
 export { addContextMenuItem, onContextMenuClick } from "./contextMenus";
-export {
-  CommonConfig,
+export { postBackend, onMessage, getURL, openOptionsPage } from "./runtime";
+export { TabPanelName } from "./types";
+export type {
+  Storage,
   WordFields,
+  ModelFields,
   PhraseFields,
   SentenceFields,
-  Storage,
-  ModelFields,
-  TabPanelName,
   WordConfig,
   PhraseConfig,
+  CommonConfig,
   SentenceConfig,
-  ConfigKeys,
   CheckWordDuplicate,
   CheckPhraseDuplicate,
   CheckSentenceDuplicate,
+  ConfigKeys,
   DuplicateConfigKeys,
 } from "./types";

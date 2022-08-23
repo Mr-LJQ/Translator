@@ -13,7 +13,6 @@ import {
   addContextMenuItem,
   onContextMenuClick,
 } from "@/extensions-api";
-
 //获取词典
 const collins = new Collins_en_cn();
 //获取anki
@@ -33,19 +32,19 @@ onStorageChange({
 
 //监听用户快捷键，用于开关拓展
 onCommand({
-  openHotkeyAndSelection() {
+  switch_hotkey_and_selection_listener() {
     getStorageByObject({
-      switchHotkeyAndSelectionListener: function isOpen(_isOpen) {
+      switchHotkeyAndSelectionListener(_isOpen) {
         return setStorage({
           switchHotkeyAndSelectionListener: !_isOpen,
         });
       },
     });
   },
-  showTranslationPage() {
+  show_translation_page() {
     postFrontend(Command.ShowIframe);
   },
-  openSearchBar() {
+  open_search_box() {
     return postFrontend(Command.OpenSearchBox);
   },
 });
@@ -76,7 +75,6 @@ addContextMenuItem(
     });
   }
 );
-
 //监听所有发送到后端的请求，并进行处理
 onMessage(async ({ command, data, sendResponse }) => {
   switch (command) {

@@ -70,7 +70,7 @@ export const Footer = React.memo(function Footer() {
           aria-labelledby="connectionStatus"
           className="p-1 mr-1 text-sm flex-1"
         >
-          <span id="connectionStatus">连接状态</span>
+          <span id="connectionStatus">连接状态：</span>
           <span
             className={classJoin({
               "text-red-500": !connected,

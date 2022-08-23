@@ -1,39 +1,45 @@
 const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+
 module.exports = {
-  mode: "development",
-  devtool: "eval-cheap-module-source-map",
   target: "web",
+  mode: "development",
+  devtool: "source-map",
   entry: {
-    background: "./src/background/index",
-    foreground: "./src/foreground/index",
-    popup: {
-      import: "./src/browserAction/index",
-      dependOn: "shared",
+    backendScript: "./src/backend-script/index",
+    contentScript: "./src/content-script/index",
+    browserAction: {
+      import: "./src/browser-action/index",
+      dependOn: ["reactVendors"],
     },
-    shower: {
-      import: "./src/iframe/view/index",
-      dependOn: "shared",
+    translationPage: {
+      import: "./src/translation-page/main",
+      dependOn: ["reactVendors"],
     },
-    options: {
-      import: "./src/options/index",
-      dependOn: "shared",
+    optionsPage: {
+      import: "./src/options-page/index",
+      dependOn: ["reactVendors"],
     },
-    injectScript:{
-      import:"./src/injectScript/index"
+    injectScript: {
+      //修改此处需要同时修改 src/backend-script/index.ts 中 executeScript 输入的 URL
+      import: "./src/inject-script/index",
     },
-    shared: ["react", "react-dom","classnames"],
+    reactVendors: ["react", "react-dom", "classnames"],
   },
   output: {
     filename: "[name].js",
-    path: path.resolve(__dirname, "./dist/"),
+    path: path.resolve(__dirname, "./temp/"),
     clean: true,
   },
   resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "src"),
+    },
     extensions: [".ts", ".tsx", ".js", ".jsx", ".d.ts", ".json"],
   },
+
   module: {
     rules: [
       {
@@ -43,13 +49,19 @@ module.exports = {
           loader: "babel-loader",
           options: {
             presets: [
-              ["@babel/preset-env",{
-                exclude:["@babel/plugin-transform-regenerator"]
-              }],
+              [
+                "@babel/preset-env",
+                {
+                  exclude: ["@babel/plugin-transform-regenerator"],
+                },
+              ],
               "@babel/preset-react",
               "@babel/preset-typescript",
             ],
-            plugins: ["@babel/plugin-proposal-class-properties"],
+            plugins: [
+              "@babel/plugin-proposal-class-properties",
+              "babel-plugin-dev-expression",
+            ],
           },
         },
       },
@@ -61,31 +73,32 @@ module.exports = {
   },
   plugins: [
     new MiniCssExtractPlugin({
-      filename:"index.css",
+      filename: "index.css",
     }),
     new HtmlWebpackPlugin({
-      title: "Popup",
+      title: "Browser Action Page",
       template: "./src/index.html",
-      chunks: ["popup", "shared"],
-      filename: "popup.html",
+      chunks: ["browserAction", "reactVendors"],
+      filename: "browserAction.html",
     }),
     new HtmlWebpackPlugin({
-      title: "Options",
+      title: "Options Page",
       template: "./src/index.html",
-      chunks: ["options", "shared"],
-      filename: "options.html",
+      chunks: ["optionsPage", "reactVendors"],
+      filename: "optionsPage.html",
     }),
     new HtmlWebpackPlugin({
-      title: "Shower",
+      title: "Translation Page",
       template: "./src/index.html",
-      chunks: ["shower", "shared"],
-      filename: "shower.html", //此处必须与"./src/shower/agent.ts中的getURL(path)对应"
+      chunks: ["translationPage", "reactVendors"],
+      //修改此处需要同时修改 ./src/content-script/agent.ts 中的 getURL(path)"
+      filename: "translationPage.html",
     }),
     new CopyPlugin({
       patterns: [
         {
           from: path.resolve(__dirname, "./src/public/"),
-          to: path.resolve(__dirname, "./dist/"),
+          to: path.resolve(__dirname, "./temp/"),
         },
       ],
     }),

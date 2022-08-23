@@ -30,7 +30,7 @@ export const useAnkiStore = create<State>((set) => ({
     };
 
     const {
-      data: version,
+      data:version,
       status: status0,
       message: message0,
     } = await postBackend(Command.GetVersion);

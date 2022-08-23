@@ -3,15 +3,16 @@
 @tailwind components;
 
 @layer components {
-  @variants group-hover, hover {
-    .audio::after {
-      content: "\1f50a";/*🔊*/
-      vertical-align: text-top;
-    }
-  }
-  
-  .audio:after {
-    content: "\1f509";/*🔉*/
+  .play-audio:after {
+    content: "\1f50a"; /*🔊*/
     vertical-align: text-top;
+  }
+  .audio:after {
+    content: "\1f509"; /*🔉*/
+    vertical-align: text-top;
+  }
+  fieldset:disabled,
+  fieldset:disabled * {
+    cursor: not-allowed;
   }
 }
