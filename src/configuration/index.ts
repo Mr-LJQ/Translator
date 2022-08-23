@@ -7,3 +7,5 @@ export {
 } from "./modelFieldNameMap";
 
 export { Command } from "./command";
+
+export const DEFAULT_ANKI_CONNECTION_URL = "http://127.0.0.1:8765";

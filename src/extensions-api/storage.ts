@@ -1,4 +1,5 @@
 import pick from "lodash.pick";
+import { DEFAULT_ANKI_CONNECTION_URL } from "@/configuration";
 import { Storage, TabPanelName, PartialStorage } from "./types";
 
 //缓存默认值对象，用于在用户刚刚加载拓展，没有进行任何配置时作为初始配置。
@@ -10,7 +11,7 @@ const defaultStorage: Storage = {
   hiddenChinese: false,
   checkedTabPanel: TabPanelName.Home,
   ankiConnectionMethod: "AnkiConnection",
-  ankiConnectionURL: "http://127.0.0.1:8765",
+  ankiConnectionURL: DEFAULT_ANKI_CONNECTION_URL,
   switchStrengthenSelectionByPressedCtrl: true,
   wordConfig: {},
   phraseConfig: {},

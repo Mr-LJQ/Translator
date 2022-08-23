@@ -4,3 +4,5 @@ export {
   PhraseNoteData,
   SentenceNoteData,
 } from "./types";
+
+export { Loading } from "./components/Loading";

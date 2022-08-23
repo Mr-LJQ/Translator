@@ -1,4 +1,5 @@
 import create from "zustand";
+import omit from "lodash.omit";
 import { immer } from "zustand/middleware/immer";
 import {
   Storage,
@@ -14,7 +15,7 @@ import {
 } from "@/extensions-api";
 import { DuplicateConfigName, ConfigName } from "../types";
 
-type State = Pick<
+type StorageStore = Pick<
   Storage,
   | "wordConfig"
   | "phraseConfig"
@@ -25,8 +26,7 @@ type State = Pick<
   | "checkedTabPanel"
   | "ankiConnectionURL"
   | "ankiConnectionMethod"
-> &
-  Handler;
+>;
 
 export interface Handler {
   fetchStorage: () => void;
@@ -50,6 +50,8 @@ export interface Handler {
     value: State[K]
   ) => void;
 }
+
+type State = StorageStore & Handler;
 
 export const useStorageStore = create<State, [["zustand/immer", never]]>(
   immer((set) => {
@@ -138,3 +140,17 @@ export const useStorageStore = create<State, [["zustand/immer", never]]>(
     } as unknown as State; //设计上是，必须先调用 fetchStorage获取到 相应的数据后，才能够调用其它方法的
   })
 );
+
+export const getStorage = function (): StorageStore {
+  const state = useStorageStore.getState();
+  return omit(state, [
+    "fetchStorage",
+    "updateConfig",
+    "updateOtherConfig",
+    "updateDuplicateConfig",
+  ]);
+};
+
+export const fetchStorage = useStorageStore.getState().fetchStorage;
+
+export const storageStoreSubscribe = useStorageStore.subscribe;

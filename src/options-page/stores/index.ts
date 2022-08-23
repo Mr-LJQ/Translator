@@ -1,2 +1,8 @@
-export { useAnkiStore } from "./ankiStore";
-export { useStorageStore, Handler } from "./storageStore";
+export { useAnkiStore, ankiStoreSubscribe } from "./ankiStore";
+export {
+  useStorageStore,
+  Handler,
+  getStorage,
+  fetchStorage,
+  storageStoreSubscribe,
+} from "./storageStore";

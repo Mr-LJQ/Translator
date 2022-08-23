@@ -17,7 +17,8 @@ import { extractEntry } from "@/utils";
 interface Props {
   configType: ConfigType;
 }
-export function AnkiConfig(props: Props) {
+
+export const AnkiConfig = React.memo(function AnkiConfig(props: Props) {
   const configType = props.configType;
   const configName = getConfigName(configType);
   const duplicateConfigName = getDuplicateConfigName(configType);
@@ -130,4 +131,4 @@ export function AnkiConfig(props: Props) {
       </Fieldset>
     </>
   );
-}
+});

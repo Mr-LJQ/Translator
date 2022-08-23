@@ -81,3 +81,5 @@ export const useAnkiStore = create<State>((set) => ({
     return set(result);
   },
 }));
+
+export const ankiStoreSubscribe = useAnkiStore.subscribe;
