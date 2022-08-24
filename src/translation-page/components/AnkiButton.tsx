@@ -51,17 +51,19 @@ export const AnkiButton = React.memo(function AnkiButton(props: Props) {
         "relative w-8",
         getStatusIcon(status),
         {
-          "bg-emerald-600 hover:bg-emerald-700": status === Status.Add,
+          "bg-emerald-600 hover:bg-emerald-700":
+            status === Status.Add ||
+            status === Status.Loading ||
+            status === Status.Success,
           "prior:bg-blue-500 prior:hover:bg-blue-600":
-            status === Status.LearnNow,
+            status === Status.LearnNow || status === Status.Forgotten,
+          "prior:bg-violet-600 prior:hover:bg-violet-700":
+            status === Status.Duplicate || status === Status.ConfigError,
           "prior:bg-red-600 prior:hover:bg-red-700":
-            status === Status.Error ||
-            status === Status.Duplicate ||
-            status === Status.Disconnect ||
-            status === Status.ConfigError,
+            status === Status.Error || status === Status.Disconnect,
           "prior:bg-yellow-500 prior:hover:bg-yellow-600":
             status === Status.Forgotten,
-          "prior:cursor-auto bg-emerald-600 prior:hover:text-white":
+          "prior:cursor-auto":
             status === Status.Loading || status === Status.Success,
         },
         className
