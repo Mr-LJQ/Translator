@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind utilities;
 @tailwind components;
-
+@import url("@/asset/fonts/remixicon.css");
 @layer components {
   .play-audio:after {
     content: "\1f50a"; /*🔊*/
@@ -10,6 +10,7 @@
   .audio:after {
     content: "\1f509"; /*🔉*/
     vertical-align: text-top;
+    font-size: 28px;
   }
   fieldset:disabled,
   fieldset:disabled * {

@@ -7,6 +7,18 @@ interface Props extends AnkiButtonInfo {
   onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
 
+const enum StatusIcon {
+  Add = "ri-add-line",
+  Loading = "ri-loader-line",
+  Disconnect = "ri-link-unlink-m",
+  Error = "ri-error-warning-line",
+  Success = "ri-check-line",
+  Forgotten = "ri-question-line",
+  LearnNow = "ri-timer-flash-line",
+  Duplicate = "ri-file-copy-2-line",
+  ConfigError = "ri-settings-3-line",
+}
+
 export const AnkiButton = React.memo(function AnkiButton(props: Props) {
   const { status, message, onClick, className, cardIds } = props;
   return (
@@ -37,26 +49,24 @@ export const AnkiButton = React.memo(function AnkiButton(props: Props) {
       }}
       className={classJoin(
         "relative w-8",
+        getStatusIcon(status),
         {
-          //"rounded-l-none":
           "bg-emerald-600 hover:bg-emerald-700": status === Status.Add,
-          "prior:bg-red-600 prior:hover:bg-red-700": status === Status.Error,
           "prior:bg-blue-500 prior:hover:bg-blue-600":
             status === Status.LearnNow,
-          "prior:bg-red-500 prior:hover:bg-red-600":
-            status === Status.Disconnect || status === Status.ConfigError,
+          "prior:bg-red-600 prior:hover:bg-red-700":
+            status === Status.Error ||
+            status === Status.Duplicate ||
+            status === Status.Disconnect ||
+            status === Status.ConfigError,
           "prior:bg-yellow-500 prior:hover:bg-yellow-600":
             status === Status.Forgotten,
-          "prior:bg-orange-500 prior:hover:bg-orange-600":
-            status === Status.Duplicate,
           "prior:cursor-auto bg-emerald-600 prior:hover:text-white":
             status === Status.Loading || status === Status.Success,
         },
         className
       )}
-    >
-      {status}
-    </Button>
+    />
   );
 });
 
@@ -90,3 +100,17 @@ const Button = React.forwardRef<
     </button>
   );
 });
+
+function getStatusIcon(state: Status) {
+  return {
+    [Status.Add]: StatusIcon.Add,
+    [Status.Loading]: StatusIcon.Loading,
+    [Status.Error]: StatusIcon.Error,
+    [Status.Success]: StatusIcon.Success,
+    [Status.LearnNow]: StatusIcon.LearnNow,
+    [Status.Duplicate]: StatusIcon.Duplicate,
+    [Status.Forgotten]: StatusIcon.Forgotten,
+    [Status.Disconnect]: StatusIcon.Disconnect,
+    [Status.ConfigError]: StatusIcon.ConfigError,
+  }[state];
+}

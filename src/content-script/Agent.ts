@@ -222,7 +222,6 @@ export class Agent {
     //对越界位置进行修正
     left = Math.min(Math.max(0, left), clientWidth - width);
     top = Math.min(Math.max(0, top), clientHeight - height);
-    console.log(this.mask!.isConnected);
     !this.mask!.isConnected && document.body.append(this.mask!);
     this.translationContainer.style.cssText = `
       visibility:visible;
