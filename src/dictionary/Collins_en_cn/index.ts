@@ -1,4 +1,4 @@
-import lowerCase from "lodash.lowercase";
+import { spaceCase } from "../utils";
 import {
   Cache,
   isErrorData,
@@ -91,17 +91,19 @@ export class Collins_en_cn {
   private async translateText(text: string): Promise<TranslationResult> {
     try {
       //将 驼峰、-、_ 等写法连接的文本转换为由空格分隔的文本
-      const formattedText = lowerCase(text);
-      const isMuchWord = /\s/g.test(formattedText)
-      let dom:Document
-      if(isMuchWord) {
-        dom = await this.getPageDOM(formattedText);
-      }else {
+      const formattedText = spaceCase(text);
+      const isMuchWord = /\s/g.test(text);
+      const isMuchFormatted = /\s/g.test(formattedText);
+      let dom: Document;
+
+      if (isMuchWord || !isMuchFormatted) {
         dom = await this.getPageDOM(text);
+      } else {
+        dom = await this.getPageDOM(formattedText);
       }
       let translation: WordData | PhraseData | SentenceData | void;
       //如果存在空格，则认为其为多个单词组合的句子、词组
-      if (isMuchWord) {
+      if (isMuchFormatted) {
         translation = translatePhraseAndSentence(dom);
       } else {
         translation = translateWord(dom);
