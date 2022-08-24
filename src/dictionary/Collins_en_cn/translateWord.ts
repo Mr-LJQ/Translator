@@ -106,7 +106,7 @@ function getTranslationList(dom: Document): Array<TranslationItem> | undefined {
       definition_audio: `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(
         definition_origin
       )}&le=eng`,
-      translation: text.slice(index).trim(), //翻译
+      translation: text.slice(index).replace(/see|also|→/ig,"").trim(), //翻译
       example_sentences: getExampleSentences(li), //例句数组
     });
     return result;

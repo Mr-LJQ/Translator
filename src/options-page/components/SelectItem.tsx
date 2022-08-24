@@ -39,7 +39,7 @@ export const SelectItem = React.memo(function SelectItem(props: Props) {
         {text}
         <input
           type="checkbox"
-          className="align-[-1px] focus:outline-none focus:ring-2 focus:ring-offset-slate-50 "
+          className="ml-1 align-[-1px] focus:outline-none focus:ring-2 focus:ring-offset-slate-50 "
           title="用于判断是否重复添加，选中越多判断越严格(命中重复的概率更低，更多类似的卡片被添加)，反之则越宽松(命中重复的概率更高，更少类似的卡片被添加)，推荐使用默认配置。"
           checked={duplicateValue}
           onChange={(event) => {
