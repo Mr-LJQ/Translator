@@ -30,7 +30,7 @@ export const useAnkiStore = create<State>((set) => ({
     };
 
     const {
-      data:version,
+      data: version,
       status: status0,
       message: message0,
     } = await postBackend(Command.GetVersion);
@@ -41,11 +41,17 @@ export const useAnkiStore = create<State>((set) => ({
       result.version = version;
     }
 
+    const [getDeckNamesResponse, getModelNamesResponse] = await Promise.all([
+      //注意顺序问题
+      postBackend(Command.GetDeckNames),
+      postBackend(Command.GetModelNames),
+    ]);
+
     const {
       data: deckNames,
       status: status1,
       message: message1,
-    } = await postBackend(Command.GetDeckNames);
+    } = getDeckNamesResponse;
     if (status1 !== AnkiResponseStatus.Success) {
       result.alertMessages.push(message1);
     } else {
@@ -56,28 +62,29 @@ export const useAnkiStore = create<State>((set) => ({
       data: modelNames,
       status: status2,
       message: message2,
-    } = await postBackend(Command.GetModelNames);
+    } = getModelNamesResponse;
     if (status2 !== AnkiResponseStatus.Success) {
       result.alertMessages.push(message2);
-    } else {
-      result.modelNames = modelNames!;
+      return set(result);
     }
+    result.modelNames = modelNames!;
 
     const fieldNamesObject: FieldNamesObject = {};
-    modelNames?.forEach(async (modelName) => {
-      const {
-        status,
-        message,
-        data: modelFieldNames,
-      } = await postBackend(Command.GetModelFieldNames, modelName);
+    const promiseArray = modelNames!.map((modelName) => {
+      return postBackend(Command.GetModelFieldNames, modelName);
+    });
+    const responses = await Promise.all(promiseArray);
+    responses.forEach((item, idx) => {
+      const modelName = modelNames![idx]!;
+      const { status, message, data } = item;
       if (status !== AnkiResponseStatus.Success) {
         result.alertMessages.push(message);
       } else {
-        fieldNamesObject[modelName] = modelFieldNames!;
+        fieldNamesObject[modelName] = data!;
       }
     });
-
     result.fieldNamesObject = fieldNamesObject;
+
     return set(result);
   },
 }));

@@ -82,7 +82,6 @@ export const AnkiConfig = React.memo(function AnkiConfig(props: Props) {
     updateConfig,
     updateDuplicateConfig,
   };
-
   return (
     <>
       <H3 className="col-span-4">{headerTitle}</H3>
