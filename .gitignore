@@ -1,8 +1,9 @@
 /.vscode
 
 /node_modules
-
+/coverage
 /dist
 
 /test.html
+/index.html
 
