@@ -22,15 +22,15 @@ module.exports = {
       import: "./src/options-page/index",
       dependOn: ["reactVendors"],
     },
+    //修改此处需要同时修改 src/backend-script/index.ts 中 executeScript 输入的 URL
     injectScript: {
-      //修改此处需要同时修改 src/backend-script/index.ts 中 executeScript 输入的 URL
       import: "./src/inject-script/index",
     },
-    reactVendors: ["react", "react-dom", "classnames"],
+    reactVendors: ["react", "react-dom", "classnames", "immer"],
   },
   output: {
     filename: "[name].js",
-    path: path.resolve(__dirname, "./temp/"),
+    path: path.resolve(__dirname, "./dist/"),
     clean: true,
   },
   resolve: {
@@ -98,7 +98,7 @@ module.exports = {
       patterns: [
         {
           from: path.resolve(__dirname, "./src/public/"),
-          to: path.resolve(__dirname, "./temp/"),
+          to: path.resolve(__dirname, "./dist/"),
         },
       ],
     }),

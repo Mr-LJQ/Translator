@@ -10,10 +10,10 @@
     "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */,
     "jsx": "preserve",
     "moduleResolution": "Node",
+    "noUncheckedIndexedAccess": true,
     "baseUrl": ".", //意思是，基础URL相对该配置文件
     "paths": {
       "@/*": ["./src/*"] //意思是，@/* 在 ./src/*中查找，例如,@/listener 则查找 ./src/listener
     },
-    "noUncheckedIndexedAccess": true
   }
 }

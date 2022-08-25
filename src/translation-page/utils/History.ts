@@ -8,14 +8,14 @@ export class History<T> {
   tail: number;
   index: number;
   maxAmount: number;
-  cacheArray: Array<T>;
+  store: Array<T>;
   subscribes: Array<SubscribeCallback>;
 
   constructor(maxAmount = 10) {
     this.head = 0;
     this.tail = -1;
     this.index = -1;
-    this.cacheArray = [];
+    this.store = [];
     this.subscribes = [];
     this.maxAmount = maxAmount;
   }
@@ -26,7 +26,7 @@ export class History<T> {
     this.subscribes.forEach((fn) => {
       return fn(this.index, this.head, this.tail);
     });
-    return this.cacheArray[this.index % maxAmount];
+    return this.store[this.index % maxAmount];
   }
   next() {
     const { tail, index, maxAmount } = this;
@@ -35,22 +35,22 @@ export class History<T> {
     this.subscribes.forEach((fn) => {
       return fn(this.index, this.head, this.tail);
     });
-    return this.cacheArray[this.index % maxAmount];
+    return this.store[this.index % maxAmount];
   }
   append(value: T) {
     this.index++;
-    const { cacheArray, maxAmount, index, head } = this;
+    const { store, maxAmount, index, head } = this;
     this.tail = index;
     this.head = Math.max(index + 1 - maxAmount, head);
     this.subscribes.forEach((fn) => {
       return fn(this.index, this.head, this.tail);
     });
-    cacheArray[index % maxAmount] = value;
+    store[index % maxAmount] = value;
     return value;
   }
   update(value: T) {
-    const { index, maxAmount, cacheArray } = this;
-    cacheArray[index % maxAmount] = value;
+    const { index, maxAmount, store } = this;
+    store[index % maxAmount] = value;
     return value;
   }
   subscribe(callback: SubscribeCallback) {
