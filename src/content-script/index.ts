@@ -12,6 +12,7 @@ import {
   postBackend,
   onStorageChange,
   getStorageByObject,
+  openOptionsPage,
 } from "@/extensions-api";
 import { validateText } from "@/utils";
 
@@ -36,6 +37,9 @@ agent.onMessage(Command.RelearnNote, async (data, sendResponse) => {
 });
 agent.onMessage(Command.TranslateText, function (data) {
   translateAndShowIframeText(data);
+});
+agent.onMessage(Command.OpenOptionsPage, function () {
+  openOptionsPage()
 });
 agent.install();
 

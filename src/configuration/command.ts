@@ -15,6 +15,8 @@ export enum Command {
   OpenSearchBox,
   ShowInjectTranslation,
   ShowIframe,
+  OpenOptionsPage,
+
 
   GetVersion,
   GetDeckNames,

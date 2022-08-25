@@ -1,7 +1,8 @@
 import React from "react";
 import classJoin from "classnames";
 import { AnkiButtonInfo, Status } from "../types";
-import { openOptionsPage } from "@/extensions-api";
+import { Command } from "@/configuration";
+import { useMessenger } from "../hooks";
 interface Props extends AnkiButtonInfo {
   className: string;
   onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
@@ -21,6 +22,7 @@ const enum StatusIcon {
 
 export const AnkiButton = React.memo(function AnkiButton(props: Props) {
   const { status, message, onClick, className, cardIds } = props;
+  const { postMessage } = useMessenger();
   return (
     <Button
       title={message}
@@ -42,7 +44,7 @@ export const AnkiButton = React.memo(function AnkiButton(props: Props) {
          * 如果出现配置错误，则点击打开配置页面
          */
         if (status === Status.ConfigError) {
-          openOptionsPage();
+          postMessage(Command.OpenOptionsPage);
         }
 
         onClick(event);

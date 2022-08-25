@@ -11,7 +11,6 @@ interface Props {
 
 export default React.memo(function Component(props: Props) {
   const { children, enabled, setEnabled, title } = props;
-  console.log(title);
   return (
     <Switch.Group>
       <div className="flex items-center justify-between p-1" title={title}>
