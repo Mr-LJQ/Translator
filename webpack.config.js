@@ -47,22 +47,6 @@ module.exports = {
         exclude: /node_modules/,
         use: {
           loader: "babel-loader",
-          options: {
-            presets: [
-              [
-                "@babel/preset-env",
-                {
-                  exclude: ["@babel/plugin-transform-regenerator"],
-                },
-              ],
-              "@babel/preset-react",
-              "@babel/preset-typescript",
-            ],
-            plugins: [
-              "@babel/plugin-proposal-class-properties",
-              "babel-plugin-dev-expression",
-            ],
-          },
         },
       },
       {

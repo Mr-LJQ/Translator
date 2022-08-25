@@ -1,7 +1,7 @@
+import { Status } from "../types";
 import { AnkiResponseStatus } from "@/anki";
-import { WordData, PhraseData } from "@/dictionary";
-import { __main__ } from "../utils";
-import { WordNoteData, PhraseNoteData, Status } from "../types";
+import type { WordData, PhraseData } from "@/dictionary";
+import type { WordNoteData, PhraseNoteData } from "../types";
 
 /**
  * 纯函数，用于处理有定义的单词翻译
@@ -124,11 +124,14 @@ export function transformAnkiResponseStatus(status: AnkiResponseStatus) {
     case AnkiResponseStatus.FirstAddSuccess: {
       return Status.LearnNow;
     }
-    default: {
-      //AnkiResponseStatus.Error
-      //AnkiResponseStatus.OldVersion
-      //AnkiResponseStatus.UnexpectedError
+    case AnkiResponseStatus.Error:
+    case AnkiResponseStatus.OldVersion:
+    case AnkiResponseStatus.UnexpectedError:
       return Status.Error;
+    default: {
+      if (__DEV__) {
+        throw new Error(`未添加对${AnkiResponseStatus[status]} 的转换`);
+      }
     }
   }
 }

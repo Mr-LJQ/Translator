@@ -1,5 +1,6 @@
 import React, { useContext } from "react";
-import { PostMessage, OnMessage, invariant } from "@/utils";
+import { invariant } from "@/utils";
+import type { PostMessage, OnMessage } from "@/utils";
 
 export const MessengerContext = React.createContext<{
   onMessage: OnMessage;
@@ -8,20 +9,20 @@ export const MessengerContext = React.createContext<{
 export const HiddenChinese = React.createContext<boolean>(null!);
 export const AudioContext = React.createContext<HTMLAudioElement>(null!);
 
-export function useMessenger() {
-  const result = useContext(MessengerContext);
-  invariant(result != null, "MessengerContext 的值为空");
-  return result;
-}
+export const useAudio = addEmptyCatch(AudioContext);
+export const useMessenger = addEmptyCatch(MessengerContext);
+export const useHiddenChinese = addEmptyCatch(HiddenChinese);
 
-export function useHiddenChinese() {
-  const result = useContext(HiddenChinese);
-  invariant(result != null, "HiddenChinese 的值为空");
-  return result;
-}
-
-export function useAudio() {
-  const result = useContext(AudioContext);
-  invariant(result != null, "AudioContext 的值为空");
-  return result;
+function addEmptyCatch<T>(context: React.Context<T>) {
+  return () => {
+    const result = useContext(context);
+    if (__DEV__) {
+      if (result === null) {
+        throw new Error(
+          "为找到上下文所对应的值，请先通过 <Context.Provider> 传递值."
+        );
+      }
+    }
+    return result;
+  };
 }

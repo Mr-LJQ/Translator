@@ -1,5 +1,9 @@
-import { TranslationResult } from "@/dictionary";
-import { WordFields, PhraseFields, SentenceFields } from "@/extensions-api";
+import type { TranslationResult } from "@/dictionary";
+import type {
+  WordFields,
+  PhraseFields,
+  SentenceFields,
+} from "@/extensions-api";
 type MakeRequired<T, K extends keyof T> = Partial<T> & Required<Pick<T, K>>;
 
 export type WordNoteData = MakeRequired<

@@ -4,12 +4,12 @@
 type SubscribeCallback = (index: number, head: number, tail: number) => void;
 
 export class History<T> {
-  head: number;
-  tail: number;
-  index: number;
-  maxAmount: number;
-  store: Array<T>;
-  subscribes: Array<SubscribeCallback>;
+  private head: number;
+  private tail: number;
+  private index: number;
+  private maxAmount: number;
+  private store: Array<T>;
+  private subscribes: Array<SubscribeCallback>;
 
   constructor(maxAmount = 10) {
     this.head = 0;

@@ -1,9 +1,9 @@
 export { History } from "./History";
 export { decodeBTag } from "./decodeBTag";
 export {
+  transformWordData,
   transformPhraseData,
   transformTranslations,
-  transformWordData,
   transformAnkiResponseStatus,
 } from "./transform";
 
