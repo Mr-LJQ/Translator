@@ -6429,7 +6429,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: registry.npmmirror.com/caniuse-lite/1.0.30001383
-      electron-to-chromium: registry.npmmirror.com/electron-to-chromium/1.4.230
+      electron-to-chromium: registry.npmmirror.com/electron-to-chromium/1.4.232
       node-releases: registry.npmmirror.com/node-releases/2.0.6
       update-browserslist-db: registry.npmmirror.com/update-browserslist-db/1.0.5_browserslist@4.21.3
     dev: true
@@ -7892,10 +7892,10 @@ packages:
     version: 1.1.1
     dev: true
 
-  registry.npmmirror.com/electron-to-chromium/1.4.230:
-    resolution: {integrity: sha512-3pwjAK0qHSDN9+YAF4fJknsSruP7mpjdWzUSruIJD/JCH77pEh0SorEyb3xVaKkfwk2tzjOt2D8scJ0KAdfXLA==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/electron-to-chromium/-/electron-to-chromium-1.4.230.tgz}
+  registry.npmmirror.com/electron-to-chromium/1.4.232:
+    resolution: {integrity: sha512-nd+FW8xHjM+PxNWG44nKnwHaBDdVpJUZuI2sS2JJPt/QpdombnmoCRWEEQNnzaktdIQhsNWdD+dlqxwO8Bn99g==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/electron-to-chromium/-/electron-to-chromium-1.4.232.tgz}
     name: electron-to-chromium
-    version: 1.4.230
+    version: 1.4.232
     dev: true
 
   registry.npmmirror.com/elliptic/6.5.4:
@@ -11132,7 +11132,7 @@ packages:
     version: 27.5.1
     engines: {node: '>= 10.13.0'}
     dependencies:
-      '@types/node': registry.npmmirror.com/@types/node/18.7.13
+      '@types/node': registry.npmmirror.com/@types/node/16.11.56
       merge-stream: registry.npmmirror.com/merge-stream/2.0.0
       supports-color: registry.npmmirror.com/supports-color/8.1.1
     dev: true
