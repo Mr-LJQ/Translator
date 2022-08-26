@@ -4,7 +4,7 @@ import { AnkiButtonInfo, Status } from "../types";
 import { Command } from "@/configuration";
 import { useMessenger } from "../hooks";
 interface Props extends AnkiButtonInfo {
-  className: string;
+  className?: string;
   onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
 
