@@ -19,7 +19,7 @@ function addEmptyCatch<T>(context: React.Context<T>) {
     if (__DEV__) {
       if (result === null) {
         throw new Error(
-          "为找到上下文所对应的值，请先通过 <Context.Provider> 传递值."
+          "未找到上下文所对应的值，请先通过 <Context.Provider> 传递值."
         );
       }
     }

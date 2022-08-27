@@ -2,9 +2,9 @@ import React, { useState, useMemo, useLayoutEffect } from "react";
 import { Messenger } from "@/utils";
 import { SelectionListener } from "@/user-operation";
 import { Command } from "@/configuration";
-import { AudioContext, MessengerContext, HiddenChinese } from "../hooks";
-import { HistoryContainer } from "./HistoryContainer";
+import { AudioContext, MessengerContext, HiddenChinese } from "./Context";
 import { DisplayContainer } from "./DisplayContainer";
+import { useFeature } from "../hooks";
 
 const audioElement = document.createElement("audio");
 
@@ -41,23 +41,28 @@ export function View() {
       setHiddenChinese(hidden);
     });
   }, []);
-
-  const Container = useMemo(function () {
+  const content = useMemo(() => {
     return (
       <AudioContext.Provider value={audioElement}>
-        <MessengerContext.Provider value={{ onMessage, postMessage }}>
-          <HistoryContainer>
-            {function (props) {
-              return <DisplayContainer {...props} />;
-            }}
-          </HistoryContainer>
+        <MessengerContext.Provider
+          value={{
+            postMessage,
+            onMessage,
+          }}
+        >
+          <Container />
         </MessengerContext.Provider>
       </AudioContext.Provider>
     );
   }, []);
   return (
     <HiddenChinese.Provider value={hiddenChinese}>
-      {Container}
+      {content}
     </HiddenChinese.Provider>
   );
 }
+
+const Container = React.memo(function Container() {
+  const feature = useFeature();
+  return <DisplayContainer {...feature} />;
+});

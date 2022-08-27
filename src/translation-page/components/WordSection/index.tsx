@@ -1,9 +1,9 @@
 import React, { useRef } from "react";
-import { AnkiButton } from "./AnkiButton";
-import { AudioButton } from "./AudioButton";
-import { useHiddenChinese } from "../hooks";
-import { decodeBTag, __main__ } from "../utils";
-import { AnkiButtonInfo, AnkiButtonInfoObject } from "../types";
+import { AnkiButton } from "../AnkiButton";
+import { AudioButton } from "../AudioButton";
+import { useHiddenChinese } from "../Context";
+import { decodeBTag, __main__ } from "../../utils";
+import { AnkiButtonInfo, AnkiButtonInfoObject } from "../../types";
 import { WordData, ExampleSentence, TranslationItem } from "@/dictionary";
 
 interface Props extends WordData {
@@ -12,7 +12,7 @@ interface Props extends WordData {
   updateAnkiTranslations: (key: string, idx: number) => void;
 }
 
-export function Word(props: Props) {
+export function WordSection(props: Props) {
   const {
     word,
     phonetic,
@@ -27,7 +27,12 @@ export function Word(props: Props) {
   return (
     <div>
       <header className="bg-green-loveEye p-2 rounded">
-        <WordAndStar word={word} star_amount={star_amount} />
+        <div className="flex items-center">
+          <h1 className="text-4xl text-black">{word}</h1>
+          <div className="leading-tight ml-4 mr-auto self-end text-lg text-yellow-600">
+            {"★".repeat(star_amount)}
+          </div>
+        </div>
         <div className="flex flex-wrap items-center">
           <Phonetic symbols={phonetic.en} audioURL={phonetic.en_audio} />
           <Phonetic symbols={phonetic.am} audioURL={phonetic.am_audio} />
@@ -50,20 +55,6 @@ export function Word(props: Props) {
     </div>
   );
 }
-const WordAndStar = React.memo(function WordAndStar(props: {
-  word: string;
-  star_amount: number;
-}) {
-  const { word, star_amount } = props;
-  return (
-    <div className="flex items-center">
-      <h1 className="text-4xl text-black">{word}</h1>
-      <div className="leading-tight ml-4 mr-auto self-end text-lg text-yellow-600">
-        {"★".repeat(star_amount)}
-      </div>
-    </div>
-  );
-});
 
 const Phonetic = React.memo(function Phonetic(props: {
   symbols?: string;

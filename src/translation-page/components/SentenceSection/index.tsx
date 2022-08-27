@@ -1,15 +1,15 @@
 import React from "react";
 import { SentenceData } from "@/dictionary";
-import { AudioButton } from "./AudioButton";
-import { AnkiButton } from "./AnkiButton";
-import { AnkiButtonInfo } from "../types";
+import { AnkiButton } from "../AnkiButton";
+import { AudioButton } from "../AudioButton";
+import { AnkiButtonInfo } from "../../types";
 
 interface Props extends SentenceData {
   ankiButtonInfo: AnkiButtonInfo;
   updateAnki: () => void;
 }
 
-export function Sentence(props: Props) {
+export function SentenceSection(props: Props) {
   const {
     sentence,
     ankiButtonInfo,

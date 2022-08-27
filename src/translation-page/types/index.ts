@@ -4,6 +4,8 @@ import type {
   PhraseFields,
   SentenceFields,
 } from "@/extensions-api";
+import { __main__ } from "../utils";
+
 type MakeRequired<T, K extends keyof T> = Partial<T> & Required<Pick<T, K>>;
 
 export type WordNoteData = MakeRequired<
@@ -40,13 +42,4 @@ export interface AnkiButtonInfo {
 
 export interface AnkiButtonInfoObject {
   [key: string | symbol]: AnkiButtonInfo[];
-}
-
-export interface DisplayContainerProps {
-  data?: TranslationResult;
-  loadingSet: Set<string>;
-  ankiButtonInfoObject: AnkiButtonInfoObject;
-  setAnkiButtonInfoObject: React.Dispatch<
-    React.SetStateAction<AnkiButtonInfoObject>
-  >;
 }

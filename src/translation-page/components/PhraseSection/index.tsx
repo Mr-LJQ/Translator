@@ -1,16 +1,16 @@
 import React from "react";
 import { PhraseData, ExampleSentence } from "@/dictionary";
-import { AudioButton } from "./AudioButton";
-import { AnkiButton } from "./AnkiButton";
-import { decodeBTag } from "../utils";
-import { AnkiButtonInfo } from "../types";
+import { AudioButton } from "../AudioButton";
+import { AnkiButton } from "../AnkiButton";
+import { decodeBTag } from "../../utils";
+import { AnkiButtonInfo } from "../../types";
 
 interface Props extends PhraseData {
   ankiButtonInfo: AnkiButtonInfo;
   updateAnki: () => void;
 }
 
-export function Phrase(props: Props) {
+export function PhraseSection(props: Props) {
   const {
     phrase,
     translations,

@@ -4,12 +4,12 @@
  *  - 拼写错误建议
  */
 import React, { useState } from "react";
-import { Loading } from "./Loading";
-import { useMessenger } from "../hooks";
+import { Loading } from "../Loading";
+import { useMessenger } from "../Context";
 import { ErrorData } from "@/dictionary";
 import { Command } from "@/configuration";
 
-export function ErrorComponent(props: ErrorData) {
+export function ErrorSection(props: ErrorData) {
   const { possibleSpelling, message, queryText } = props;
 
   if (possibleSpelling) {

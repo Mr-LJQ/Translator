@@ -3,7 +3,7 @@
  */
 import React, { useRef, useCallback, useImperativeHandle } from "react";
 import classJoin from "classnames";
-import { useAudio } from "../hooks";
+import { useAudio } from "../Context";
 
 interface Props {
   audioURL?: string;

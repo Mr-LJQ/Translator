@@ -1,13 +1,12 @@
 import React from "react";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
-import { AnkiButton } from "./AnkiButton";
-import { MessengerContext } from "../hooks";
-import { Status } from "../types";
+import { AnkiButton } from ".";
+import { MessengerContext } from "../Context";
+import { Status } from "../../types";
 
 export default {
   title: "AnkiButton",
   component: AnkiButton,
-  // More on argTypes: https://storybook.js.org/docs/react/api/argtypes
   argTypes: {
     backgroundColor: { control: "color" },
   },
@@ -27,7 +26,6 @@ const Template: ComponentStory<typeof AnkiButton> = (args) => (
 );
 
 export const Primary = Template.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
 Primary.args = {
   status: Status.Add,
   message: "添加到Anki",
