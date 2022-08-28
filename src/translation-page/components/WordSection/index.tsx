@@ -178,7 +178,7 @@ const ExampleSentences = React.memo(function ExampleSentences(props: {
   );
 });
 
-const Translations = React.memo(function Translations(props: {
+const Translations = function Translations(props: {
   updateAnkiTranslations: (key: string, idx: number) => void;
   ankiButtonInfoObject: AnkiButtonInfoObject;
   translations: {
@@ -201,7 +201,7 @@ const Translations = React.memo(function Translations(props: {
       })}
     </ul>
   );
-});
+};
 
 const TranslationsLi = React.memo(function TranslationsLi(props: {
   partOfSpeech: string;

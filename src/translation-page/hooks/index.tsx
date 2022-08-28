@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { isErrorData, TranslationResult } from "@/dictionary";
 import { Command } from "@/configuration";
 import { useMessenger } from "../components/Context";
-import { __main__ } from "../utils";
 import { useAnki } from "./useAnki";
 import { useHistory } from "./useHistory";
 import { useLoadedObserver } from "./useLoadedObserver";
@@ -68,7 +67,7 @@ export function useFeature() {
       showTranslationCallbackRef.current = callback;
       return renderHistory(newHistory);
     },
-    [updateHistory, createHistory, renderHistory]
+    [updateHistory, createHistory, renderHistory, history]
   );
 
   /**
@@ -82,7 +81,7 @@ export function useFeature() {
         });
       });
     },
-    [onMessage, loadedSubscribe]
+    [onMessage, loadedSubscribe, showTranslation]
   );
 
   /**

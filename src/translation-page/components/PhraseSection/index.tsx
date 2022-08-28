@@ -21,6 +21,7 @@ export function PhraseSection(props: Props) {
     example_sentences,
     updateAnki,
   } = props;
+
   return (
     <div>
       <header className="bg-green-loveEye rounded p-1.5">

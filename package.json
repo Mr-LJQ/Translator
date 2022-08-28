@@ -5,8 +5,7 @@
   "private": true,
   "scripts": {
     "test": "jest",
-    "build": "webpack",
-    "watch": "webpack --watch",
+    "dev": "webpack --watch",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },

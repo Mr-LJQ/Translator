@@ -80,7 +80,7 @@ export function useHistory(params: HistoryParams) {
     historyRef.current.scrollTop = scrollTop;
     setData(data);
     setAnkiButtonInfoObject(ankiButtonInfoObject);
-  }, []);
+  }, [setData]);
 
   /**
    * 展示前一个历史翻译
@@ -162,7 +162,7 @@ export function useHistory(params: HistoryParams) {
         loadedSubscribe(backwardHistory);
       });
     },
-    [onMessage, loadedSubscribe]
+    [onMessage, loadedSubscribe,backwardHistory]
   );
   /**
    * 监听进入下一个历史条目的指令
@@ -173,7 +173,7 @@ export function useHistory(params: HistoryParams) {
         loadedSubscribe(forwardHistory);
       });
     },
-    [loadedSubscribe, onMessage]
+    [loadedSubscribe, onMessage,forwardHistory]
   );
 
   /**

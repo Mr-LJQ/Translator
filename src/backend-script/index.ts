@@ -8,6 +8,7 @@ import {
   postFrontend,
   setBadgeText,
   executeScript,
+  openOptionsPage,
   onStorageChange,
   getStorageByObject,
   addContextMenuItem,
@@ -121,8 +122,12 @@ onMessage(async ({ command, data, sendResponse }) => {
       sendResponse(response);
       break;
     }
+    case Command.OpenOptionsPage: {
+      openOptionsPage()
+      break;
+    }
     default:
-      throw new Error("存在未处理的指令:" + command);
+      throw new Error("存在未处理的指令:" + Command[command]);
   }
 });
 

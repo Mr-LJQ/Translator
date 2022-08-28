@@ -1,4 +1,3 @@
-import { COMMON_CONFIG_MAP } from "@/configuration";
 import { AnkiResponseStatus, AnkiResponse } from "../types";
 
 function createAnkiResponse<T>(options: AnkiResponse<T>): AnkiResponse<T> {
@@ -42,7 +41,7 @@ export function createDuplicateResponse(cardIds: number[]) {
     data: cardIds,
     status: AnkiResponseStatus.Duplicate,
     message:
-      "该卡片出现重复项，请自行在Anki上处理重复项，单击复制重复卡片的ID，以在Anki Browser上快速定位。",
+      "该卡片出现重复项，单击按钮复制重复卡片的ID，以在Anki Browser上快速定位(处理完毕后可再次点击该按钮进行重试操纵)。",
   });
 }
 
@@ -50,14 +49,14 @@ export function createFirstAddSuccessResponse(cardIds: number[]) {
   return createAnkiResponse({
     data: cardIds,
     status: AnkiResponseStatus.FirstAddSuccess,
-    message:"已成功添加到Anki，是否需要立刻开始学习？(用于在待学习列表很长的时候，使其无需等待，立刻开始学习)",
+    message: "已成功添加到Anki，是否需要立刻开始学习？",
   });
 }
 
-export function createConfigErrorResponse() {
+export function createConfigErrorResponse(message: string) {
   return createAnkiResponse({
     status: AnkiResponseStatus.ConfigError,
-    message: `存在配置错误，是否打开配置页面设置配置？可能是一下问题之一导致该错误：\n\t- ${COMMON_CONFIG_MAP.deckName},未配置\n\t- ${COMMON_CONFIG_MAP.modelName},未配置\n\t- 没有配置任何一个 model field 项\n\t- 配置的某个 model field 项与 Anki 上的不匹配，请刷新后重新配置`,
+    message:`${message},单击按钮可打开配置页进行相关配置，如已重新配置，则可点击重试。`,
   });
 }
 

@@ -24,6 +24,9 @@ export type SendResponse = Parameters<
 
 //向后端发送消息的函数
 export async function postBackend(
+  command: Command.OpenOptionsPage
+): Promise<void>;
+export async function postBackend(
   command: Command.GetDeckNames
 ): Promise<GetDeckNamesReturnType>;
 export async function postBackend(
@@ -61,6 +64,11 @@ export async function postBackend(command: Command, data?: any): Promise<any> {
 }
 
 interface Handler {
+  (args: {
+    command: Command.OpenOptionsPage;
+    data: undefined;
+    sendResponse: () => void;
+  }): Promise<void>;
   (args: {
     command: Command.ShowInjectTranslation;
     data: Required<ShowData>;

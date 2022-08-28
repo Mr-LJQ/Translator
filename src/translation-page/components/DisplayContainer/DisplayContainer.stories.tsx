@@ -1,6 +1,6 @@
 import React from "react";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
-import { DisplayContainer } from "./index";
+import { DisplayContainer } from ".";
 export default {
   title: "DisplayContainer",
   component: DisplayContainer,

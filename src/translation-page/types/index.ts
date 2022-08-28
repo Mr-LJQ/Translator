@@ -1,10 +1,8 @@
-import type { TranslationResult } from "@/dictionary";
 import type {
   WordFields,
   PhraseFields,
   SentenceFields,
 } from "@/extensions-api";
-import { __main__ } from "../utils";
 
 type MakeRequired<T, K extends keyof T> = Partial<T> & Required<Pick<T, K>>;
 

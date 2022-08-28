@@ -12,7 +12,6 @@ import {
   postBackend,
   onStorageChange,
   getStorageByObject,
-  openOptionsPage,
 } from "@/extensions-api";
 import { validateText } from "@/utils";
 
@@ -39,7 +38,7 @@ agent.onMessage(Command.TranslateText, function (data) {
   translateAndShowIframeText(data);
 });
 agent.onMessage(Command.OpenOptionsPage, function () {
-  openOptionsPage()
+  postBackend(Command.OpenOptionsPage)
 });
 agent.install();
 

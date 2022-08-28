@@ -1,33 +1,20 @@
 import React from "react";
 import classJoin from "classnames";
-import { Command } from "@/configuration";
-import { useMessenger } from "../Context";
 import { AnkiButtonInfo, Status } from "../../types";
+import { getStatusIcon } from "../../utils";
+import { warning } from "@/utils";
 
 interface Props extends AnkiButtonInfo {
   className?: string;
-  updateAnki: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  updateAnki: () => void;
 }
 
-const enum StatusIcon {
-  Add = "ri-add-line",
-  Loading = "ri-loader-line",
-  Disconnect = "ri-link-unlink-m",
-  Error = "ri-error-warning-line",
-  Success = "ri-check-line",
-  Forgotten = "ri-question-line",
-  LearnNow = "ri-timer-flash-line",
-  Duplicate = "ri-file-copy-2-line",
-  ConfigError = "ri-settings-3-line",
-}
-
-export const AnkiButton = React.memo(function AnkiButton(props: Props) {
+export const AnkiButton = function AnkiButton(props: Props) {
   const { status, message, updateAnki, className, cardIds } = props;
-  const { postMessage } = useMessenger();
   return (
     <Button
       title={message}
-      onClick={(event) => {
+      onClick={() => {
         /**
          * 如果当前状态是 loading、success，则退出
          */
@@ -37,13 +24,11 @@ export const AnkiButton = React.memo(function AnkiButton(props: Props) {
             return;
           case Status.Add:
           case Status.Error:
-          case Status.Disconnect:
-          case Status.Forgotten:
           case Status.LearnNow:
-            return updateAnki(event);
+          case Status.Forgotten:
+          case Status.Disconnect:
           case Status.ConfigError:
-            postMessage(Command.OpenOptionsPage);
-            return;
+            break
           case Status.Duplicate: {
             if (cardIds) {
               const queryText = cardIds
@@ -54,8 +39,14 @@ export const AnkiButton = React.memo(function AnkiButton(props: Props) {
               navigator.clipboard.writeText(queryText);
               return;
             }
+            break
+          }
+          default:{
+            warning(false,`存在未处理的 ${status}`)
           }
         }
+        //@ts-ignore updateAnki不需要传入任何数据，这里传入数据只不过是为了便于测试
+        return updateAnki(status, message, cardIds);
       }}
       className={classJoin(
         "relative w-8",
@@ -78,7 +69,7 @@ export const AnkiButton = React.memo(function AnkiButton(props: Props) {
       )}
     />
   );
-});
+};
 
 /*
  * 纯组件，封装部分样式
@@ -110,17 +101,3 @@ const Button = React.forwardRef<
     </button>
   );
 });
-
-function getStatusIcon(state: Status) {
-  return {
-    [Status.Add]: StatusIcon.Add,
-    [Status.Loading]: StatusIcon.Loading,
-    [Status.Error]: StatusIcon.Error,
-    [Status.Success]: StatusIcon.Success,
-    [Status.LearnNow]: StatusIcon.LearnNow,
-    [Status.Duplicate]: StatusIcon.Duplicate,
-    [Status.Forgotten]: StatusIcon.Forgotten,
-    [Status.Disconnect]: StatusIcon.Disconnect,
-    [Status.ConfigError]: StatusIcon.ConfigError,
-  }[state];
-}

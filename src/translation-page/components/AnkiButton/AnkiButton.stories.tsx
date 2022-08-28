@@ -8,7 +8,7 @@ export default {
   title: "AnkiButton",
   component: AnkiButton,
   argTypes: {
-    updateAnki: { action: "color" },
+    updateAnki: { action: "updateAnki" },
   },
 } as ComponentMeta<typeof AnkiButton>;
 
@@ -72,10 +72,12 @@ export const Forgotten = Template.bind({});
 Forgotten.args = {
   status: Status.Forgotten,
   message: "Forgotten",
+  cardIds:[4399]
 };
 
 export const LearnNow = Template.bind({});
 LearnNow.args = {
   status: Status.LearnNow,
   message: "LearnNow",
+  cardIds:[9527]
 };

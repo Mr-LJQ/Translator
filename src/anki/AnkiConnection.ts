@@ -1,7 +1,5 @@
-/**
- * 这是用于调用 AnkiConnection 提供的接口的封装
- */
 import omit from "lodash.omit";
+import { COMMON_CONFIG_MAP } from "@/configuration";
 import { getStorageByArray, onStorageChange } from "@/extensions-api";
 import { extractPromiseType } from "@/types";
 import {
@@ -58,7 +56,9 @@ type flatAnkiResponse<T extends (...args: any[]) => Promise<any>> =
   ReturnPromiseType<T> extends AnkiResponse<any>
     ? Promise<ReturnPromiseType<T>>
     : Promise<AnkiResponse<ReturnPromiseType<T>>>;
-
+/**
+ * 这是用于调用 AnkiConnection 提供的接口的封装
+ */
 export class AnkiConnection {
   version: number;
   ankiConfig: AnkiConfig;
@@ -170,13 +170,13 @@ export class AnkiConnection {
     const deckName = config.deckName;
     const deckNames = await this._getDeckNames();
     if (deckName == null || !deckNames.includes(deckName)) {
-      throw createConfigErrorResponse();
+      throw createConfigErrorResponse(`卡片对应的${COMMON_CONFIG_MAP.deckName} 为空或在Anki上不存在`);
     }
     //检查 modelName 是否为空
     const modelName = config.modelName;
     const modelNames = await this._getModelNames();
     if (modelName == null || !modelNames.includes(modelName)) {
-      throw createConfigErrorResponse();
+      throw createConfigErrorResponse(`卡片对应的${COMMON_CONFIG_MAP.modelName} 为空或在Anki上不存在`);
     }
     //检查 fields 是否正确（在Anki上该值是否存在）
     const modelFieldNames = await this._getModelFieldNames(modelName);
@@ -187,7 +187,7 @@ export class AnkiConnection {
     //检查用户是否配置了任何一个fieldName，fieldNames不能够都没有配置
     const isEmpty = fieldNames.every((val) => val == null || val === "");
     if (isEmpty) {
-      throw createConfigErrorResponse();
+      throw createConfigErrorResponse(`未配置任何一个 字段名`);
     }
 
     const includesAll = fieldNames.every((val) => {
@@ -195,7 +195,7 @@ export class AnkiConnection {
       return modelFieldNames.includes(val as string);
     });
     if (!includesAll) {
-      throw createConfigErrorResponse();
+      throw createConfigErrorResponse(`存在一些 字段名 无法在对应的 模型 中找到`);
     }
   }
 
