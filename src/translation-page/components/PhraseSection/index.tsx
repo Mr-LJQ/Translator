@@ -9,7 +9,9 @@ interface Props extends PhraseData {
   ankiButtonInfo: AnkiButtonInfo;
   updateAnki: () => void;
 }
-
+/**
+ * 用于展示 Phrase 相关翻译数据的组件
+ */
 export function PhraseSection(props: Props) {
   const {
     phrase,
@@ -27,7 +29,7 @@ export function PhraseSection(props: Props) {
           <AudioButton audioURL={phrase_audio} className="mr-auto ml-1" />
           <AnkiButton
             {...ankiButtonInfo}
-            onClick={updateAnki}
+            updateAnki={updateAnki}
             className="float-right"
           />
         </div>

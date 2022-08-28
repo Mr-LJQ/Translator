@@ -1,5 +1,6 @@
 import { Status } from "../types";
 import { AnkiResponseStatus } from "@/anki";
+import { warning } from "@/utils";
 import type { WordData, PhraseData } from "@/dictionary";
 import type { WordNoteData, PhraseNoteData } from "../types";
 
@@ -129,9 +130,7 @@ export function transformAnkiResponseStatus(status: AnkiResponseStatus) {
     case AnkiResponseStatus.UnexpectedError:
       return Status.Error;
     default: {
-      if (__DEV__) {
-        throw new Error(`未添加对${AnkiResponseStatus[status]} 的转换`);
-      }
+      warning(false, `未添加对${AnkiResponseStatus[status]} 的转换`);
     }
   }
 }

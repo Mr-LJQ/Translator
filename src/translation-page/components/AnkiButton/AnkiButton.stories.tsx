@@ -8,7 +8,7 @@ export default {
   title: "AnkiButton",
   component: AnkiButton,
   argTypes: {
-    backgroundColor: { control: "color" },
+    updateAnki: { action: "color" },
   },
 } as ComponentMeta<typeof AnkiButton>;
 
@@ -25,9 +25,57 @@ const Template: ComponentStory<typeof AnkiButton> = (args) => (
   </MessengerContext.Provider>
 );
 
-export const Primary = Template.bind({});
-Primary.args = {
+export const Add = Template.bind({});
+Add.args = {
   status: Status.Add,
-  message: "添加到Anki",
-  onClick: () => void 0,
+  message: "Add",
+};
+
+export const Success = Template.bind({});
+Success.args = {
+  status: Status.Success,
+  message: "Success",
+};
+
+export const Loading = Template.bind({});
+Loading.args = {
+  status: Status.Loading,
+  message: "Loading",
+};
+
+export const Error = Template.bind({});
+Error.args = {
+  status: Status.Error,
+  message: "Error",
+};
+
+export const Disconnect = Template.bind({});
+Disconnect.args = {
+  status: Status.Disconnect,
+  message: "Disconnect",
+};
+
+export const ConfigError = Template.bind({});
+ConfigError.args = {
+  status: Status.ConfigError,
+  message: "ConfigError",
+};
+
+export const Duplicate = Template.bind({});
+Duplicate.args = {
+  status: Status.Duplicate,
+  message: "Duplicate",
+  cardIds:[123,456,789]
+};
+
+export const Forgotten = Template.bind({});
+Forgotten.args = {
+  status: Status.Forgotten,
+  message: "Forgotten",
+};
+
+export const LearnNow = Template.bind({});
+LearnNow.args = {
+  status: Status.LearnNow,
+  message: "LearnNow",
 };

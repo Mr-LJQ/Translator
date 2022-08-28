@@ -11,16 +11,18 @@ interface Props extends WordData {
   ankiButtonInfoObject: AnkiButtonInfoObject;
   updateAnkiTranslations: (key: string, idx: number) => void;
 }
-
+/**
+ * 用于展示 Word 相关翻译数据的组件
+ */
 export function WordSection(props: Props) {
   const {
     word,
     phonetic,
-    updateAnki,
     star_amount,
     translations,
     translationList,
     ankiButtonInfoObject,
+    updateAnki,
     updateAnkiTranslations,
   } = props;
 
@@ -140,7 +142,7 @@ const Explanation = React.memo(function Explanation(props: ExplanationProps) {
       <PartOfSpeech>{part_of_speech}</PartOfSpeech>
       <AnkiButton
         {...ankiButtonInfo}
-        onClick={() => {
+        updateAnki={() => {
           return updateAnki(index);
         }}
         className="float-right"
@@ -248,7 +250,7 @@ const TranslationLi = React.memo(function TranslationLi(props: {
       <AnkiButton
         className="float-right"
         {...ankiButtonInfo}
-        onClick={() => {
+        updateAnki={() => {
           return updateAnkiTranslations(partOfSpeech, idx);
         }}
       />

@@ -1,14 +1,13 @@
-/**
- * 在翻译返回错误时进行渲染的组件，实现以下功能：
- *  - 再次查询 、
- *  - 拼写错误建议
- */
 import React, { useState } from "react";
 import { Loading } from "../Loading";
 import { useMessenger } from "../Context";
 import { ErrorData } from "@/dictionary";
 import { Command } from "@/configuration";
-
+/**
+ * 在翻译返回错误时进行渲染的组件，实现以下功能：
+ *  - 再次查询
+ *  - 拼写错误建议
+ */
 export function ErrorSection(props: ErrorData) {
   const { possibleSpelling, message, queryText } = props;
 
@@ -40,7 +39,7 @@ function PossibleSpelling(props: { possibleSpelling: string[] }) {
                 postMessage(Command.TranslateText, text);
               }}
             >
-              <a href="#">{text}</a>
+              <a>{text}</a>
             </li>
           );
         })}
@@ -54,8 +53,8 @@ function TranslationAgain(props: { queryText?: string; message?: string }) {
   const { queryText, message } = props;
   const [isLoading, setIsLoading] = useState(false);
   return (
-    <div className=" fixed inset-0  flex flex-col items-center pt-20 bg-green-loveEye">
-      {isLoading && <Loading className="fixed inset-0 z-50" />}
+    <div className="relative flex h-screen flex-col items-center justify-center bg-green-loveEye">
+      {isLoading && <Loading className="absolute inset-0 z-50" />}
       {queryText && (
         <button
           type="button"

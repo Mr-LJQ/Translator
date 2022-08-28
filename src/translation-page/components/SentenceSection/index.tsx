@@ -8,7 +8,9 @@ interface Props extends SentenceData {
   ankiButtonInfo: AnkiButtonInfo;
   updateAnki: () => void;
 }
-
+/**
+ * 用于展示 Sentence 相关翻译数据的组件
+ */
 export function SentenceSection(props: Props) {
   const {
     sentence,
@@ -26,7 +28,7 @@ export function SentenceSection(props: Props) {
       <main className="mt-1 bg-green-loveEye p-1.5 text-xl rounded indent-[2em]">
         <AnkiButton
           {...ankiButtonInfo}
-          onClick={updateAnki}
+          updateAnki={updateAnki}
           className="float-right"
         />
         {sentence_translation}

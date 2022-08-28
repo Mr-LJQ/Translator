@@ -1,9 +1,8 @@
+import React from "react";
+import classJoin from "classnames";
 /**
  * 一个展示loading状态的组件
  */
-import React from "react";
-import classJoin from "classnames";
-
 export const Loading = React.memo(function Loading(props: {
   className: string;
 }) {

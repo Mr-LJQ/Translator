@@ -5,7 +5,7 @@
 
 import { FunctionAny } from "@/types";
 import { Command } from "@/configuration";
-import { warning, invariant } from "@/utils";
+import { warning } from "@/utils";
 import { NoteData } from "@/translation-page";
 import { TranslationResult } from "@/dictionary";
 import { AddNoteReturnType, RelearnCardsReturnType } from "@/anki";
@@ -63,13 +63,6 @@ export class Messenger {
       return;
     }
 
-    if (__DEV__) {
-      warning(
-        handlers[command] != null && handlers[command]!.length !== 0,
-        `对于指令 ${Command[command]} ,未添加任何处理函数`
-      );
-    }
-
     if (handlers[command] != null) {
       handlers[command]!.forEach((fn) => {
         fn(data, (data: any) => {
@@ -106,10 +99,7 @@ export class Messenger {
     command: Command.TranslateText,
     listener: (data: string) => void
   ): () => void;
-  onMessage(
-    command: Command.OpenOptionsPage,
-    listener: () => void
-  ): () => void;
+  onMessage(command: Command.OpenOptionsPage, listener: () => void): () => void;
   onMessage(
     command: Command.HistoryIndex,
     listener: (data: { index: number; head: number; tail: number }) => void
@@ -176,10 +166,7 @@ export class Messenger {
   ): void;
   postMessage(command: Command, data?: any, callback?: FunctionAny): void {
     const target = this.target;
-    //此处应该使用报错的 invariant 而非 warning，因为其执行会添加回调函数，如果不报错属于内存泄漏
-    if (!target) {
-      invariant(false, "target 不存在，其在通信中是必须的");
-    }
+    warning(!!target, "target 不存在，其在通信中是必须的");
     /* 因为浏览器的postMessage不提供原生的响应回调功能，因此需要自定义实现
      * 设置回调时:(postMessage)
      *   如果存在回调函数，则创建一个唯一的ID保存该回调函数

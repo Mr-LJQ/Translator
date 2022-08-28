@@ -1,6 +1,5 @@
 module.exports = {
   root: true, //根目录，表明该文件所在目录是eslint向上查找并合并配置文件的终点
-  sourceType: module,
   env: {
     node: true,
     es2021: true,

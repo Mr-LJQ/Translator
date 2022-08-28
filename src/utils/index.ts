@@ -1,4 +1,4 @@
-export { invariant, warning } from "./alert";
+export { warning } from "./alert";
 export { validateText } from "./validateText";
 export { Messenger } from "./Messenger";
 export type { PostMessage, OnMessage } from "./Messenger";

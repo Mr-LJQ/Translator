@@ -6,7 +6,7 @@ import { AnkiButtonInfo, Status } from "../../types";
 
 interface Props extends AnkiButtonInfo {
   className?: string;
-  onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  updateAnki: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
 
 const enum StatusIcon {
@@ -22,33 +22,40 @@ const enum StatusIcon {
 }
 
 export const AnkiButton = React.memo(function AnkiButton(props: Props) {
-  const { status, message, onClick, className, cardIds } = props;
+  const { status, message, updateAnki, className, cardIds } = props;
   const { postMessage } = useMessenger();
   return (
     <Button
       title={message}
       onClick={(event) => {
         /**
-         * 如果重复，则用户点击后可以复制一份用于在 Anki上查看到底有那些重复项
+         * 如果当前状态是 loading、success，则退出
          */
-        if (status === Status.Duplicate && cardIds) {
-          const queryText = cardIds
-            .map((item) => {
-              return "cid:" + item;
-            })
-            .join(" OR ");
-          navigator.clipboard.writeText(queryText);
-          return;
+        switch (status) {
+          case Status.Loading:
+          case Status.Success:
+            return;
+          case Status.Add:
+          case Status.Error:
+          case Status.Disconnect:
+          case Status.Forgotten:
+          case Status.LearnNow:
+            return updateAnki(event);
+          case Status.ConfigError:
+            postMessage(Command.OpenOptionsPage);
+            return;
+          case Status.Duplicate: {
+            if (cardIds) {
+              const queryText = cardIds
+                .map((item) => {
+                  return "cid:" + item;
+                })
+                .join(" OR ");
+              navigator.clipboard.writeText(queryText);
+              return;
+            }
+          }
         }
-
-        /**
-         * 如果出现配置错误，则点击打开配置页面
-         */
-        if (status === Status.ConfigError) {
-          postMessage(Command.OpenOptionsPage);
-        }
-
-        onClick(event);
       }}
       className={classJoin(
         "relative w-8",
@@ -64,8 +71,6 @@ export const AnkiButton = React.memo(function AnkiButton(props: Props) {
             status === Status.Duplicate || status === Status.ConfigError,
           "prior:bg-red-600 prior:hover:bg-red-700":
             status === Status.Error || status === Status.Disconnect,
-          "prior:bg-yellow-500 prior:hover:bg-yellow-600":
-            status === Status.Forgotten,
           "prior:cursor-auto":
             status === Status.Loading || status === Status.Success,
         },

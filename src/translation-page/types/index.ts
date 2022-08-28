@@ -38,6 +38,7 @@ export interface AnkiButtonInfo {
   status: Status;
   message: string;
   cardIds?: number[];
+  lastUsefulSubmission?: Status;
 }
 
 export interface AnkiButtonInfoObject {
