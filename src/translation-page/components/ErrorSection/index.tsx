@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Loading } from "../Loading";
 import { useMessenger } from "../Context";
 import { ErrorData } from "@/dictionary";
@@ -10,7 +10,6 @@ import { Command } from "@/configuration";
  */
 export function ErrorSection(props: ErrorData) {
   const { possibleSpelling, message, queryText } = props;
-
   if (possibleSpelling) {
     return <PossibleSpelling possibleSpelling={possibleSpelling} />;
   }
@@ -34,12 +33,12 @@ function PossibleSpelling(props: { possibleSpelling: string[] }) {
           return (
             <li
               key={text}
-              className="my-1.5 pl-8 text-base text-blue-600 cursor-pointer"
+              className="my-1.5 pl-8 text-base text-blue-700 cursor-pointer"
               onClick={() => {
                 postMessage(Command.TranslateText, text);
               }}
             >
-              <a>{text}</a>
+              {text}
             </li>
           );
         })}
@@ -52,21 +51,32 @@ function TranslationAgain(props: { queryText?: string; message?: string }) {
   const { postMessage } = useMessenger();
   const { queryText, message } = props;
   const [isLoading, setIsLoading] = useState(false);
+  const timeoutRef = useRef<any>();
+  useEffect(() => {
+    return () => {
+      const timerId = timeoutRef.current;
+      timerId != null && clearTimeout(timerId);
+    };
+  }, []);
   return (
-    <div className="relative flex h-screen flex-col items-center justify-center bg-green-loveEye">
-      {isLoading && <Loading className="absolute inset-0 z-50" />}
+    <div className="absolute flex inset-0 flex-col items-center justify-center bg-green-loveEye">
+      {isLoading && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/30 cursor-not-allowed select-none">
+          <Loading color="white" size={40} />
+        </div>
+      )}
       {queryText && (
         <button
           type="button"
           onClick={() => {
             if (isLoading) return;
             setIsLoading(true);
-            setTimeout(function () {
+            timeoutRef.current = setTimeout(function () {
               setIsLoading(false);
             }, 2000);
             postMessage(Command.TranslateText, queryText);
           }}
-          className=" 
+          className={`
             px-4 py-2
             font-bold 
             leading-6  
@@ -74,20 +84,20 @@ function TranslationAgain(props: { queryText?: string; message?: string }) {
             shadow  
             rounded-md  
             text-white  
-            bg-indigo-500  
-            hover:bg-indigo-400  
+            bg-indigo-600  
+            hover:bg-indigo-700  
             cursor-pointer 
             focus:outline-none  
             focus:ring-2  
             focus:ring-offset-2  
             focus:ring-slate-400  
             focus:ring-offset-slate-50 
-          "
+          `}
         >
           再次查询
         </button>
       )}
-      <p className=" text-2xl text-center ">{message}</p>
+      <p className=" text-2xl text-center mt-2">{message}</p>
     </div>
   );
 }

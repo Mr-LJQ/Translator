@@ -1,7 +1,6 @@
 import React from "react";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { AnkiButton } from ".";
-import { MessengerContext } from "../Context";
 import { Status } from "../../types";
 
 export default {
@@ -13,28 +12,19 @@ export default {
 } as ComponentMeta<typeof AnkiButton>;
 
 const Template: ComponentStory<typeof AnkiButton> = (args) => (
-  <MessengerContext.Provider
-    value={
-      {
-        onMessage: () => void 0,
-        postMessage: () => void 0,
-      } as any
-    }
-  >
-    <AnkiButton {...args} />
-  </MessengerContext.Provider>
+  <AnkiButton {...args} />
 );
-
-export const Add = Template.bind({});
-Add.args = {
-  status: Status.Add,
-  message: "Add",
-};
 
 export const Success = Template.bind({});
 Success.args = {
   status: Status.Success,
   message: "Success",
+};
+
+export const Add = Template.bind({});
+Add.args = {
+  status: Status.Add,
+  message: "Add",
 };
 
 export const Loading = Template.bind({});
@@ -65,19 +55,19 @@ export const Duplicate = Template.bind({});
 Duplicate.args = {
   status: Status.Duplicate,
   message: "Duplicate",
-  cardIds:[123,456,789]
+  cardIds: [123, 456, 789],
 };
 
 export const Forgotten = Template.bind({});
 Forgotten.args = {
   status: Status.Forgotten,
   message: "Forgotten",
-  cardIds:[4399]
+  cardIds: [4399],
 };
 
 export const LearnNow = Template.bind({});
 LearnNow.args = {
   status: Status.LearnNow,
   message: "LearnNow",
-  cardIds:[9527]
+  cardIds: [9527],
 };

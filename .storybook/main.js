@@ -4,9 +4,11 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 module.exports = {
   stories: ["../src/**/*.stories.@(js|jsx|ts|tsx)"],
   addons: [
+    '@storybook/addon-a11y',
     "@storybook/addon-links",
     "@storybook/addon-essentials",
     "@storybook/addon-interactions",
+    "storybook-addon-pseudo-states",
   ],
   core: {
     builder: "webpack5",
@@ -15,7 +17,9 @@ module.exports = {
       lazyCompilation: true,
     },
   },
-  features: {},
+  features: {
+    interactionsDebugger: true,
+  },
   webpackFinal: async (config) => {
     config.module.rules.push({
       test: /\.css$/,

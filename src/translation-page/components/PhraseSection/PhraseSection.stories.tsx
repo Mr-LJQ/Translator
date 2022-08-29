@@ -1,12 +1,14 @@
 import React from "react";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
-import { decorators } from "@/test/decorators/translationPage";
-import { PhraseSection } from "./index";
-import { __main__ } from "../../utils";
+import { PhraseSection } from ".";
+import { audioDecorators } from "@/test";
 export default {
   title: "PhraseSection",
   component: PhraseSection,
-  decorators,
+  decorators: audioDecorators,
+  argTypes: {
+    updateAnki: { action: "updateAnki" },
+  },
 } as ComponentMeta<typeof PhraseSection>;
 
 const Template: ComponentStory<typeof PhraseSection> = (args) => (
@@ -46,5 +48,4 @@ Primary.args = {
     status: 0,
     message: "添加到Anki",
   },
-  updateAnki: () => void 0,
 };

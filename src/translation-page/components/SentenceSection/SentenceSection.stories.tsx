@@ -1,11 +1,14 @@
 import React from "react";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
-import { decorators } from "@/test/decorators/translationPage";
-import { SentenceSection } from "./index";
+import { SentenceSection } from ".";
+import { audioDecorators } from "@/test";
 export default {
   title: "SentenceSection",
   component: SentenceSection,
-  decorators,
+  decorators: audioDecorators,
+  argTypes: {
+    updateAnki: { action: "updateAnki" },
+  },
 } as ComponentMeta<typeof SentenceSection>;
 
 const Template: ComponentStory<typeof SentenceSection> = (args) => (
@@ -23,5 +26,4 @@ Primary.args = {
     status: 0,
     message: "添加到Anki",
   },
-  updateAnki: () => void 0,
 };

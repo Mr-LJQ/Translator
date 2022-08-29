@@ -37,7 +37,6 @@ export const AnkiButton = function AnkiButton(props: Props) {
                 })
                 .join(" OR ");
               navigator.clipboard.writeText(queryText);
-              return;
             }
             break
           }
