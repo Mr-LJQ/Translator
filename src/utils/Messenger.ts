@@ -46,7 +46,7 @@ export class Messenger {
   addTarget = (target: Window) => {
     this.target = target;
   };
-  handleMessage = (event: MessageEvent<MessageData>) => {
+  private handleMessage = (event: MessageEvent<MessageData>) => {
     const { target, handlers, callbacks } = this;
     const source = event.source;
     const { data, command, callbackName } = event.data;
@@ -62,7 +62,6 @@ export class Messenger {
       delete callbacks[callbackName];
       return;
     }
-
     if (handlers[command] != null) {
       handlers[command]!.forEach((fn) => {
         fn(data, (data: any) => {
@@ -166,7 +165,10 @@ export class Messenger {
   ): void;
   postMessage(command: Command, data?: any, callback?: FunctionAny): void {
     const target = this.target;
-    warning(!!target, "target 不存在，其在通信中是必须的");
+    if (target == null) {
+      warning(!!target, "target 不存在，其在通信中是必须的");
+      return;
+    }
     /* 因为浏览器的postMessage不提供原生的响应回调功能，因此需要自定义实现
      * 设置回调时:(postMessage)
      *   如果存在回调函数，则创建一个唯一的ID保存该回调函数
