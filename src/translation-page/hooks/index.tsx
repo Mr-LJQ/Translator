@@ -5,6 +5,7 @@ import { useMessenger } from "../components/Context";
 import { useAnki } from "./useAnki";
 import { useHistory } from "./useHistory";
 import { useLoadedObserver } from "./useLoadedObserver";
+import { createHistory } from "../utils";
 
 /**
  * 将 useHistory、useAnki、useLoadedObserver提供的功能结合起来
@@ -31,7 +32,6 @@ export function useFeature() {
   const {
     history,
     ankiButtonInfoObject,
-    createHistory,
     updateHistory,
     renderHistory,
     setAnkiButtonInfoObject,
@@ -67,7 +67,7 @@ export function useFeature() {
       showTranslationCallbackRef.current = callback;
       return renderHistory(newHistory);
     },
-    [updateHistory, createHistory, renderHistory, history]
+    [updateHistory, renderHistory, history]
   );
 
   /**

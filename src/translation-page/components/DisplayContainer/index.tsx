@@ -19,7 +19,7 @@ import { WordSection } from "../WordSection";
 import { ErrorSection } from "../ErrorSection";
 import { PhraseSection } from "../PhraseSection";
 import { SentenceSection } from "../SentenceSection";
-import { Loading } from "../Loading";
+import { LoadingMask } from "../Loading";
 
 export interface Props {
   isLoading: boolean;
@@ -53,15 +53,15 @@ export function DisplayContainer(props: Props) {
   //初始阶段data为空
   if (!data) {
     return (
-      <p className="fixed flex inset-2 justify-center pt-20 text-2xl text-center bg-green-loveEye ">
-        翻译记录为空，尚未进行任何翻译
+      <p className="fixed inset-0 flex items-center justify-center text-2xl text-center bg-green-loveEye ">
+        翻译记录为空
       </p>
     );
   }
 
   return (
     <>
-      {isLoading && <Loading className="fixed inset-0 z-50" />}
+      {isLoading && <LoadingMask className="fixed inset-0 z-50" />}
       {isErrorData(data) && <ErrorSection {...data} />}
       {isWordData(data) && (
         <WordSection

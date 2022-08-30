@@ -64,8 +64,7 @@ addContextMenuItem(
     onContextMenuClick(function (info) {
       const frameId = info.frameId;
       if (!frameId) {
-        console.error(new Error("info.frameId is undefined"));
-        return;
+        throw new Error("info.frameId is undefined");
       }
       if (injectedFrames.includes(frameId)) return;
       injectedFrames.push(frameId);
@@ -123,7 +122,7 @@ onMessage(async ({ command, data, sendResponse }) => {
       break;
     }
     case Command.OpenOptionsPage: {
-      openOptionsPage()
+      openOptionsPage();
       break;
     }
     default:

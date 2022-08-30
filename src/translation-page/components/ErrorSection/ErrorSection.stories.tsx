@@ -1,10 +1,15 @@
 import React from "react";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
-import { userEvent, within, waitFor } from "@storybook/testing-library";
+import {
+  userEvent,
+  within,
+  waitFor,
+  waitForElementToBeRemoved,
+} from "@storybook/testing-library";
 import { expect, jest } from "@storybook/jest";
 import { Command } from "@/configuration/command";
 import { ErrorSection } from ".";
-import { audioDecorators } from "@/test";
+import { containerDecorator, cacographyData, errorData } from "@/test";
 import { MessengerContext } from "../Context";
 
 const onMessageMocked = jest.fn<any, any[]>();
@@ -12,17 +17,7 @@ const postMessageMocked = jest.fn<any, any[]>();
 export default {
   title: "ErrorSection",
   component: ErrorSection,
-  decorators: audioDecorators.concat([
-    (Story) => {
-      return (
-        <MessengerContext.Provider
-          value={{ postMessage: postMessageMocked, onMessage: onMessageMocked }}
-        >
-          <Story />
-        </MessengerContext.Provider>
-      );
-    },
-  ]),
+  decorators: [containerDecorator],
 } as ComponentMeta<typeof ErrorSection>;
 
 const Template: ComponentStory<typeof ErrorSection> = (args) => (
@@ -31,9 +26,19 @@ const Template: ComponentStory<typeof ErrorSection> = (args) => (
 
 export const Primary = Template.bind({});
 Primary.args = {
-  queryText: "word",
-  message: "网络连接异常，请重新尝试。",
+  ...errorData,
 };
+Primary.decorators = [
+  (Story) => {
+    return (
+      <MessengerContext.Provider
+        value={{ postMessage: postMessageMocked, onMessage: onMessageMocked }}
+      >
+        <Story />
+      </MessengerContext.Provider>
+    );
+  },
+];
 Primary.play = async ({ canvasElement }) => {
   const canvas = within(canvasElement);
   const againButton = canvas.getByRole("button", { name: "再次查询" });
@@ -42,14 +47,20 @@ Primary.play = async ({ canvasElement }) => {
   await waitFor(() => {
     expect(canvas.getByRole("img", { name: "loading" })).toBeInTheDocument();
   });
+  await waitForElementToBeRemoved(
+    () => {
+      return canvas.queryByRole("img", { name: "loading" });
+    },
+    { timeout: 3000 }
+  );
   postMessageMocked.mockClear();
 };
 
 export const Cacography = Template.bind({});
 Cacography.args = {
-  possibleSpelling: ["word", "worded"],
+  ...cacographyData,
 };
-
+Cacography.decorators = Primary.decorators;
 Cacography.play = async ({ canvasElement }) => {
   const canvas = within(canvasElement);
   const getListItem = (name: string) => {

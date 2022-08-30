@@ -1,12 +1,15 @@
 import React from "react";
-/**
- * 一个展示loading状态的组件
- */
-export const Loading = React.memo(function Loading(props: {
+import classJoin from "classnames";
+
+interface Props {
   color?: string;
   size?: number;
   className?: string;
-}) {
+}
+/**
+ * 一个展示loading状态的组件
+ */
+export const Loading = React.memo(function Loading(props: Props) {
   const { color, size = 20, className } = props;
   return (
     <span role="img" aria-label="loading" className={className}>
@@ -32,5 +35,22 @@ export const Loading = React.memo(function Loading(props: {
         ></path>
       </svg>
     </span>
+  );
+});
+
+/**
+ * 为便于使用，添加了一些预定义的样式类型
+ */
+export const LoadingMask = React.memo(function LoadingWrapper(props: Props) {
+  const { className, color = "white", size = 40 } = props;
+  return (
+    <Loading
+      className={classJoin(
+        "flex items-center justify-center bg-black/30 cursor-not-allowed select-none",
+        className
+      )}
+      color={color}
+      size={size}
+    />
   );
 });

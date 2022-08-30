@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Loading } from "../Loading";
+import { LoadingMask } from "../Loading";
 import { useMessenger } from "../Context";
 import { ErrorData } from "@/dictionary";
 import { Command } from "@/configuration";
@@ -59,12 +59,8 @@ function TranslationAgain(props: { queryText?: string; message?: string }) {
     };
   }, []);
   return (
-    <div className="absolute flex inset-0 flex-col items-center justify-center bg-green-loveEye">
-      {isLoading && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/30 cursor-not-allowed select-none">
-          <Loading color="white" size={40} />
-        </div>
-      )}
+    <div className="flex fixed inset-0 flex-col items-center justify-center bg-green-loveEye">
+      {isLoading && <LoadingMask className="fixed inset-0 z-50" />}
       {queryText && (
         <button
           type="button"

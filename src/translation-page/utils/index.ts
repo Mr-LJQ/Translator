@@ -1,6 +1,7 @@
 export { History } from "./History";
 export { decodeBTag } from "./decodeBTag";
 export { getStatusIcon } from "./getStatusIcon";
+export { createHistory } from "./createHistory";
 
 export {
   transformWordData,

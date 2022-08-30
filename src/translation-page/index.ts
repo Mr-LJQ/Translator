@@ -5,4 +5,4 @@ export type {
   SentenceNoteData,
 } from "./types";
 
-export { Loading } from "./components/Loading";
+export { Loading, LoadingMask } from "./components/Loading";

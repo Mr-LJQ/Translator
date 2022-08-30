@@ -28,7 +28,7 @@ export const AnkiButton = function AnkiButton(props: Props) {
           case Status.Forgotten:
           case Status.Disconnect:
           case Status.ConfigError:
-            break
+            break;
           case Status.Duplicate: {
             if (cardIds) {
               const queryText = cardIds
@@ -38,17 +38,24 @@ export const AnkiButton = function AnkiButton(props: Props) {
                 .join(" OR ");
               navigator.clipboard.writeText(queryText);
             }
-            break
+            break;
           }
-          default:{
-            warning(false,`存在未处理的 ${status}`)
+          default: {
+            warning(false, `存在未处理的 ${status}`);
           }
         }
         //@ts-ignore updateAnki不需要传入任何数据，这里传入数据只不过是为了便于测试
         return updateAnki(status, message, cardIds);
       }}
       className={classJoin(
-        "relative w-8",
+        ` 
+          relative w-8 
+          focus:outline-none  
+          focus:ring-2  
+          focus:ring-offset-1  
+          focus:ring-slate-400  
+          focus:ring-offset-slate-50 
+        `,
         getStatusIcon(status),
         {
           "bg-emerald-600 hover:bg-emerald-700":

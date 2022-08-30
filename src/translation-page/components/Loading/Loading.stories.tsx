@@ -1,6 +1,6 @@
 import React from "react";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
-import { Loading } from "./index";
+import { Loading, LoadingMask as LoadingMaskComponent } from "./index";
 export default {
   title: "Loading",
   component: Loading,
@@ -20,4 +20,13 @@ Size30.args = {
 export const ColorRed = Template.bind({});
 ColorRed.args = {
   color: "red",
+};
+
+export const LoadingMask: ComponentStory<typeof LoadingMaskComponent> = (
+  args
+) => {
+  return <LoadingMaskComponent {...args} />;
+};
+LoadingMask.args = {
+  className: "absolute inset-0 z-50",
 };

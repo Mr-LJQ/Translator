@@ -49,6 +49,7 @@ export const AudioButton = React.forwardRef<{ playAudio: () => void }, Props>(
           focus-visible:underline
           focus-visible:underline-offset-4
           hover:play-audio
+          focus:play-audio
           focus:outline-none
           select-none
           cursor-pointer

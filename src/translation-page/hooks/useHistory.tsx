@@ -5,16 +5,11 @@ import React, {
   useEffect,
   useRef,
 } from "react";
-import {
-  isWordData,
-  isPhraseData,
-  isSentenceData,
-  TranslationResult,
-} from "@/dictionary";
+import { TranslationResult } from "@/dictionary";
 import { Command } from "@/configuration";
 import { History, __main__ } from "../utils";
+import { AnkiButtonInfoObject } from "../types";
 import { useMessenger } from "../components/Context";
-import { AnkiButtonInfoObject, Status } from "../types";
 
 interface HistoryType {
   scrollTop: number;
@@ -75,12 +70,15 @@ export function useHistory(params: HistoryParams) {
   /**
    * 渲染提供的历史条目
    */
-  const renderHistory = useCallback((history: HistoryType) => {
-    const { scrollTop, ankiButtonInfoObject, data } = history;
-    historyRef.current.scrollTop = scrollTop;
-    setData(data);
-    setAnkiButtonInfoObject(ankiButtonInfoObject);
-  }, [setData]);
+  const renderHistory = useCallback(
+    (history: HistoryType) => {
+      const { scrollTop, ankiButtonInfoObject, data } = history;
+      historyRef.current.scrollTop = scrollTop;
+      setData(data);
+      setAnkiButtonInfoObject(ankiButtonInfoObject);
+    },
+    [setData]
+  );
 
   /**
    * 展示前一个历史翻译
@@ -100,44 +98,6 @@ export function useHistory(params: HistoryParams) {
     if (history) renderHistory(history);
   }, [updateHistory, renderHistory]);
 
-  /**
-   * 创建新的历史记录
-   */
-  const createHistory = useCallback((data: TranslationResult) => {
-    const ankiButtonInfoObject: AnkiButtonInfoObject = { [__main__]: [] };
-    //if (data.type === "ERROR") {}
-    if (isPhraseData(data) || isSentenceData(data)) {
-      ankiButtonInfoObject[__main__]!.push({
-        status: Status.Add,
-        message: "添加到Anki",
-      });
-    }
-    if (isWordData(data)) {
-      data.translationList?.forEach(() => {
-        ankiButtonInfoObject[__main__]!.push({
-          status: Status.Add,
-          message: "添加到Anki",
-        });
-      });
-      //有多少个独立的翻译短语，就有多少个添加按钮
-      if (data.translations) {
-        Object.entries(data.translations).forEach(([key, value]) => {
-          ankiButtonInfoObject[key] = value.map(() => {
-            return {
-              status: Status.Add,
-              message: "添加到Anki",
-            };
-          });
-        });
-      }
-    }
-
-    return {
-      data,
-      scrollTop: 0,
-      ankiButtonInfoObject,
-    };
-  }, []);
   /**
    * 在历史堆栈变动时，将变动信息发送到内容脚本
    */
@@ -162,7 +122,7 @@ export function useHistory(params: HistoryParams) {
         loadedSubscribe(backwardHistory);
       });
     },
-    [onMessage, loadedSubscribe,backwardHistory]
+    [onMessage, loadedSubscribe, backwardHistory]
   );
   /**
    * 监听进入下一个历史条目的指令
@@ -173,7 +133,7 @@ export function useHistory(params: HistoryParams) {
         loadedSubscribe(forwardHistory);
       });
     },
-    [loadedSubscribe, onMessage,forwardHistory]
+    [loadedSubscribe, onMessage, forwardHistory]
   );
 
   /**
@@ -190,7 +150,6 @@ export function useHistory(params: HistoryParams) {
 
   return {
     updateHistory,
-    createHistory,
     renderHistory,
     ankiButtonInfoObject,
     setAnkiButtonInfoObject,

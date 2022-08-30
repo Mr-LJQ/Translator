@@ -25,3 +25,5 @@ export type extractPromiseType<T extends Promise<any>> = T extends Promise<
   : never;
 
 export type FunctionAny = (...args: any[]) => void;
+
+

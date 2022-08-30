@@ -50,7 +50,10 @@ export class Messenger {
     const { target, handlers, callbacks } = this;
     const source = event.source;
     const { data, command, callbackName } = event.data;
-    if (target !== source) return;
+    if (!__DEV__) {
+      // !__DEV__ 判断的目的在于便于测试，且希望其能够在生产环境中得到一些安全性
+      if (target !== source) return;
+    } 
     const callback = callbackName == null ? null : callbacks[callbackName]; // 注释一
     //执行回调专用指令(回调函数响应)
     //@ts-ignore 内部使用，不对外暴露

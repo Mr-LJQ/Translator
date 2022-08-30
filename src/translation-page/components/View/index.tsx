@@ -2,9 +2,9 @@ import React, { useState, useMemo, useLayoutEffect } from "react";
 import { Messenger } from "@/utils";
 import { SelectionListener } from "@/user-operation";
 import { Command } from "@/configuration";
-import { AudioContext, MessengerContext, HiddenChinese } from "./Context";
-import { DisplayContainer } from "./DisplayContainer";
-import { useFeature } from "../hooks";
+import { AudioContext, MessengerContext, HiddenChinese } from "../Context";
+import { DisplayContainer } from "../DisplayContainer";
+import { useFeature } from "../../hooks";
 
 const audioElement = document.createElement("audio");
 
@@ -13,7 +13,6 @@ const messenger = new Messenger({
   //这是在iframe内的，因此必定存在
   target: window.top!,
 });
-
 const { onMessage, postMessage } = messenger;
 messenger.install();
 
@@ -21,7 +20,6 @@ const selectionListener = new SelectionListener((text) => {
   postMessage(Command.TranslateText, text);
 });
 //监听停止播放的指令
-
 onMessage(Command.PauseAudio, () => {
   try {
     audioElement.pause();

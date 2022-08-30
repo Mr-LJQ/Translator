@@ -11,9 +11,6 @@ test("正确转换 AnkiResponseStatus", () => {
     }
   }).not.toThrowError();
   expect(() => {
-    const count = 10;
-    for (let i = 0; i < count; i++) {
-      transformAnkiResponseStatus(i);
-    }
+    transformAnkiResponseStatus(10);
   }).toThrowError();
 });
