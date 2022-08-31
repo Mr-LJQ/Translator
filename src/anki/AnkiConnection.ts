@@ -117,7 +117,9 @@ export class AnkiConnection {
 
   private _addErrorCatch<T extends (...args: any[]) => Promise<any>>(
     executor: T
-  ): (...args: Parameters<T>) => flatAnkiResponse<T> {
+  ): (
+    ...args: Parameters<T>
+  ) => flatAnkiResponse<T> | Promise<AnkiResponse<unknown>> {
     return async (...args: Parameters<T>) => {
       try {
         /**
@@ -170,13 +172,17 @@ export class AnkiConnection {
     const deckName = config.deckName;
     const deckNames = await this._getDeckNames();
     if (deckName == null || !deckNames.includes(deckName)) {
-      throw createConfigErrorResponse(`卡片对应的${COMMON_CONFIG_MAP.deckName} 为空或在Anki上不存在`);
+      throw createConfigErrorResponse(
+        `卡片对应的${COMMON_CONFIG_MAP.deckName} 为空或在Anki上不存在`
+      );
     }
     //检查 modelName 是否为空
     const modelName = config.modelName;
     const modelNames = await this._getModelNames();
     if (modelName == null || !modelNames.includes(modelName)) {
-      throw createConfigErrorResponse(`卡片对应的${COMMON_CONFIG_MAP.modelName} 为空或在Anki上不存在`);
+      throw createConfigErrorResponse(
+        `卡片对应的${COMMON_CONFIG_MAP.modelName} 为空或在Anki上不存在`
+      );
     }
     //检查 fields 是否正确（在Anki上该值是否存在）
     const modelFieldNames = await this._getModelFieldNames(modelName);
@@ -195,7 +201,9 @@ export class AnkiConnection {
       return modelFieldNames.includes(val as string);
     });
     if (!includesAll) {
-      throw createConfigErrorResponse(`存在一些 字段名 无法在对应的 模型 中找到`);
+      throw createConfigErrorResponse(
+        `存在一些 字段名 无法在对应的 模型 中找到`
+      );
     }
   }
 

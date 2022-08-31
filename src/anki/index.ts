@@ -8,3 +8,16 @@ export type {
   GetModelFieldNamesReturnType,
 } from "./AnkiConnection";
 export { AnkiResponseStatus } from "./types";
+
+export {
+  isAnkiResponse,
+  createForgottenResponse,
+  createDuplicateResponse,
+  createAnkiErrorResponse,
+  createOldVersionResponse,
+  createSuccessAnkiResponse,
+  createConfigErrorResponse,
+  createDisconnectionResponse,
+  createFirstAddSuccessResponse,
+  createUnexpectedErrorResponse,
+} from "./utils";

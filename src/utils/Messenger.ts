@@ -8,8 +8,6 @@ import { AddNoteReturnType, RelearnCardsReturnType } from "@/anki";
 let uniqueId = 1;
 const CALLBACK = "CALLBACK";
 
-let callbackTarget: undefined | Window;
-
 interface MessageData {
   command: Command;
   //可选
@@ -72,9 +70,6 @@ export class Messenger {
         //传递给用户的回调函数，下面是内部发送逻辑
         if (callbackName != null) {
           //只有设置了回调函数的指令调用该方法时才有效。
-          if (__DEV__) {
-            callbackTarget = source as Window;
-          }
           //@ts-ignore CALLBACK 为内部使用的，用于触发回调
           this.postMessage(CALLBACK, data, callbackName);
         }
@@ -200,15 +195,6 @@ export class Messenger {
       uniqueId++; //保证唯一性
     }
 
-    /**
-     * callbackTarget相关的逻辑都是为了测试提供便利，其在生产中应该被删除
-     */
-    if (__DEV__) {
-      if (callbackTarget) {
-        callbackTarget.postMessage(message, "*");
-        callbackTarget = undefined;
-      }
-    }
     target.postMessage(message, "*");
   }
 }

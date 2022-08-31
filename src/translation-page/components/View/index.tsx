@@ -15,7 +15,12 @@ const messenger = new Messenger({
 });
 const { onMessage, postMessage } = messenger;
 messenger.install();
-
+/**
+ * 便于测试，使测试时不会出现跨域问题 
+ */
+if (__DEV__) {
+  messenger.addTarget(window);
+}
 const selectionListener = new SelectionListener((text) => {
   postMessage(Command.TranslateText, text);
 });
