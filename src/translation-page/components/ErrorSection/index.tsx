@@ -27,7 +27,7 @@ function PossibleSpelling(props: { possibleSpelling: string[] }) {
 
   return (
     <div className="bg-green-loveEye">
-      <p className="font-bold text-gray-700 text-lg">你要找的是否是：</p>
+      <h1 className="font-bold text-gray-700 text-lg">你要找的是否是：</h1>
       <ul>
         {possibleSpelling.map((text) => {
           return (

@@ -1,8 +1,3 @@
-/**
- * 对 window.addEventListener("message",callback) 与 window.postMessage 进行二次封装，
- *  使window.postMessage具备回调函数功能
- */
-
 import { FunctionAny } from "@/types";
 import { Command } from "@/configuration";
 import { warning } from "@/utils";
@@ -13,6 +8,8 @@ import { AddNoteReturnType, RelearnCardsReturnType } from "@/anki";
 let uniqueId = 1;
 const CALLBACK = "CALLBACK";
 
+let callbackTarget: undefined | Window;
+
 interface MessageData {
   command: Command;
   //可选
@@ -21,12 +18,16 @@ interface MessageData {
 }
 export type PostMessage = Messenger["postMessage"];
 export type OnMessage = Messenger["onMessage"];
-export class Messenger {
-  target?: Window;
-  self: Window;
-  callbacks: { [key: number]: FunctionAny };
-  handlers: { [key: string]: FunctionAny[] };
 
+/**
+ * 对 window.addEventListener("message",callback) 与 window.postMessage 进行二次封装，
+ *  使window.postMessage具备回调函数功能
+ */
+export class Messenger {
+  private target?: Window;
+  private self: Window;
+  private callbacks: { [key: number]: FunctionAny };
+  private handlers: { [key: string]: FunctionAny[] };
   constructor(options: { self: Window; target?: Window }) {
     this.self = options.self;
     this.target = options.target;
@@ -51,32 +52,34 @@ export class Messenger {
     const source = event.source;
     const { data, command, callbackName } = event.data;
     if (!__DEV__) {
-      // !__DEV__ 判断的目的在于便于测试，且希望其能够在生产环境中得到一些安全性
+      // !__DEV__ 判断的目的在于便于测试，另一个目的是希望其能够在生产环境中得到一些安全性
       if (target !== source) return;
-    } 
+    }
     const callback = callbackName == null ? null : callbacks[callbackName]; // 注释一
     //执行回调专用指令(回调函数响应)
-    //@ts-ignore 内部使用，不对外暴露
+    //@ts-ignore CALLBACK为内部使用，不对外暴露
     if (command === CALLBACK && callback == null) return;
-    //@ts-ignore 内部使用，不对外暴露
+    //@ts-ignore CALLBACK为内部使用，不对外暴露
     if (command === CALLBACK && callback) {
       callback(data);
       //@ts-ignore 根据 注释一 ,callback 存在，则 callbackName 必定不为 undefined
       delete callbacks[callbackName];
       return;
     }
-    if (handlers[command] != null) {
-      handlers[command]!.forEach((fn) => {
-        fn(data, (data: any) => {
-          //传递给用户的回调函数，下面是内部发送逻辑
-          if (callbackName != null) {
-            //只有设置了回调函数的指令调用该方法时才有效。
-            //@ts-ignore CALLBACK 为内部使用的，用于触发回调
-            this.postMessage(CALLBACK, data, callbackName);
+    if (handlers[command] == null) return;
+    handlers[command]!.forEach((fn) => {
+      fn(data, (data: any) => {
+        //传递给用户的回调函数，下面是内部发送逻辑
+        if (callbackName != null) {
+          //只有设置了回调函数的指令调用该方法时才有效。
+          if (__DEV__) {
+            callbackTarget = source as Window;
           }
-        });
+          //@ts-ignore CALLBACK 为内部使用的，用于触发回调
+          this.postMessage(CALLBACK, data, callbackName);
+        }
       });
-    }
+    });
   };
 
   //translation-page listen agent
@@ -197,6 +200,15 @@ export class Messenger {
       uniqueId++; //保证唯一性
     }
 
+    /**
+     * callbackTarget相关的逻辑都是为了测试提供便利，其在生产中应该被删除
+     */
+    if (__DEV__) {
+      if (callbackTarget) {
+        callbackTarget.postMessage(message, "*");
+        callbackTarget = undefined;
+      }
+    }
     target.postMessage(message, "*");
   }
 }
