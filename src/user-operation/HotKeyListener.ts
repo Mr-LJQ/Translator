@@ -64,7 +64,7 @@ export class HotKeyListener {
    * @param letter 当前需要判断的字母
    * @returns Boolean
    */
-  private validate = (letter: string) => {
+  private validate = (letter: string | undefined) => {
     if (letter == null) return false;
     return this.checkout.test(letter);
   };
