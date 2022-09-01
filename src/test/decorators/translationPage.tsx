@@ -34,8 +34,9 @@ export function hiddenChineseDecorator(Story: any) {
   );
 }
 
+export const audioElement = document.createElement("audio");
+
 export function audioElementDecorator(Story: any) {
-  const audioElement = document.createElement("audio");
   return (
     <AudioContext.Provider value={audioElement}>
       <Story />

@@ -10,11 +10,9 @@ const Template: ComponentStory<typeof Loading> = (args) => (
   <Loading {...args} />
 );
 
-export const Size20 = Template.bind({});
-
-export const Size30 = Template.bind({});
-Size30.args = {
-  size: 30,
+export const Size50 = Template.bind({});
+Size50.args = {
+  size: 50,
 };
 
 export const ColorRed = Template.bind({});

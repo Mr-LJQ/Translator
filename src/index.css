@@ -10,7 +10,6 @@
   .audio:after {
     content: "\1f509"; /*🔉*/
     vertical-align: text-top;
-    font-size: 28px;
   }
   fieldset:disabled,
   fieldset:disabled * {

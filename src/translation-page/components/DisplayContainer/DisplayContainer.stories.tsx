@@ -70,14 +70,7 @@ export const SentenceSection = Template.bind({});
 
 export const Loading = Template.bind({});
 Loading.args = {
-  data: sentenceData,
-  ankiButtonInfoObject: {
-    [__main__]: [
-      {
-        status: Status.Loading,
-        message: "请等待...",
-      },
-    ],
-  },
+  //@ts-ignore 说明 Loading 与 data 无关
+  data:{},
   isLoading: true,
 };

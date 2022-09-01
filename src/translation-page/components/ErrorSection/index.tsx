@@ -93,7 +93,7 @@ function TranslationAgain(props: { queryText?: string; message?: string }) {
           再次查询
         </button>
       )}
-      <p className=" text-2xl text-center mt-2">{message}</p>
+      <h1 className=" text-2xl text-center mt-2">{message}</h1>
     </div>
   );
 }

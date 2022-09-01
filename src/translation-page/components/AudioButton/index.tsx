@@ -40,17 +40,18 @@ export const AudioButton = React.forwardRef<{ playAudio: () => void }, Props>(
     );
     return (
       <button
+        aria-label="AudioButton"
         className={classJoin(
           `
           h-12
-          text-[0px]
+          text-3xl
           align-text-top
           audio
-          focus-visible:underline
-          focus-visible:underline-offset-4
-          hover:play-audio
+          focus:underline
           focus:play-audio
-          focus:outline-none
+          focus:underline-offset-4
+          hover:play-audio
+          outline-none
           select-none
           cursor-pointer
           `,
@@ -60,9 +61,7 @@ export const AudioButton = React.forwardRef<{ playAudio: () => void }, Props>(
         ref={buttonRef}
         hidden={!audioURL}
         onClick={playAudio}
-      >
-        播放音频
-      </button>
+      />
     );
   }
 );

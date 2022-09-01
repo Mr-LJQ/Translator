@@ -13,6 +13,8 @@ export const AnkiButton = function AnkiButton(props: Props) {
   const { status, message, updateAnki, className, cardIds } = props;
   return (
     <Button
+      aria-label="AnkiButton"
+      data-status={status}
       title={message}
       onClick={() => {
         /**
@@ -50,10 +52,11 @@ export const AnkiButton = function AnkiButton(props: Props) {
       className={classJoin(
         ` 
           relative w-8 
+          m-1
           focus:outline-none  
           focus:ring-2  
-          focus:ring-offset-1  
-          focus:ring-slate-400  
+          focus:ring-offset-2  
+          focus:ring-slate-500  
           focus:ring-offset-slate-50 
         `,
         getStatusIcon(status),
@@ -62,14 +65,13 @@ export const AnkiButton = function AnkiButton(props: Props) {
             status === Status.Add ||
             status === Status.Loading ||
             status === Status.Success,
-          "prior:bg-blue-500 prior:hover:bg-blue-600":
+          "bg-blue-500 hover:bg-blue-600":
             status === Status.LearnNow || status === Status.Forgotten,
-          "prior:bg-violet-600 prior:hover:bg-violet-700":
+          "bg-violet-600 hover:bg-violet-700":
             status === Status.Duplicate || status === Status.ConfigError,
-          "prior:bg-red-600 prior:hover:bg-red-700":
+          "bg-red-600 hover:bg-red-700":
             status === Status.Error || status === Status.Disconnect,
-          "prior:cursor-auto":
-            status === Status.Loading || status === Status.Success,
+          "cursor-auto": status === Status.Loading || status === Status.Success,
         },
         className
       )}

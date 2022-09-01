@@ -16,7 +16,7 @@ const messenger = new Messenger({
 const { onMessage, postMessage } = messenger;
 messenger.install();
 /**
- * 便于测试，使测试时不会出现跨域问题 
+ * 便于测试，使测试时不会出现跨域问题
  */
 if (__DEV__) {
   messenger.addTarget(window);
@@ -37,7 +37,7 @@ onMessage(Command.OpenSelection, (enable) => {
 });
 
 export function View() {
-  const [hiddenChinese, setHiddenChinese] = useState(true);
+  const [hiddenChinese, setHiddenChinese] = useState(false);
   //需要使用 useLayoutEffect ，以尽可能早的添加该监听
   useLayoutEffect(() => {
     return onMessage(Command.HiddenChinese, (hidden) => {

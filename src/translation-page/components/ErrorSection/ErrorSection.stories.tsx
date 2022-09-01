@@ -6,11 +6,11 @@ import {
   waitFor,
   waitForElementToBeRemoved,
 } from "@storybook/testing-library";
+import { ErrorSection } from ".";
+import { MessengerContext } from "../Context";
 import { expect, jest } from "@storybook/jest";
 import { Command } from "@/configuration/command";
-import { ErrorSection } from ".";
 import { containerDecorator, cacographyData, errorData } from "@/test";
-import { MessengerContext } from "../Context";
 
 const onMessageMocked = jest.fn<any, any[]>();
 const postMessageMocked = jest.fn<any, any[]>();

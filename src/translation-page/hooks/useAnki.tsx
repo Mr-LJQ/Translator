@@ -61,7 +61,7 @@ export function useAnki(params: AnkiParams) {
       });
 
       const { status } = ankiButtonInfo;
-      const prevStatus = status
+      const prevStatus = status;
       switch (status) {
         case Status.Add:
         case Status.Duplicate:
@@ -98,7 +98,9 @@ export function useAnki(params: AnkiParams) {
             loadingSet.delete(symbol);
             return produce(ankiButtonInfoObject, (draft) => {
               draft[key]![idx]!.message = message;
-              draft[key]![idx]!.cardIds = data || ankiButtonInfo.cardIds;
+              if (Array.isArray(data) && data.every((item) => isFinite(item))) {
+                draft[key]![idx]!.cardIds = data;
+              }
               //transformAnkiResponseStatus 保证不为undefined，有开发时的报错保护，以及相关单元测试进行保证
               draft[key]![idx]!.status = transformAnkiResponseStatus(status)!;
             });
@@ -119,15 +121,20 @@ export function useAnki(params: AnkiParams) {
            *  在配置错误被用户修正前，用户点击按钮都会打开配置页面
            *  在修正后，用户点击按钮则会重新添加卡片。
            */
-          if (prevStatus === Status.ConfigError && newStatus === Status.ConfigError) {
-            postMessage(Command.OpenOptionsPage)
+          if (
+            prevStatus === Status.ConfigError &&
+            newStatus === Status.ConfigError
+          ) {
+            postMessage(Command.OpenOptionsPage);
           }
 
           setAnkiButtonInfoObject(function (ankiButtonInfoObject) {
             loadingSet.delete(symbol);
             return produce(ankiButtonInfoObject, (draft) => {
               draft[key]![idx]!.message = message;
-              draft[key]![idx]!.cardIds = data || ankiButtonInfo.cardIds;
+              if (Array.isArray(data) && data.every((item) => isFinite(item))) {
+                draft[key]![idx]!.cardIds = data;
+              }
               draft[key]![idx]!.status = newStatus;
             });
           });
