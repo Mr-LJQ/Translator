@@ -4,23 +4,54 @@ import userEvent from "@testing-library/user-event";
 import { AnkiButton } from ".";
 import { Status } from "../../types";
 
-test("当处于 Status.Duplicate 状态时，单击按钮可以将查询字符串添加到剪切板", async () => {
+test("当处于 Status.Loading/Success 状态时，单击按钮什么都不会发生", async () => {
   const mockFn = jest.fn();
   const user = userEvent.setup();
 
-  render(
+  const ables = [
+    Status.Add,
+    Status.Error,
+    Status.LearnNow,
+    Status.Forgotten,
+    Status.Disconnect,
+    Status.ConfigError,
+  ];
+
+  const view = render(
     <AnkiButton
       {...{
-        status: Status.Duplicate,
-        message: "Duplicate",
-        cardIds: [123, 456, 789],
+        message: "",
         updateAnki: mockFn,
+        status: Status.Loading,
       }}
     />
   );
   await user.click(screen.getByRole("button"));
-  expect(mockFn).toBeCalledTimes(1);
-  expect(await navigator.clipboard.readText()).toBe(
-    "cid:123 OR cid:456 OR cid:789"
+  expect(mockFn).toBeCalledTimes(0);
+
+  view.rerender(
+    <AnkiButton
+      {...{
+        message: "",
+        updateAnki: mockFn,
+        status: Status.Success,
+      }}
+    />
   );
+  await user.click(screen.getByRole("button"));
+  expect(mockFn).toBeCalledTimes(0);
+
+  for (const [i, status] of ables.entries()) {
+    view.rerender(
+      <AnkiButton
+        {...{
+          message: "",
+          status: status,
+          updateAnki: mockFn,
+        }}
+      />
+    );
+    await user.click(screen.getByRole("button"));
+    expect(mockFn).toBeCalledTimes(i+1);
+  }
 });

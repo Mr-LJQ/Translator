@@ -128,6 +128,24 @@ export function useAnki(params: AnkiParams) {
             postMessage(Command.OpenOptionsPage);
           }
 
+          /**
+           * 如果是重复，则第二次点击会复制一份利于在Anki上查找重复卡片的搜索字符
+           *  如果重复已处理，则进行重试，不会复制。
+           */
+          if (
+            prevStatus === Status.Duplicate &&
+            newStatus === Status.Duplicate
+          ) {
+            if (data) {
+              const queryText = (data as number[])
+                .map((item) => {
+                  return "cid:" + item;
+                })
+                .join(" OR ");
+              navigator.clipboard.writeText(queryText);
+            }
+          }
+
           setAnkiButtonInfoObject(function (ankiButtonInfoObject) {
             loadingSet.delete(symbol);
             return produce(ankiButtonInfoObject, (draft) => {

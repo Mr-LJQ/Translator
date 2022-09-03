@@ -21,7 +21,7 @@ import { PhraseSection } from "../PhraseSection";
 import { SentenceSection } from "../SentenceSection";
 import { LoadingMask } from "../Loading";
 
-export interface Props {
+interface Props {
   isLoading: boolean;
   data: TranslationResult | undefined;
   ankiButtonInfoObject: AnkiButtonInfoObject;

@@ -2,7 +2,6 @@ import React from "react";
 import classJoin from "classnames";
 import { AnkiButtonInfo, Status } from "../../types";
 import { getStatusIcon } from "../../utils";
-import { warning } from "@/utils";
 
 interface Props extends AnkiButtonInfo {
   className?: string;
@@ -24,27 +23,6 @@ export const AnkiButton = function AnkiButton(props: Props) {
           case Status.Loading:
           case Status.Success:
             return;
-          case Status.Add:
-          case Status.Error:
-          case Status.LearnNow:
-          case Status.Forgotten:
-          case Status.Disconnect:
-          case Status.ConfigError:
-            break;
-          case Status.Duplicate: {
-            if (cardIds) {
-              const queryText = cardIds
-                .map((item) => {
-                  return "cid:" + item;
-                })
-                .join(" OR ");
-              navigator.clipboard.writeText(queryText);
-            }
-            break;
-          }
-          default: {
-            warning(false, `存在未处理的 ${status}`);
-          }
         }
         //@ts-ignore updateAnki不需要传入任何数据，这里传入数据只不过是为了便于测试
         return updateAnki(status, message, cardIds);

@@ -235,9 +235,20 @@ test("正确的Anki操作功能(useAnki)", async () => {
     expect(ankiButton).toHaveAttribute("data-status", String(Status.Duplicate));
   });
 
+  //status.Duplicate时，再次点击会将复制一份搜索字符串到剪切板
+  await user.click(ankiButton);
+  expect(ankiButton).toHaveAttribute("data-status", String(Status.Loading));
+  expect(mockAddNote).toBeCalledWith(returnData);
+  ankiCallback(createDuplicateResponse([123, 456, 789]));
+  await waitFor(() => {
+    expect(ankiButton).toHaveAttribute("data-status", String(Status.Duplicate));
+  });
+  const queryText = await navigator.clipboard.readText();
+  expect(queryText).toBe("cid:123 OR cid:456 OR cid:789");
+
   await user.click(ankiButton);
   expect(mockAddNote).toBeCalledWith(returnData);
-  expect(mockAddNote).toBeCalledTimes(2);
+  expect(mockAddNote).toBeCalledTimes(3);
   ankiCallback(createConfigErrorResponse(""));
   await waitFor(() => {
     expect(ankiButton).toHaveAttribute(
@@ -251,7 +262,7 @@ test("正确的Anki操作功能(useAnki)", async () => {
   onMessage(Command.OpenOptionsPage, mockOpenOptionsPage);
   await user.click(ankiButton);
   expect(mockAddNote).toBeCalledWith(returnData);
-  expect(mockAddNote).toBeCalledTimes(3);
+  expect(mockAddNote).toBeCalledTimes(4);
   ankiCallback(createConfigErrorResponse(""));
   await waitFor(() => {
     expect(ankiButton).toHaveAttribute(
@@ -263,7 +274,7 @@ test("正确的Anki操作功能(useAnki)", async () => {
   await user.click(ankiButton);
   expect(mockOpenOptionsPage).toBeCalledTimes(1);
   expect(mockAddNote).toBeCalledWith(returnData);
-  expect(mockAddNote).toBeCalledTimes(4);
+  expect(mockAddNote).toBeCalledTimes(5);
   ankiCallback(createAnkiErrorResponse(""));
   await waitFor(() => {
     expect(ankiButton).toHaveAttribute("data-status", String(Status.Error));
@@ -272,7 +283,7 @@ test("正确的Anki操作功能(useAnki)", async () => {
   await user.click(ankiButton);
   expect(mockOpenOptionsPage).toBeCalledTimes(1);
   expect(mockAddNote).toBeCalledWith(returnData);
-  expect(mockAddNote).toBeCalledTimes(5);
+  expect(mockAddNote).toBeCalledTimes(6);
   ankiCallback(createForgottenResponse([4399]));
   await waitFor(() => {
     expect(ankiButton).toHaveAttribute("data-status", String(Status.Forgotten));
@@ -392,7 +403,6 @@ test("正确的实现其它功能(useFeature)", async () => {
     ).toBeInTheDocument();
   });
 });
-
 
 /* 
 test("正确的实现Selection功能", async () => {

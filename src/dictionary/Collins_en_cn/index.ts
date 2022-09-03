@@ -144,7 +144,11 @@ function handleNotFound(dom: Document, text: string) {
     throw createCacography(possibleSpelling);
   }
   //真的没有找到任何翻译
-  throw createNoCacheError(`"没找到关于 '${text}' 的任何翻译"`);
+  throw createNoCacheError(
+    `"没找到关于 '${
+      text.length > 100 ? text.slice(0, 101) + "..." : text
+    }' 的任何翻译"`
+  );
 }
 
 /**
