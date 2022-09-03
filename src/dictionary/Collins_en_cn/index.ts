@@ -90,15 +90,24 @@ export class Collins_en_cn {
    */
   private async translateText(text: string): Promise<TranslationResult> {
     try {
+      //对于以 - 连接的单个单词，例如 add-on，应该传递原文本
+      const kebabCase = /\b[a-z]+-[a-z]+\b/i;
+      const kebabText = text.replace(kebabCase, "");
+      const isKebabCase = kebabText.length === 0;
+      //对于多个单词组合而成的文本，应该传递为原文本
+      const isMuchWord = /\s/g.test(text);
+
       //将 驼峰、-、_ 等写法连接的文本转换为由空格分隔的文本
       const formattedText = spaceCase(text);
-      const isMuchWord = /\s/g.test(text);
+
+      //如果其无法分成多个单词，则应该传递原文本
       const isMuchFormatted = /\s/g.test(formattedText);
       let dom: Document;
 
-      if (isMuchWord || !isMuchFormatted) {
+      if (isMuchWord || isKebabCase || !isMuchFormatted) {
         dom = await this.getPageDOM(text);
       } else {
+        //对驼峰、-、_ 等写法连接的文本，将其分开后在查询
         dom = await this.getPageDOM(formattedText);
       }
       let translation: WordData | PhraseData | SentenceData | void;

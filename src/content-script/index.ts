@@ -38,7 +38,7 @@ agent.onMessage(Command.TranslateText, function (data) {
   translateAndShowIframeText(data);
 });
 agent.onMessage(Command.OpenOptionsPage, function () {
-  postBackend(Command.OpenOptionsPage)
+  postBackend(Command.OpenOptionsPage);
 });
 agent.install();
 

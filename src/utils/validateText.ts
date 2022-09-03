@@ -12,11 +12,11 @@ export function validateText(text: string) {
   if (!text) return false;
 
   //如果英文字母数量不足百分之五十，则认为其并非需要查询的内容
-  const amount = text.match(/\b[a-z]+\b/gi)?.reduce((amount, item) => {
+  const amount = text.match(/[a-z]+/gi)?.reduce((amount, item) => {
     return amount + item.length;
   }, 0);
   if (!amount || amount / text.length < 0.5) return false;
-  
+
   //过滤用户对URL的复制的查询
   if (text.search(/http:|https:/gi) === 0) return false;
 
