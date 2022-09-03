@@ -10,7 +10,7 @@ import type { HotKey, TranslateAndDisplayText, GetPoint } from "@/types";
 export class HotKeyListener {
   modify;
   restore;
-  private hotKey?: HotKey;
+  private hotKey: HotKey;
   private checkout: RegExp;
   private getPoint: GetPoint;
   private translateAndDisplayText: TranslateAndDisplayText;
@@ -22,14 +22,14 @@ export class HotKeyListener {
     this.getPoint = getPoint;
     this.translateAndDisplayText = translateAndDisplayText;
     this.hotKey = "shiftKey";
-    this.checkout = /[a-z_]/i;
+    this.checkout = /[a-z-]/i;
 
     const { modify, restore } = new UserSelectHandler();
     this.modify = modify;
     this.restore = restore;
   }
 
-  updateHotKey = (hotKey: HotKey | undefined) => {
+  updateHotKey = (hotKey: HotKey) => {
     this.hotKey = hotKey;
   };
 
@@ -43,8 +43,11 @@ export class HotKeyListener {
 
   private onKeyDown = (event: KeyboardEvent) => {
     const { hotKey } = this;
+    const otherHotkey = ["shiftKey", "ctrlKey", "altKey"].filter((item) => {
+      return item !== hotKey;
+    }) as HotKey[];
 
-    if (hotKey && event[hotKey]) {
+    if (hotKey && event[hotKey] && otherHotkey.every((name) => !event[name])) {
       //当焦点在可输入元素上，不进行热键选词
       const focusNode = document.activeElement;
       if (focusNode && isContentEditable(focusNode)) return;

@@ -5,8 +5,8 @@ export class UserSelectHandler {
   modify = (element: HTMLElement) => {
     const modifiedHTMLElements = this.modifiedHTMLElements;
     if (!modifiedHTMLElements.has(element)) {
-      var userSelectValue = element.style.getPropertyValue(USER_SELECT);
-      var userSelectPriority = element.style.getPropertyPriority(USER_SELECT);
+      const userSelectValue = element.style.getPropertyValue(USER_SELECT);
+      const userSelectPriority = element.style.getPropertyPriority(USER_SELECT);
       modifiedHTMLElements.set(element, [userSelectValue, userSelectPriority]);
       element.style.setProperty(USER_SELECT, "text", "important");
     }
