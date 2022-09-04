@@ -7,7 +7,7 @@ import {
   isSearchContainer,
 } from "./utils";
 
-import type{ TranslateAndDisplayText } from "@/types";
+import type { TranslateAndDisplayText } from "@/types";
 
 export class SelectionListener {
   private enableCtrl = true;
@@ -30,9 +30,9 @@ export class SelectionListener {
   /**
    * @param value true,使得用户能够在按住 Ctrl键进行选取时，可以翻译 可输入元素内部的文本，false则是不可以
    */
-  switchStrengthenSelectionByPressedCtrl = (value: boolean) =>{
+  switchStrengthenSelectionByPressedCtrl = (value: boolean) => {
     this.enableCtrl = value;
-  }
+  };
 
   private onMouseDown = () => {
     document.addEventListener("selectionchange", this.onSelectionChange, {
@@ -67,7 +67,6 @@ export class SelectionListener {
       if (focusNode && isContentEditable(focusNode)) return;
     }
     if (isSearchContainer(focusNode)) return;
-
     this.translateAndDisplayText(selectedText);
   };
 }
