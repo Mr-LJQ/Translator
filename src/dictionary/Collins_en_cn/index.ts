@@ -1,4 +1,5 @@
 import { spaceCase } from "../utils";
+import { translate_alibaba } from "../substitute";
 import {
   Cache,
   isErrorData,
@@ -112,8 +113,12 @@ export class Collins_en_cn {
       }
       let translation: WordData | PhraseData | SentenceData | void;
       //如果存在空格，则认为其为多个单词组合的句子、词组
-      if (isMuchFormatted) {
+      if (isMuchFormatted || isMuchWord) {
         translation = translatePhraseAndSentence(dom);
+        //情况三：无法在网易翻译找到，尝试使用阿里翻译兜底
+        if (!translation) {
+          translation = await translate_alibaba(text);
+        }
       } else {
         translation = translateWord(dom);
       }
