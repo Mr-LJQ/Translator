@@ -13,141 +13,47 @@ import {
   containerDecorator,
 } from "@/test";
 import { View } from ".";
+
+const renderData = {
+  wordData,
+  phraseData,
+  sentenceData,
+  errorData,
+  cacographyData,
+};
 export default {
   title: "View",
   component: View,
+  argTypes: {
+    hiddenChinese: {
+      control: "boolean",
+    },
+    data: {
+      control: {
+        type: "select",
+      },
+      options: Object.keys(renderData),
+      mapping: renderData,
+    },
+  },
   decorators: [containerDecorator],
 } as ComponentMeta<typeof View>;
 
-const Template: ComponentStory<typeof View> = () => {
+const { install, postMessage } = new Messenger({
+  self: window,
+  target: window,
+});
+install();
+
+const Template: ComponentStory<typeof View> = (args) => {
+  //@ts-ignore
+  const { hiddenChinese, data } = args;
+  postMessage(Command.HiddenChinese, hiddenChinese);
+  postMessage(Command.ShowTranslation, data, () => void 0);
   return <View />;
 };
 
 export const WordSection = Template.bind({});
-
-WordSection.play = async ({ canvasElement }) => {
-  const canvas = within(canvasElement);
-  const { install, uninstall, postMessage } = new Messenger({
-    self: window,
-    target: window,
-  });
-  const callback = jest.fn();
-  install();
-  postMessage(Command.ShowTranslation, wordData, callback);
-  await waitFor(() => {
-    expect(canvas.getByRole("heading")).toHaveTextContent(wordData.word);
-  });
-  await waitFor(() => {
-    expect(callback).toBeCalled();
-  });
-  uninstall();
-};
-
-export const PhraseSection = Template.bind({});
-
-PhraseSection.play = async ({ canvasElement }) => {
-  const canvas = within(canvasElement);
-  const { install, uninstall, postMessage } = new Messenger({
-    self: window,
-    target: window,
-  });
-  install();
-  const callback = jest.fn();
-  postMessage(Command.ShowTranslation, phraseData, callback);
-  await waitFor(() => {
-    expect(canvas.getByRole("heading")).toHaveTextContent(phraseData.phrase);
-  });
-  await waitFor(() => {
-    expect(callback).toBeCalled();
-  });
-  uninstall();
-};
-
-export const SentenceSection = Template.bind({});
-
-SentenceSection.play = async ({ canvasElement }) => {
-  const canvas = within(canvasElement);
-  const { install, uninstall, postMessage } = new Messenger({
-    self: window,
-    target: window,
-  });
-  install();
-  const callback = jest.fn();
-  postMessage(Command.ShowTranslation, sentenceData, callback);
-  await waitFor(() => {
-    expect(canvas.getByRole("heading")).toHaveTextContent(
-      sentenceData.sentence
-    );
-  });
-  await waitFor(() => {
-    expect(callback).toBeCalled();
-  });
-  uninstall();
-};
-
-export const ErrorSection = Template.bind({});
-
-ErrorSection.play = async ({ canvasElement }) => {
-  const canvas = within(canvasElement);
-  const { install, uninstall, postMessage } = new Messenger({
-    self: window,
-    target: window,
-  });
-  install();
-  const callback = jest.fn();
-  postMessage(Command.ShowTranslation, errorData, callback);
-  await waitFor(() => {
-    expect(
-      canvas.getByRole("button", { name: "再次查询" })
-    ).toBeInTheDocument();
-  });
-  await waitFor(() => {
-    expect(callback).toBeCalled;
-  });
-  uninstall();
-};
-
-export const cacographySection = Template.bind({});
-
-cacographySection.play = async ({ canvasElement }) => {
-  const canvas = within(canvasElement);
-  const { install, uninstall, postMessage } = new Messenger({
-    self: window,
-    target: window,
-  });
-  install();
-  const callback = jest.fn();
-  postMessage(Command.ShowTranslation, cacographyData, callback);
-  await waitFor(() => {
-    expect(
-      canvas.getByRole("heading", { name: "你要找的是否是：" })
-    ).toBeInTheDocument();
-  });
-  await waitFor(() => {
-    expect(callback).toBeCalled;
-  });
-  uninstall();
-};
-
-export const History = Template.bind({});
-
-History.play = async ({ canvasElement }) => {
-  const { install, uninstall, postMessage } = new Messenger({
-    self: window,
-    target: window,
-  });
-  install();
-  const callback = jest.fn();
-  const canvas = within(canvasElement);
-  postMessage(Command.ShowTranslation, errorData, callback);
-  await waitFor(() => {
-    expect(
-      canvas.getByRole("button", { name: "再次查询" })
-    ).toBeInTheDocument();
-  });
-  postMessage(Command.ShowTranslation, phraseData, callback);
-  await waitFor(() => {
-    expect(canvas.getByRole("heading")).toHaveTextContent(phraseData.phrase);
-  });
-  uninstall();
+WordSection.args = {
+  hiddenChinese: false,
 };

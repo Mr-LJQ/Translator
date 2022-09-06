@@ -1,5 +1,11 @@
 import React from "react";
-import { render, screen, waitFor, act } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  act,
+  waitForElementToBeRemoved,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Messenger } from "@/utils/Messenger";
 import { Command } from "@/configuration";
@@ -10,9 +16,6 @@ import {
   sentenceData,
   wordData,
 } from "@/test";
-import { View } from ".";
-import { Status } from "../../types";
-import { transformWordData, transformTranslations } from "../../utils";
 import {
   AddNoteReturnType,
   createAnkiErrorResponse,
@@ -25,9 +28,63 @@ import {
   createSuccessAnkiResponse,
   createUnexpectedErrorResponse,
 } from "@/anki";
+import { View } from ".";
+import { Status } from "../../types";
+import { transformWordData } from "../../utils";
 
 //jsdom没有实现该方法
 const mockScrollTo = jest.spyOn(window, "scrollTo").mockImplementation();
+
+/**
+ * 由于 jsdom 在 selection 改变时不会触发 selectionchange监听，因此需要手动实现
+ */
+const originAddEventlistener = document.addEventListener.bind(document);
+const originRemoveEventListener = document.removeEventListener.bind(document);
+
+let prevSelection: string | undefined;
+const map = new Map<(...args: any[]) => void, (...args: any[]) => void>();
+
+jest
+  .spyOn(document, "removeEventListener")
+  .mockImplementation((type, listener, options) => {
+    //@ts-ignore listener在设计上保证是函数
+    if (map.has(listener)) {
+      //@ts-ignore listener在设计上保证是函数
+      originRemoveEventListener(type, map.get(listener), options);
+      return;
+    }
+    originRemoveEventListener(type, listener, options);
+  });
+jest
+  .spyOn(document, "addEventListener")
+  .mockImplementation((type, listener, options) => {
+    if (type === "mousedown") {
+      const callback = (...args: [ev: MouseEvent]) => {
+        prevSelection = getSelection()?.toString();
+        //@ts-ignore listener在设计上保证是函数
+        return listener.apply(document, args);
+      };
+      //@ts-ignore listener在设计上保证是函数
+      map.set(listener, callback);
+      originAddEventlistener(type, callback, options);
+      return;
+    }
+    if (type === "mouseup") {
+      const callback = (...args: [ev: MouseEvent]) => {
+        const currentSelection = getSelection()?.toString();
+        if (currentSelection !== prevSelection) {
+          document.dispatchEvent(new Event("selectionchange", {}));
+        }
+        //@ts-ignore listener在设计上保证是函数
+        return listener.apply(document, args);
+      };
+      //@ts-ignore listener在设计上保证是函数
+      map.set(listener, callback);
+      originAddEventlistener(type, callback, options);
+      return;
+    }
+    originAddEventlistener(type, listener, options);
+  });
 
 function sleep(time = 0) {
   return act(() => {
@@ -404,7 +461,6 @@ test("正确的实现其它功能(useFeature)", async () => {
   });
 });
 
-/* 
 test("正确的实现Selection功能", async () => {
   const user = userEvent.setup();
   render(<h1>word</h1>);
@@ -412,17 +468,48 @@ test("正确的实现Selection功能", async () => {
   const mockFn = jest.fn();
   onMessage(Command.TranslateText, mockFn);
   await user.dblClick(screen.getByRole("heading"));
-  await waitFor(() => {
-    expect(mockFn).toBeCalledWith("word", expect.any(Function));
-  });
-}); */
+  expect(mockFn).not.toBeCalled();
+  postMessage(Command.OpenSelection, true);
+  await user.dblClick(screen.getByRole("heading"));
+  expect(mockFn).toBeCalledWith("word", expect.any(Function));
+  postMessage(Command.OpenSelection, false);
+  await user.dblClick(screen.getByRole("heading"));
+  expect(mockFn).toBeCalledTimes(1);
+});
 
-/*
-test("Anki按钮一一对应",)
-test("数据正确渲染",)
-test("历史记录功能正确运作",)
-test("停止播放指令监听有效",)
-test("开关Selection功能的指令监听有效",)
-test("Selection功能正常运行",)
-test("Loading能够在正确的时机显示",)
-test("显隐中文翻译功能正确实现",) */
+test("监听停止播放指令", async () => {
+  const originPause = HTMLAudioElement.prototype.pause;
+  const mockFn = jest.fn();
+  HTMLAudioElement.prototype.pause = mockFn;
+  const { postMessage } = messenger;
+  postMessage(Command.PauseAudio);
+  await waitFor(() => {
+    expect(mockFn).toBeCalledTimes(1);
+  });
+  HTMLAudioElement.prototype.pause = originPause;
+});
+
+test("显隐中文翻译功能正确实现", async () => {
+  render(<View />);
+  const { postMessage } = messenger;
+  postMessage(Command.ShowTranslation, wordData, () => void 0);
+  const chinese = wordData.translationList![0]!.translation;
+  await waitFor(() => {
+    expect(screen.getByText(chinese)).toBeInTheDocument();
+  });
+  postMessage(Command.HiddenChinese, true);
+  await waitForElementToBeRemoved(screen.queryByText(chinese));
+});
+
+test("切换翻译数据时，停止音频播放", async () => {
+  render(<View />);
+  const { postMessage } = messenger;
+  const originPause = HTMLAudioElement.prototype.pause;
+  const mockFn = jest.fn();
+  HTMLAudioElement.prototype.pause = mockFn;
+  postMessage(Command.ShowTranslation, sentenceData, () => void 0);
+  await waitFor(() => {
+    expect(mockFn).toBeCalled();
+  });
+  HTMLAudioElement.prototype.pause = originPause;
+});
