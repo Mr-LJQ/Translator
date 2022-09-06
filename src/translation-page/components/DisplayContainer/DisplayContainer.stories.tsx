@@ -1,7 +1,6 @@
 import React from "react";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { DisplayContainer } from ".";
-import { Status } from "../../types";
 import { __main__, createHistory } from "../../utils";
 import { Primary as ErrorPrimary } from "../ErrorSection/ErrorSection.stories";
 import { Primary as PhrasePrimary } from "../PhraseSection/PhraseSection.stories";
@@ -71,6 +70,6 @@ export const SentenceSection = Template.bind({});
 export const Loading = Template.bind({});
 Loading.args = {
   //@ts-ignore 说明 Loading 与 data 无关
-  data:{},
+  data: {},
   isLoading: true,
 };
