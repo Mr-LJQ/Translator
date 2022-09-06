@@ -11,16 +11,23 @@ export function containerDecorator(Story: any) {
         width: 400,
         height: 300,
         boxShadow: "0 0 0 10px skyblue",
-        overflowY: "auto",
         transform: "scale(1)",
       }}
     >
       <div
         style={{
-          padding: "0 8px 8px 8px",
+          width: 400,
+          height: 300,
+          overflowY: "auto",
         }}
       >
-        <Story />
+        <div
+          style={{
+            padding: "0 8px 8px 8px",
+          }}
+        >
+          <Story />
+        </div>
       </div>
     </div>
   );
