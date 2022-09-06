@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { isErrorData, TranslationResult } from "@/dictionary";
 import { Command } from "@/configuration";
-import { useMessenger } from "../components/Context";
+import { useMessenger, useAudio } from "../components/Context";
 import { useAnki } from "./useAnki";
 import { useHistory } from "./useHistory";
 import { useLoadedObserver } from "./useLoadedObserver";
@@ -12,7 +12,7 @@ import { createHistory } from "../utils";
  */
 export function useFeature() {
   const { onMessage } = useMessenger();
-
+  const audioElement = useAudio();
   const [data, setData] = useState<TranslationResult | undefined>();
   //创建一个data的引用，以及时获取最新的 data
   const dateRef = useRef(data);
@@ -101,8 +101,9 @@ export function useFeature() {
     function () {
       showTranslationCallbackRef.current?.();
       showTranslationCallbackRef.current = undefined;
+      audioElement.pause();
     },
-    [data]
+    [data, audioElement]
   );
   return {
     data,
