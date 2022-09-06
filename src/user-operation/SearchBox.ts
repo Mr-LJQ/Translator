@@ -1,12 +1,12 @@
-/**
- * 允许用户通过搜索栏主动输入单词，而后对单词进行查询
- */
 import { attachSymbolToSearchContainer } from "./utils";
 import type { TranslateAndDisplayText } from "@/types";
 
+/**
+ * 允许用户通过搜索栏主动输入单词，而后对单词进行查询
+ */
 export class SearchBox {
   openSearchBox;
-  closeSearchBox;
+  private closeSearchBox;
   private container;
 
   constructor(translateAndDisplayText: TranslateAndDisplayText) {
@@ -15,15 +15,15 @@ export class SearchBox {
     );
     this.container = container;
     this.openSearchBox = openSearchBox;
-    this.closeSearchBox = closeSearchBox
+    this.closeSearchBox = closeSearchBox;
   }
   install = () => {
     document.body.append(this.container);
   };
   uninstall = () => {
-    this.closeSearchBox()
+    this.closeSearchBox();
     this.container.remove();
-  }
+  };
 }
 
 const FORM_ID = "search-form";
@@ -100,7 +100,7 @@ function createSearchBar(translateAndDisplayText: TranslateAndDisplayText) {
   //当用户按下enter键时进行查询
   form.addEventListener("submit", function (event) {
     event.preventDefault();
-    var text = input.value.trim();
+    const text = input.value.trim();
     if (text) {
       translateAndDisplayText(text);
     }
