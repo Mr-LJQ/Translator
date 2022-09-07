@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import classJoin from "classnames";
 import { setStorage } from "@/extensions-api";
-import { Loading } from "@/translation-page";
+import { LoadingMask } from "@/translation-page";
 import { Button } from "../pure-components";
 import { useAnkiStore, ankiStoreSubscribe, getStorage } from "../stores";
 
@@ -51,7 +51,7 @@ export const Footer = React.memo(function Footer() {
   return (
     <>
       {(isRefreshing || isSaving) && (
-        <Loading className="absolute inset-0 z-50" />
+        <LoadingMask className="absolute inset-0 z-50" />
       )}
       {displayAlert && (
         <AlertMessage
