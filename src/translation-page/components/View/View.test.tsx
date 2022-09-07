@@ -95,6 +95,9 @@ function sleep(time = 0) {
     });
   });
 }
+const mockPause = jest.fn();
+
+HTMLAudioElement.prototype.pause = mockPause;
 
 let messenger: Messenger;
 beforeEach(() => {
@@ -105,6 +108,7 @@ beforeEach(() => {
 afterEach(() => {
   messenger.uninstall();
   mockScrollTo.mockClear();
+  mockPause.mockClear();
 });
 
 test("正确的历史功能(useHistory)", async () => {
@@ -478,15 +482,11 @@ test("正确的实现Selection功能", async () => {
 });
 
 test("监听停止播放指令", async () => {
-  const originPause = HTMLAudioElement.prototype.pause;
-  const mockFn = jest.fn();
-  HTMLAudioElement.prototype.pause = mockFn;
   const { postMessage } = messenger;
   postMessage(Command.PauseAudio);
   await waitFor(() => {
-    expect(mockFn).toBeCalledTimes(1);
+    expect(mockPause).toBeCalledTimes(1);
   });
-  HTMLAudioElement.prototype.pause = originPause;
 });
 
 test("显隐中文翻译功能正确实现", async () => {
@@ -504,12 +504,8 @@ test("显隐中文翻译功能正确实现", async () => {
 test("切换翻译数据时，停止音频播放", async () => {
   render(<View />);
   const { postMessage } = messenger;
-  const originPause = HTMLAudioElement.prototype.pause;
-  const mockFn = jest.fn();
-  HTMLAudioElement.prototype.pause = mockFn;
   postMessage(Command.ShowTranslation, sentenceData, () => void 0);
   await waitFor(() => {
-    expect(mockFn).toBeCalled();
+    expect(mockPause).toBeCalledTimes(1)
   });
-  HTMLAudioElement.prototype.pause = originPause;
 });
