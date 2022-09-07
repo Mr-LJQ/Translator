@@ -19,13 +19,8 @@ module.exports = {
   },
   features: {
     interactionsDebugger: true,
-    storyStoreV7: true,
   },
   webpackFinal: async (config) => {
-    config.module.rules.push({
-      test: /\.css$/,
-      use: ["postcss-loader"],
-    });
     return {
       ...config,
       resolve: { ...config.resolve, ...custom.resolve },
