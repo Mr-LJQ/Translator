@@ -90,12 +90,9 @@ async function translateAndShowSearchText(text: string) {
 }
 /**
  * 用于处理shower传递的翻译，
- * 其特别之处在于iframe不会移动(point没有变化),只支持英文
+ * 其特别之处在于iframe不会移动(point没有变化)
  */
 async function translateAndShowIframeText(text: string) {
-  //过滤掉非英文
-  const result = validateText(text);
-  if (!result) return;
   const translatedData = await postBackend(Command.TranslateText, text);
   agent.showTranslation({ translatedData });
 }

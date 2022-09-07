@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useLayoutEffect } from "react";
-import { Messenger } from "@/utils";
+import { Messenger, validateText } from "@/utils";
 import { SelectionListener } from "@/user-operation";
 import { Command } from "@/configuration";
 import { AudioContext, MessengerContext, HiddenChinese } from "../Context";
@@ -17,6 +17,9 @@ const { onMessage, postMessage } = messenger;
 messenger.install();
 
 const selectionListener = new SelectionListener((text) => {
+  //过滤掉非英文
+  const result = validateText(text);
+  if (!result) return;
   postMessage(Command.TranslateText, text);
 });
 //监听停止播放的指令

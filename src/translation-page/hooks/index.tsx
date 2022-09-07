@@ -101,7 +101,10 @@ export function useFeature() {
     function () {
       showTranslationCallbackRef.current?.();
       showTranslationCallbackRef.current = undefined;
-      audioElement.pause();
+      try {
+        audioElement.pause();
+        // eslint-disable-next-line no-empty
+      } catch (e) {}
     },
     [data, audioElement]
   );
