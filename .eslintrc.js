@@ -30,6 +30,11 @@ module.exports = {
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/no-non-null-assertion": "off",
       },
+      settings: {
+        react: {
+          version: "detect", // React version. "detect" automatically picks the version you have installed.
+        },
+      },
     },
   ],
   extends: [
