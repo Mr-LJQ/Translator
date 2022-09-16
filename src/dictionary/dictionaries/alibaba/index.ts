@@ -59,10 +59,11 @@ async function getToken(): Promise<TokenData> {
   return response;
 }
 
-let csrf_token: TokenData | undefined;
+let csrf_token: TokenData | null = null;
 
 export async function translateSentence(
-  text: string
+  text: string,
+  targetLanguage: "zh" | "en" = "zh"
 ): Promise<SentenceData | typeof NEXT_HANDLER> {
   if (csrf_token == null) {
     csrf_token = await getToken();
@@ -70,7 +71,7 @@ export async function translateSentence(
   const { token, parameterName, headerName } = csrf_token;
   const formData = new FormData();
   formData.append("srcLang", "auto");
-  formData.append("tgtLang", "zh");
+  formData.append("tgtLang", targetLanguage);
   formData.append("domain", "general");
   formData.append(parameterName, token);
   formData.append("query", text);
@@ -100,10 +101,14 @@ export async function translateSentence(
       )}&le=eng`,
     };
   }
-
+  //可能是csrf_token过期导致不能够获取到翻译数据，那么在用户下次重试时获取一个新的csrf_token，
+  csrf_token = null;
   return NEXT_HANDLER;
 }
 
 export const alibaba = {
   translateSentence,
+  translateChinese: (text: string) => {
+    return translateSentence(text, "en");
+  },
 };

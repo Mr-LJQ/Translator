@@ -9,12 +9,11 @@
  *  而网络请求往往是缓慢的，特别是在网络情况不好的时候。
  */
 
+import transformWords from "lodash.words";
 import { youdao, alibaba } from "./dictionaries";
-import {} from "./utils";
 import {
   Cache,
   chain,
-  spaceCase,
   isErrorData,
   NEXT_HANDLER,
   createNoCacheError,
@@ -38,10 +37,14 @@ export class Dictionary {
   private wordTranslators: Array<
     (text: string) => Promise<WordData | typeof NEXT_HANDLER>
   >;
+  private chineseTranslators: Array<
+    (text: string) => Promise<WordData | SentenceData | typeof NEXT_HANDLER>
+  >;
   constructor(max = 30) {
     const { translateWord, translatePhrase, translateSentence } = youdao;
     this.wordTranslators = [translateWord];
     this.phraseTranslators = [translatePhrase];
+    this.chineseTranslators = [translateWord, alibaba.translateChinese];
     this.sentenceTranslators = [translateSentence, alibaba.translateSentence];
     this.cache = new Cache(max);
   }
@@ -74,13 +77,20 @@ export class Dictionary {
     const isKebabCase = kebabText.length === 0;
     //对于多个单词组合而成的文本，应该传递为原文本
     const isMuchWord = /\s/g.test(text);
+    //将单词字符串转换为单词数组
+    const words = transformWords(`${text}`.replace(/['\u2019]/g, ""));
     //将 驼峰、-、_ 等写法连接的文本转换为由空格分隔的文本
-    const formattedText = spaceCase(text);
+    const formattedText = words.reduce(
+      (result, word, index) => result + (index ? " " : "") + word,
+      ""
+    );
     const isFormattedMuchWord = /\s/g.test(formattedText);
 
     let result: TranslationResult;
     try {
-      if (isKebabCase || (!isMuchWord && !isFormattedMuchWord)) {
+      if (isChinese(text, words.length)) {
+        result = await this.translateChinese(text);
+      } else if (isKebabCase || (!isMuchWord && !isFormattedMuchWord)) {
         result = await this.translateWord(text);
       } else {
         const muchWord = isMuchWord ? text : formattedText;
@@ -101,23 +111,33 @@ export class Dictionary {
    * 由于无法将 phrase 与 sentence 区分开，因此先判断是否为 phrase，如果不是再将其作为 sentence处理
    * @param muchWord 多个单词组成的文本
    */
-  private translatePhraseOrSentence(muchWord: string) {
+  private translatePhraseOrSentence(text: string) {
     //短语优先与句子
-    return chain([...this.phraseTranslators, ...this.sentenceTranslators], {
-      args: [muchWord],
-      fallback: () => {
-        return createNoCacheError(omitText(muchWord));
-      },
-    });
+    return taskChain(
+      [...this.phraseTranslators, ...this.sentenceTranslators],
+      text
+    );
   }
-  private translateWord(word: string) {
-    return chain(this.wordTranslators, {
-      args: [word],
-      fallback: () => {
-        return createNoCacheError(omitText(word));
-      },
-    });
+  private translateWord(text: string) {
+    return taskChain(this.wordTranslators, text);
   }
+  private translateChinese(text: string) {
+    return taskChain(this.chineseTranslators, text);
+  }
+}
+/**
+ * 封装起来的重复代码
+ */
+function taskChain<T extends (text: string) => Promise<any>>(
+  handler: T[],
+  text: string
+) {
+  return chain(handler, {
+    args: [text] as Parameters<T>,
+    fallback: () => {
+      return createNoCacheError(omitText(text));
+    },
+  });
 }
 
 /**
@@ -127,4 +147,19 @@ function omitText(text: string) {
   return `"没找到关于 '${
     text.length > 100 ? text.slice(0, 101) + "..." : text
   }' 的任何翻译"`;
+}
+
+/**
+ * 纯函数，判断传入的字符是否包含中文
+ */
+function isChinese(text: string, wordSize: number) {
+  let chineseSize = 0;
+  text.replace(/[\u4e00-\u9fa5]+/gi, (chinese) => {
+    chineseSize += chinese.length;
+    return chinese;
+  });
+  if (chineseSize / wordSize > 2) {
+    return true;
+  }
+  return false;
 }

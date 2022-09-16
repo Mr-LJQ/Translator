@@ -5,6 +5,7 @@ import {
   TranslationResult,
   WordData,
 } from "../../types";
+import { warning } from "@/utils";
 import { translateWord as _translateWord } from "./translateWord";
 import { createCacography, request, NEXT_HANDLER } from "../../utils";
 import { translatePhrase as _translatePhrase } from "./translatePhrase";
@@ -57,7 +58,7 @@ function catchError(
     try {
       result = handler(dom);
     } catch (e) {
-      console.error(e);
+      warning(false, (e as any)?.message);
       result = NEXT_HANDLER;
     }
     if (result == null) handleNotFound(dom);

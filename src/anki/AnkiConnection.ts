@@ -1,4 +1,5 @@
 import omit from "lodash.omit";
+import { warning } from "@/utils";
 import { COMMON_CONFIG_MAP } from "@/configuration";
 import { getStorageByArray, onStorageChange } from "@/extensions-api";
 import { extractPromiseType, ReturnPromiseType } from "@/types";
@@ -127,9 +128,7 @@ export class AnkiConnection {
         return createSuccessAnkiResponse(result);
       } catch (e) {
         if (isAnkiResponse(e)) return e;
-        if (__DEV__) {
-          console.error(e);
-        }
+        warning(false, (e as any)?.message);
         if (typeof e === "string" || e instanceof Error) {
           return createUnexpectedErrorResponse(e);
         }
