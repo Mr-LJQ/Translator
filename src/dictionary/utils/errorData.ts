@@ -18,3 +18,13 @@ export function createNoCacheError(message: string) {
     message,
   });
 }
+
+export function createDisconnectionError(
+  message = "网络连接错误，请检查网络连接状态"
+) {
+  return createErrorData({
+    message,
+    cache: false,
+    isDisconnection: true,
+  });
+}

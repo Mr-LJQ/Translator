@@ -1,7 +1,9 @@
-import type { WordData, ExampleSentence, TranslationItem } from "../types";
+import type { WordData, ExampleSentence, TranslationItem } from "../../types";
 
 //单词翻译
 export function translateWord(dom: Document): WordData | void {
+  //这是一个与传入的参数全等的字符串，之所以进行这一步，
+  // 是因为如果该字符不能够在网页上被找到，则意味着翻译不存在/拼写错误。
   const word = getOriginText(dom);
   const star_amount =
     Number(dom.querySelector(".star")?.className?.match(/star(\d)/)?.[1]) || 0;
@@ -106,7 +108,10 @@ function getTranslationList(dom: Document): Array<TranslationItem> | undefined {
       definition_audio: `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(
         definition_origin
       )}&le=eng`,
-      translation: text.slice(index).replace(/see|also|→/ig,"").trim(), //翻译
+      translation: text
+        .slice(index)
+        .replace(/see|also|→/gi, "")
+        .trim(), //翻译
       example_sentences: getExampleSentences(li), //例句数组
     });
     return result;

@@ -26,4 +26,5 @@ export type extractPromiseType<T extends Promise<any>> = T extends Promise<
 
 export type FunctionAny = (...args: any[]) => void;
 
-
+export type ReturnPromiseType<T extends (...args: any[]) => Promise<any>> =
+  T extends (...args: any[]) => Promise<infer R> ? R : never;

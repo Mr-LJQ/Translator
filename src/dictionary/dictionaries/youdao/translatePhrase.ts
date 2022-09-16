@@ -1,4 +1,4 @@
-import type { ExampleSentence, PhraseData } from "../types";
+import type { ExampleSentence, PhraseData } from "../../types";
 //短语翻译
 export function translatePhrase(dom: Document): PhraseData | void {
   const phrase = getOriginText(dom);

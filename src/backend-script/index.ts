@@ -1,6 +1,6 @@
 import { AnkiConnection } from "@/anki";
 import { Command } from "@/configuration";
-import { Collins_en_cn } from "@/dictionary";
+import { Dictionary } from "@/dictionary";
 import {
   onCommand,
   onMessage,
@@ -15,7 +15,7 @@ import {
   onContextMenuClick,
 } from "@/extensions-api";
 //获取词典
-const collins = new Collins_en_cn();
+const dictionary = new Dictionary();
 //获取anki
 const anki = new AnkiConnection();
 
@@ -79,12 +79,12 @@ addContextMenuItem(
 onMessage(async ({ command, data, sendResponse }) => {
   switch (command) {
     case Command.TranslateText: {
-      const response = await collins.translate(data);
+      const response = await dictionary.translate(data);
       sendResponse(response);
       break;
     }
     case Command.TranslateInjectText: {
-      const response = await collins.translate(data.text);
+      const response = await dictionary.translate(data.text);
       postFrontend(Command.ShowInjectTranslation, {
         translatedData: response,
         point: data.point,

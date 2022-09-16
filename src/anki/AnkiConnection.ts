@@ -1,7 +1,7 @@
 import omit from "lodash.omit";
 import { COMMON_CONFIG_MAP } from "@/configuration";
 import { getStorageByArray, onStorageChange } from "@/extensions-api";
-import { extractPromiseType } from "@/types";
+import { extractPromiseType, ReturnPromiseType } from "@/types";
 import {
   isAnkiResponse,
   createDuplicateResponse,
@@ -45,12 +45,6 @@ type AnkiConfig = Pick<
   | "checkPhraseDuplicate"
   | "checkSentenceDuplicate"
 >;
-
-type ReturnPromiseType<T extends (...args: any[]) => Promise<any>> = T extends (
-  ...args: any[]
-) => Promise<infer R>
-  ? R
-  : never;
 
 type flatAnkiResponse<T extends (...args: any[]) => Promise<any>> =
   ReturnPromiseType<T> extends AnkiResponse<any>

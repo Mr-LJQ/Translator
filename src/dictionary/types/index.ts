@@ -28,8 +28,9 @@ export interface ErrorData {
   type: "ERROR";
   cache: boolean;
   message?: string;
-  possibleSpelling?: string[];
   queryText?: string;
+  isDisconnection?: boolean;
+  possibleSpelling?: string[];
 }
 export type TranslationResult =
   | WordData
