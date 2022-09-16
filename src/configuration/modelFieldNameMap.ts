@@ -10,6 +10,7 @@ const WORD_FIELDS_MAP: WordFields = {
   word: "单词",
   translation: "翻译",
   part_of_speech: "词性",
+  form: "单词形式",
   definition_audio: "定义音频",
   am: "美国音标",
   en: "英国音标",

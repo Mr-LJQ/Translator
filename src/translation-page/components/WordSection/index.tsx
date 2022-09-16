@@ -17,6 +17,7 @@ interface Props extends WordData {
 export function WordSection(props: Props) {
   const {
     word,
+    form,
     phonetic,
     star_amount,
     translations,
@@ -39,6 +40,7 @@ export function WordSection(props: Props) {
           <Phonetic symbols={phonetic.en} audioURL={phonetic.en_audio} />
           <Phonetic symbols={phonetic.am} audioURL={phonetic.am_audio} />
         </div>
+        <p className="text-sm">{form}</p>
       </header>
       {translationList && (
         <TranslationList

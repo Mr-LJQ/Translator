@@ -16,6 +16,7 @@ export interface PhraseData {
 export interface WordData {
   type: "WORD";
   word: string; //单词本体
+  form?: string;
   star_amount: number; //单词出现的频率
   phonetic: Phonetic; //单词音标与音频
   translations?: {

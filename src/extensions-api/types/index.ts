@@ -10,6 +10,7 @@ export interface WordFields {
   en: string;
   am: string;
   word: string;
+  form: string;
   am_audio: string;
   en_audio: string;
   definition: string;

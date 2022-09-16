@@ -8,15 +8,30 @@ export function translateWord(dom: Document): WordData | void {
   const star_amount =
     Number(dom.querySelector(".star")?.className?.match(/star(\d)/)?.[1]) || 0;
   if (!word) return;
-
+  const translations = formatTranslations(getTranslation(dom));
+  const translationList = getTranslationList(dom);
+  if (!translations && !translationList) return;
   return {
     word,
     star_amount,
     type: "WORD",
+    translations,
+    translationList,
+    form: getForm(dom),
     phonetic: getPhonetic(dom, word),
-    translationList: getTranslationList(dom),
-    translations: formatTranslations(getTranslation(dom)),
   };
+}
+
+/**
+ * 获取单词的形式，例如,对于 word 则有
+ * [ 复数 words 第三人称单数 words 现在分词 wording 过去式 worded 过去分词 worded ]
+ */
+function getForm(dom: Document) {
+  const p = dom.querySelector("#phrsListTab .trans-container p.additional");
+  if (!p) return;
+  const form = p.textContent?.trim();
+  if (form?.startsWith("[") && form.endsWith("]")) return form;
+  return;
 }
 
 /**

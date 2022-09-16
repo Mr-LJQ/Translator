@@ -11,7 +11,7 @@ export function transformWordData(
   wordData: WordData,
   index: number
 ): WordNoteData {
-  const { word, phonetic, star_amount, translationList } = wordData;
+  const { word, form, phonetic, star_amount, translationList } = wordData;
   const { am, en, am_audio, en_audio } = phonetic;
   //之所以必定有，是这个函数是用户在看到 translationList 存在后添加是调用的
   const {
@@ -35,6 +35,7 @@ export function transformWordData(
     star_amount: "★".repeat(star_amount),
     am,
     en,
+    form,
     am_audio,
     en_audio,
     part_of_speech,
@@ -56,11 +57,12 @@ export function transformTranslations(
   key: string,
   idx: number
 ): WordNoteData {
-  const { star_amount, phonetic, word, translations } = wordData;
+  const { star_amount, phonetic, word, form, translations } = wordData;
   const { am, en, am_audio, en_audio } = phonetic;
 
   const noteWordData = {
     word,
+    form,
     star_amount: "★".repeat(star_amount),
     part_of_speech: key,
     //必然存在的，因为只有存在才会调用该函数

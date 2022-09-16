@@ -6,6 +6,7 @@
   "scripts": {
     "test": "jest",
     "dev": "webpack --watch",
+    "tsc": "tsc --noEmit",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
     "prepare": "husky install"
