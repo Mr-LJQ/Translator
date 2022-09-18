@@ -122,7 +122,9 @@ onMessage(async ({ command, data, sendResponse }) => {
       break;
     }
     case Command.OpenOptionsPage: {
-      openOptionsPage();
+      setStorage({ checkedTabPanel: data }, () => {
+        openOptionsPage();
+      });
       break;
     }
     default:

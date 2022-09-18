@@ -37,8 +37,8 @@ agent.onMessage(Command.RelearnNote, async (data, sendResponse) => {
 agent.onMessage(Command.TranslateText, function (data) {
   translateAndShowIframeText(data);
 });
-agent.onMessage(Command.OpenOptionsPage, function () {
-  postBackend(Command.OpenOptionsPage);
+agent.onMessage(Command.OpenOptionsPage, function (data) {
+  postBackend(Command.OpenOptionsPage, data);
 });
 agent.install();
 

@@ -10,6 +10,7 @@ import {
   GetModelFieldNamesReturnType,
 } from "@/anki";
 import { TranslationResult } from "@/dictionary";
+import { TabPanelName } from "./types";
 export function getURL(name: string) {
   return chrome.runtime.getURL(name);
 }
@@ -24,7 +25,8 @@ export type SendResponse = Parameters<
 
 //向后端发送消息的函数
 export async function postBackend(
-  command: Command.OpenOptionsPage
+  command: Command.OpenOptionsPage,
+  data: TabPanelName
 ): Promise<void>;
 export async function postBackend(
   command: Command.GetDeckNames
@@ -66,7 +68,7 @@ export async function postBackend(command: Command, data?: any): Promise<any> {
 interface Handler {
   (args: {
     command: Command.OpenOptionsPage;
-    data: undefined;
+    data: TabPanelName;
     sendResponse: () => void;
   }): Promise<void>;
   (args: {

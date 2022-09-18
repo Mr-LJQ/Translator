@@ -4,6 +4,7 @@ import { warning } from "@/utils";
 import { NoteData } from "@/translation-page";
 import { TranslationResult } from "@/dictionary";
 import { AddNoteReturnType, RelearnCardsReturnType } from "@/anki";
+import { TabPanelName } from "@/extensions-api";
 
 let uniqueId = 1;
 const CALLBACK = "CALLBACK";
@@ -99,7 +100,10 @@ export class Messenger {
     command: Command.TranslateText,
     listener: (data: string) => void
   ): () => void;
-  onMessage(command: Command.OpenOptionsPage, listener: () => void): () => void;
+  onMessage(
+    command: Command.OpenOptionsPage,
+    listener: (data: TabPanelName) => void
+  ): () => void;
   onMessage(
     command: Command.HistoryIndex,
     listener: (data: { index: number; head: number; tail: number }) => void
@@ -149,7 +153,7 @@ export class Messenger {
   ): void;
   // translation-page to agent
   postMessage(command: Command.TranslateText, data: string): void;
-  postMessage(command: Command.OpenOptionsPage): void;
+  postMessage(command: Command.OpenOptionsPage, data: TabPanelName): void;
   postMessage(
     command: Command.HistoryIndex,
     data: { index: number; head: number; tail: number }

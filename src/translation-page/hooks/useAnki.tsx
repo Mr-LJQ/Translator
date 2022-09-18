@@ -6,6 +6,7 @@ import { Command } from "@/configuration";
 import { useMessenger } from "../components/Context";
 import { transformAnkiResponseStatus, __main__ } from "../utils";
 import { Status, NoteData, AnkiButtonInfoObject } from "../types";
+import { TabPanelName } from "@/extensions-api";
 
 interface AnkiParams {
   loadingSet: Set<string>;
@@ -30,7 +31,6 @@ export function useAnki(params: AnkiParams) {
       //先有相应的数据可以被用户看到，用户的操作才会触发该函数，因此可以断言非空。
       const ankiButtonInfo = ankiButtonInfoObject[key]![idx]!;
       const symbol = `${String(key)}+${idx}`;
-
       setAnkiButtonInfoObject(function (ankiButtonInfoObject) {
         loadingSet.add(symbol);
         return produce(ankiButtonInfoObject, (draft) => {
@@ -59,7 +59,7 @@ export function useAnki(params: AnkiParams) {
           );
         });
       });
-
+      const tabPanelName = getTabPanelName(data);
       const { status } = ankiButtonInfo;
       const prevStatus = status;
       switch (status) {
@@ -125,7 +125,7 @@ export function useAnki(params: AnkiParams) {
             prevStatus === Status.ConfigError &&
             newStatus === Status.ConfigError
           ) {
-            postMessage(Command.OpenOptionsPage);
+            postMessage(Command.OpenOptionsPage, tabPanelName);
           }
 
           /**
@@ -162,4 +162,18 @@ export function useAnki(params: AnkiParams) {
     [loadingSet, postMessage, setAnkiButtonInfoObject]
   );
   return submit;
+}
+
+function getTabPanelName(data: NoteData) {
+  if ("word" in data) {
+    return TabPanelName.Word;
+  }
+  if ("phrase" in data) {
+    return TabPanelName.Phrase;
+  }
+  if ("sentence" in data) {
+    return TabPanelName.Sentence;
+  }
+  warning(false, "BUG : getTabPanelName 方法无法正确映射到 TabPanelName.");
+  return TabPanelName.Home;
 }
