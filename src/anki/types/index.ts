@@ -49,3 +49,14 @@ export interface AnkiResponse<T> {
   message: string;
   status: AnkiResponseStatus;
 }
+
+export type AnkiConfig = Pick<
+  Storage,
+  | "wordConfig"
+  | "phraseConfig"
+  | "sentenceConfig"
+  | "ankiConnectionURL"
+  | "checkWordDuplicate"
+  | "checkPhraseDuplicate"
+  | "checkSentenceDuplicate"
+>;

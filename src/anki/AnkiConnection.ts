@@ -1,7 +1,6 @@
 import omit from "lodash.omit";
 import { warning } from "@/utils";
 import { COMMON_CONFIG_MAP } from "@/configuration";
-import { getStorageByArray, onStorageChange } from "@/extensions-api";
 import { extractPromiseType, ReturnPromiseType } from "@/types";
 import {
   isAnkiResponse,
@@ -20,11 +19,10 @@ import {
   getDuplicateConfigName,
 } from "./utils";
 //声明
-import { Storage } from "@/extensions-api";
 import { NoteData } from "@/translation-page";
-import { AnkiResponse, NoteType, AddNoteParams } from "./types";
+import { AnkiResponse, NoteType, AddNoteParams, AnkiConfig } from "./types";
 
-//值必须是小写，且必须是这个值，不应该修改，这是AnkiConnection所要求的
+//值必须是小写，且必须是这个值，不应该修改，这是 AnkiConnection 所要求的
 enum Action {
   Version = "version",
   AddNote = "addNote",
@@ -36,17 +34,7 @@ enum Action {
   UpdateNoteFields = "updateNoteFields",
 }
 
-type AnkiConfig = Pick<
-  Storage,
-  | "wordConfig"
-  | "phraseConfig"
-  | "sentenceConfig"
-  | "ankiConnectionURL"
-  | "checkWordDuplicate"
-  | "checkPhraseDuplicate"
-  | "checkSentenceDuplicate"
->;
-
+//避免 AnkiResponse 嵌套
 type flatAnkiResponse<T extends (...args: any[]) => Promise<any>> =
   ReturnPromiseType<T> extends AnkiResponse<any>
     ? Promise<ReturnPromiseType<T>>
@@ -68,39 +56,6 @@ export class AnkiConnection {
   constructor() {
     this.version = 6; //版本不同，返回值不同，不能够随意修改
     this.ankiConfig = {} as AnkiConfig; //后面会进行初始化赋值
-
-    //初始化AnkiConfig
-    //值是必定存在的，因为 getStorage 内部会保证在没值的时候使用默认值，而默认值设定了相应的值
-    getStorageByArray(
-      [
-        "wordConfig",
-        "phraseConfig",
-        "sentenceConfig",
-        "ankiConnectionURL",
-        "checkWordDuplicate",
-        "checkPhraseDuplicate",
-        "checkSentenceDuplicate",
-      ],
-      (config) => {
-        this.updateAnkiConfig<AnkiConfig>(config as AnkiConfig); //初始化时，必须包括所有的 AnkiConfig 配置
-      }
-    );
-    //监听用户配置更新
-    onStorageChange({
-      wordConfig: (_, wordConfig) => this.updateAnkiConfig({ wordConfig }),
-      phraseConfig: (_, phraseConfig) =>
-        this.updateAnkiConfig({ phraseConfig }),
-      sentenceConfig: (_, sentenceConfig) =>
-        this.updateAnkiConfig({ sentenceConfig }),
-      ankiConnectionURL: (_, ankiConnectionURL) =>
-        this.updateAnkiConfig({ ankiConnectionURL }),
-      checkPhraseDuplicate: (_, checkPhraseDuplicate) =>
-        this.updateAnkiConfig({ checkPhraseDuplicate }),
-      checkSentenceDuplicate: (_, checkSentenceDuplicate) =>
-        this.updateAnkiConfig({ checkSentenceDuplicate }),
-      checkWordDuplicate: (_, checkWordDuplicate) =>
-        this.updateAnkiConfig({ checkWordDuplicate }),
-    });
 
     this.addNote = this._addErrorCatch(this._addNote);
     this.getVersion = this._addErrorCatch(this._getVersion);

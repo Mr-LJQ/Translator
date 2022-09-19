@@ -1,4 +1,4 @@
-import { AnkiConnection } from "@/anki";
+import { AnkiConnection, AnkiConfig } from "@/anki";
 import { Command } from "@/configuration";
 import { Dictionary } from "@/dictionary";
 import {
@@ -13,11 +13,44 @@ import {
   getStorageByObject,
   addContextMenuItem,
   onContextMenuClick,
+  getStorageByArray,
 } from "@/extensions-api";
 //获取词典
 const dictionary = new Dictionary();
 //获取anki
 const anki = new AnkiConnection();
+
+//初始化AnkiConfig
+//值是必定存在的，因为 getStorage 内部会保证在没值的时候使用默认值，而默认值设定了相应的值
+getStorageByArray(
+  [
+    "wordConfig",
+    "phraseConfig",
+    "sentenceConfig",
+    "ankiConnectionURL",
+    "checkWordDuplicate",
+    "checkPhraseDuplicate",
+    "checkSentenceDuplicate",
+  ],
+  (config) => {
+    anki.updateAnkiConfig<AnkiConfig>(config); //初始化时，必须包括所有的 AnkiConfig 配置
+  }
+);
+//监听用户配置更新
+onStorageChange({
+  wordConfig: (_, wordConfig) => anki.updateAnkiConfig({ wordConfig }),
+  phraseConfig: (_, phraseConfig) => anki.updateAnkiConfig({ phraseConfig }),
+  sentenceConfig: (_, sentenceConfig) =>
+    anki.updateAnkiConfig({ sentenceConfig }),
+  ankiConnectionURL: (_, ankiConnectionURL) =>
+    anki.updateAnkiConfig({ ankiConnectionURL }),
+  checkPhraseDuplicate: (_, checkPhraseDuplicate) =>
+    anki.updateAnkiConfig({ checkPhraseDuplicate }),
+  checkSentenceDuplicate: (_, checkSentenceDuplicate) =>
+    anki.updateAnkiConfig({ checkSentenceDuplicate }),
+  checkWordDuplicate: (_, checkWordDuplicate) =>
+    anki.updateAnkiConfig({ checkWordDuplicate }),
+});
 
 //初始化isOpen标识文本
 getStorageByObject({

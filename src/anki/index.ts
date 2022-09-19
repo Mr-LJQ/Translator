@@ -7,7 +7,7 @@ export type {
   GetModelNamesReturnType,
   GetModelFieldNamesReturnType,
 } from "./AnkiConnection";
-export { AnkiResponseStatus } from "./types";
+export { AnkiResponseStatus, AnkiConfig } from "./types";
 
 export {
   isAnkiResponse,
