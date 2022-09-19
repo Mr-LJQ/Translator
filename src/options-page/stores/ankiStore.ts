@@ -1,7 +1,7 @@
 import create from "zustand";
 import { FieldNamesObject } from "../types";
 import { Command } from "@/configuration";
-import { AnkiResponseStatus } from "@/anki";
+import { isAnkiResponseError } from "@/anki";
 import { postBackend } from "@/extensions-api";
 
 interface State {
@@ -28,17 +28,12 @@ export const useAnkiStore = create<State>((set) => ({
       version: undefined,
       fieldNamesObject: {},
     };
-
-    const {
-      data: version,
-      status: status0,
-      message: message0,
-    } = await postBackend(Command.GetVersion);
-    if (status0 !== AnkiResponseStatus.Success) {
-      result.alertMessages.push(message0);
+    const response = await postBackend(Command.GetVersion);
+    if (isAnkiResponseError(response)) {
+      result.alertMessages.push(response.message);
       return set(result);
     } else {
-      result.version = version;
+      result.version = response.data;
     }
 
     const [getDeckNamesResponse, getModelNamesResponse] = await Promise.all([
@@ -47,28 +42,18 @@ export const useAnkiStore = create<State>((set) => ({
       postBackend(Command.GetModelNames),
     ]);
 
-    const {
-      data: deckNames,
-      status: status1,
-      message: message1,
-    } = getDeckNamesResponse;
-    if (status1 !== AnkiResponseStatus.Success) {
-      result.alertMessages.push(message1);
+    if (isAnkiResponseError(getDeckNamesResponse)) {
+      result.alertMessages.push(getDeckNamesResponse.message);
     } else {
-      result.deckNames = deckNames!;
+      result.deckNames = getDeckNamesResponse.data;
     }
 
-    const {
-      data: modelNames,
-      status: status2,
-      message: message2,
-    } = getModelNamesResponse;
-    if (status2 !== AnkiResponseStatus.Success) {
-      result.alertMessages.push(message2);
+    if (isAnkiResponseError(getModelNamesResponse)) {
+      result.alertMessages.push(getModelNamesResponse.message);
       return set(result);
     }
-    result.modelNames = modelNames!;
-
+    const modelNames = getModelNamesResponse.data;
+    result.modelNames = modelNames;
     const fieldNamesObject: FieldNamesObject = {};
     const promiseArray = modelNames!.map((modelName) => {
       return postBackend(Command.GetModelFieldNames, modelName);
@@ -76,11 +61,10 @@ export const useAnkiStore = create<State>((set) => ({
     const responses = await Promise.all(promiseArray);
     responses.forEach((item, idx) => {
       const modelName = modelNames![idx]!;
-      const { status, message, data } = item;
-      if (status !== AnkiResponseStatus.Success) {
-        result.alertMessages.push(message);
+      if (isAnkiResponseError(item)) {
+        result.alertMessages.push(item.message);
       } else {
-        fieldNamesObject[modelName] = data!;
+        fieldNamesObject[modelName] = item.data;
       }
     });
     result.fieldNamesObject = fieldNamesObject;

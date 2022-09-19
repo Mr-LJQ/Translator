@@ -18,15 +18,13 @@ import {
 } from "@/test";
 import {
   AddNoteReturnType,
-  createAnkiErrorResponse,
+  createErrorResponse,
   createConfigErrorResponse,
   createDisconnectionResponse,
   createDuplicateResponse,
   createFirstAddSuccessResponse,
   createForgottenResponse,
-  createOldVersionResponse,
   createSuccessAnkiResponse,
-  createUnexpectedErrorResponse,
 } from "@/anki";
 import { View } from ".";
 import { Status } from "../../types";
@@ -216,7 +214,7 @@ test("正确的历史功能(useHistory)", async () => {
     expect(
       screen.getByRole("heading", { name: wordData.word })
     ).toBeInTheDocument();
-    addNoteCallback(createAnkiErrorResponse(""));
+    addNoteCallback(createErrorResponse(""));
   }
   await waitFor(() => {
     expect(
@@ -340,7 +338,7 @@ test("正确的Anki操作功能(useAnki)", async () => {
   );
   expect(mockAddNote).toBeCalledWith(returnData);
   expect(mockAddNote).toBeCalledTimes(5);
-  ankiCallback(createAnkiErrorResponse(""));
+  ankiCallback(createErrorResponse(""));
   await waitFor(() => {
     expect(ankiButton).toHaveAttribute("data-status", String(Status.Error));
   });
@@ -365,7 +363,7 @@ test("正确的Anki操作功能(useAnki)", async () => {
   await user.click(ankiButton);
   expect(mockRelearnNote).toBeCalledWith([9527]);
   expect(mockRelearnNote).toBeCalledTimes(2);
-  ankiCallback(createAnkiErrorResponse(""));
+  ankiCallback(createErrorResponse(""));
   await waitFor(() => {
     expect(ankiButton).toHaveAttribute("data-status", String(Status.Error));
   });
@@ -384,7 +382,7 @@ test("正确的Anki操作功能(useAnki)", async () => {
   await user.click(ankiButton);
   expect(mockRelearnNote).toBeCalledWith([9527]);
   expect(mockRelearnNote).toBeCalledTimes(4);
-  ankiCallback(createOldVersionResponse());
+  ankiCallback(createErrorResponse(""));
   await waitFor(() => {
     expect(ankiButton).toHaveAttribute("data-status", String(Status.Error));
   });
@@ -392,7 +390,7 @@ test("正确的Anki操作功能(useAnki)", async () => {
   await user.click(ankiButton);
   expect(mockRelearnNote).toBeCalledWith([9527]);
   expect(mockRelearnNote).toBeCalledTimes(5);
-  ankiCallback(createUnexpectedErrorResponse(""));
+  ankiCallback(createErrorResponse(""));
   await waitFor(() => {
     expect(ankiButton).toHaveAttribute("data-status", String(Status.Error));
   });
@@ -436,17 +434,17 @@ test("正确的实现其它功能(useFeature)", async () => {
   expect(
     screen.getByRole("heading", { name: wordData.word })
   ).toBeInTheDocument();
-  ankiCallbacks[0]!(createOldVersionResponse());
+  ankiCallbacks[0]!(createErrorResponse(""));
   await sleep();
   expect(
     screen.getByRole("heading", { name: wordData.word })
   ).toBeInTheDocument();
-  ankiCallbacks[1]!(createOldVersionResponse());
+  ankiCallbacks[1]!(createErrorResponse(""));
   await sleep();
   expect(
     screen.getByRole("heading", { name: wordData.word })
   ).toBeInTheDocument();
-  ankiCallbacks[2]!(createOldVersionResponse());
+  ankiCallbacks[2]!(createErrorResponse(""));
   await waitFor(() => {
     expect(
       screen.getByRole("heading", { name: phraseData.phrase })

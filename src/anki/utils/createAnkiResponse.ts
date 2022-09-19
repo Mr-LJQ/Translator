@@ -1,35 +1,57 @@
-import { AnkiResponseStatus, AnkiResponse } from "../types";
+import {
+  AnkiResponse,
+  AnkiResponseError,
+  AnkiResponseStatus,
+  AnkiResponseSuccess,
+} from "../types";
+export const ankiResponseSymbol = Symbol();
 
-function createAnkiResponse<T>(options: AnkiResponse<T>): AnkiResponse<T> {
+function createAnkiResponseError<T>(
+  options: Omit<AnkiResponse<T>, typeof ankiResponseSymbol | "ok">
+): AnkiResponseError<T> {
   return Object.assign(
     {
-      __isAnkiResponse__: true,
-    },
+      ok: false,
+      [ankiResponseSymbol]: true,
+    } as const,
     options
   );
 }
 
-export function isAnkiResponse(target: any) {
+function createAnkiResponseSuccess<T>(
+  options: Omit<AnkiResponse<T>, typeof ankiResponseSymbol | "ok">
+): AnkiResponseSuccess<T> {
+  return Object.assign(
+    {
+      ok: true,
+      [ankiResponseSymbol]: true,
+    } as const,
+    options
+  );
+}
+
+export function isAnkiResponse(target: unknown): target is AnkiResponse<any> {
   if (target === null || typeof target !== "object") return false;
-  return target.__isAnkiResponse__ === true;
+  if (ankiResponseSymbol in target) return true;
+  return false;
+}
+
+export function isAnkiResponseError(
+  target: unknown
+): target is AnkiResponseError<any> {
+  return isAnkiResponse(target) && target.ok === false;
 }
 
 export function createSuccessAnkiResponse<T>(data: T) {
-  return createAnkiResponse({
+  return createAnkiResponseSuccess({
     data,
     message: "ok",
     status: AnkiResponseStatus.Success,
   });
 }
 
-export function createDisconnectionResponse(message: string) {
-  return createAnkiResponse({
-    status: AnkiResponseStatus.Disconnect,
-    message,
-  });
-}
 export function createForgottenResponse(cardIds: number[]) {
-  return createAnkiResponse({
+  return createAnkiResponseSuccess({
     data: cardIds,
     status: AnkiResponseStatus.Forgotten,
     message: "曾经添加过该卡片，是否做遗忘处理？(立刻将其添加到学习列表中)",
@@ -37,7 +59,7 @@ export function createForgottenResponse(cardIds: number[]) {
 }
 
 export function createDuplicateResponse(cardIds: number[]) {
-  return createAnkiResponse({
+  return createAnkiResponseSuccess({
     data: cardIds,
     status: AnkiResponseStatus.Duplicate,
     message:
@@ -46,7 +68,7 @@ export function createDuplicateResponse(cardIds: number[]) {
 }
 
 export function createFirstAddSuccessResponse(cardIds: number[]) {
-  return createAnkiResponse({
+  return createAnkiResponseSuccess({
     data: cardIds,
     status: AnkiResponseStatus.FirstAddSuccess,
     message: "已成功添加到Anki，是否需要立刻开始学习？",
@@ -54,29 +76,25 @@ export function createFirstAddSuccessResponse(cardIds: number[]) {
 }
 
 export function createConfigErrorResponse(message: string) {
-  return createAnkiResponse({
+  return createAnkiResponseError({
+    data: undefined,
     status: AnkiResponseStatus.ConfigError,
     message: `${message},单击按钮可打开配置页进行相关配置，如已重新配置，则可点击重试。`,
   });
 }
 
-export function createOldVersionResponse() {
-  return createAnkiResponse({
-    status: AnkiResponseStatus.OldVersion,
-    message: "AnkiConnection版本过低，请更新到最新版本。",
-  });
-}
-
-export function createAnkiErrorResponse(message: string) {
-  return createAnkiResponse({
+export function createErrorResponse(e: string | Error) {
+  return createAnkiResponseError({
+    data: undefined,
     status: AnkiResponseStatus.Error,
-    message,
+    message: typeof e === "string" ? e : e.message,
   });
 }
 
-export function createUnexpectedErrorResponse(e: Error | string) {
-  return createAnkiResponse({
-    status: AnkiResponseStatus.UnexpectedError,
-    message: typeof e === "string" ? e : e.message,
+export function createDisconnectionResponse(message: string) {
+  return createAnkiResponseError({
+    message,
+    data: undefined,
+    status: AnkiResponseStatus.Disconnect,
   });
 }

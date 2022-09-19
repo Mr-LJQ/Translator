@@ -1,14 +1,14 @@
 export {
+  ankiResponseSymbol,
   isAnkiResponse,
+  isAnkiResponseError,
   createForgottenResponse,
   createDuplicateResponse,
-  createAnkiErrorResponse,
-  createOldVersionResponse,
+  createErrorResponse,
   createSuccessAnkiResponse,
   createConfigErrorResponse,
   createDisconnectionResponse,
   createFirstAddSuccessResponse,
-  createUnexpectedErrorResponse,
 } from "./createAnkiResponse";
 
 export {

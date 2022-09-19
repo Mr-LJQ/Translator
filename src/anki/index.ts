@@ -10,14 +10,13 @@ export type {
 export { AnkiResponseStatus, AnkiConfig } from "./types";
 
 export {
+  isAnkiResponseError,
   isAnkiResponse,
   createForgottenResponse,
   createDuplicateResponse,
-  createAnkiErrorResponse,
-  createOldVersionResponse,
+  createErrorResponse,
   createSuccessAnkiResponse,
   createConfigErrorResponse,
   createDisconnectionResponse,
   createFirstAddSuccessResponse,
-  createUnexpectedErrorResponse,
 } from "./utils";

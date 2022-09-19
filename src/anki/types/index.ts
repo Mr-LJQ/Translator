@@ -1,3 +1,4 @@
+import { ankiResponseSymbol } from "../utils";
 export const enum NoteType {
   Word = 0,
   Phrase = 1,
@@ -38,16 +39,23 @@ export enum AnkiResponseStatus {
   Forgotten,
   Duplicate,
   Disconnect,
-  OldVersion,
   ConfigError,
   FirstAddSuccess,
-  UnexpectedError,
 }
 
 export interface AnkiResponse<T> {
-  data?: T;
+  data: T;
+  ok: boolean;
   message: string;
   status: AnkiResponseStatus;
+  [ankiResponseSymbol]: boolean;
+}
+
+export interface AnkiResponseError<T> extends AnkiResponse<T> {
+  ok: false;
+}
+export interface AnkiResponseSuccess<T> extends AnkiResponse<T> {
+  ok: true;
 }
 
 export type AnkiConfig = Pick<

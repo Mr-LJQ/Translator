@@ -128,8 +128,6 @@ export function transformAnkiResponseStatus(status: AnkiResponseStatus) {
       return Status.LearnNow;
     }
     case AnkiResponseStatus.Error:
-    case AnkiResponseStatus.OldVersion:
-    case AnkiResponseStatus.UnexpectedError:
       return Status.Error;
     default: {
       warning(false, `未添加对${AnkiResponseStatus[status]} 的转换`);

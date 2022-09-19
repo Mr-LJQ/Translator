@@ -6,13 +6,11 @@ import {
   isAnkiResponse,
   createDuplicateResponse,
   createForgottenResponse,
-  createAnkiErrorResponse,
-  createOldVersionResponse,
+  createErrorResponse,
   createSuccessAnkiResponse,
   createConfigErrorResponse,
   createDisconnectionResponse,
   createFirstAddSuccessResponse,
-  createUnexpectedErrorResponse,
   getConfigName,
   getMediaFields,
   getNotMediaFields,
@@ -20,7 +18,13 @@ import {
 } from "./utils";
 //声明
 import { NoteData } from "@/translation-page";
-import { AnkiResponse, NoteType, AddNoteParams, AnkiConfig } from "./types";
+import {
+  AnkiResponse,
+  NoteType,
+  AddNoteParams,
+  AnkiConfig,
+  AnkiResponseError,
+} from "./types";
 
 //值必须是小写，且必须是这个值，不应该修改，这是 AnkiConnection 所要求的
 enum Action {
@@ -37,8 +41,8 @@ enum Action {
 //避免 AnkiResponse 嵌套
 type flatAnkiResponse<T extends (...args: any[]) => Promise<any>> =
   ReturnPromiseType<T> extends AnkiResponse<any>
-    ? Promise<ReturnPromiseType<T>>
-    : Promise<AnkiResponse<ReturnPromiseType<T>>>;
+    ? ReturnPromiseType<T>
+    : AnkiResponse<ReturnPromiseType<T>>;
 /**
  * 这是用于调用 AnkiConnection 提供的接口的封装
  */
@@ -55,7 +59,7 @@ export class AnkiConnection {
 
   constructor() {
     this.version = 6; //版本不同，返回值不同，不能够随意修改
-    this.ankiConfig = {} as AnkiConfig; //后面会进行初始化赋值
+    this.ankiConfig = {} as AnkiConfig; //正确实现时，其会进行初始化赋值
 
     this.addNote = this._addErrorCatch(this._addNote);
     this.getVersion = this._addErrorCatch(this._getVersion);
@@ -69,8 +73,10 @@ export class AnkiConnection {
     executor: T
   ): (
     ...args: Parameters<T>
-  ) => flatAnkiResponse<T> | Promise<AnkiResponse<unknown>> {
-    return async (...args: Parameters<T>) => {
+  ) => Promise<flatAnkiResponse<T> | AnkiResponseError<unknown>> {
+    return async (
+      ...args: Parameters<T>
+    ): Promise<flatAnkiResponse<T> | AnkiResponseError<unknown>> => {
       try {
         /**
          * result 有两种情况：
@@ -79,15 +85,16 @@ export class AnkiConnection {
          * 这是为了保证，返回的都是AnkiResponse.
          */
         const result = await executor.apply(this, args);
-        if (isAnkiResponse(result)) return result;
-        return createSuccessAnkiResponse(result);
+        if (isAnkiResponse(result)) return result as flatAnkiResponse<T>;
+        return createSuccessAnkiResponse(result) as flatAnkiResponse<T>;
       } catch (e) {
-        if (isAnkiResponse(e)) return e;
+        if (isAnkiResponse(e))
+          return e as flatAnkiResponse<T> | AnkiResponseError<unknown>;
         warning(false, (e as any)?.message);
         if (typeof e === "string" || e instanceof Error) {
-          return createUnexpectedErrorResponse(e);
+          return createErrorResponse(e);
         }
-        return createUnexpectedErrorResponse(
+        return createErrorResponse(
           "这是一个出乎该插件开发者预料的错误,如需解决请提交该问题"
         );
       }
@@ -319,10 +326,12 @@ export class AnkiConnection {
             !Object.prototype.hasOwnProperty.call(response, "result") ||
             !Object.prototype.hasOwnProperty.call(response, "error")
           ) {
-            throw createOldVersionResponse();
+            throw createErrorResponse(
+              "AnkiConnection版本过低，请更新到最新版本。"
+            );
           }
           if (response.error) {
-            throw createAnkiErrorResponse(response.error);
+            throw createErrorResponse(response.error);
           }
           resolve(response.result);
         } catch (e) {
