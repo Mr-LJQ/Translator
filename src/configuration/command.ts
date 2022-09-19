@@ -17,7 +17,6 @@ export enum Command {
   ShowIframe,
   OpenOptionsPage,
 
-
   GetVersion,
   GetDeckNames,
   GetModelNames,

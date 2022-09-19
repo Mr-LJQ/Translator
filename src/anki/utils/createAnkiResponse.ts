@@ -56,7 +56,7 @@ export function createFirstAddSuccessResponse(cardIds: number[]) {
 export function createConfigErrorResponse(message: string) {
   return createAnkiResponse({
     status: AnkiResponseStatus.ConfigError,
-    message:`${message},单击按钮可打开配置页进行相关配置，如已重新配置，则可点击重试。`,
+    message: `${message},单击按钮可打开配置页进行相关配置，如已重新配置，则可点击重试。`,
   });
 }
 

@@ -52,6 +52,6 @@ test("当处于 Status.Loading/Success 状态时，单击按钮什么都不会�
       />
     );
     await user.click(screen.getByRole("button"));
-    expect(mockFn).toBeCalledTimes(i+1);
+    expect(mockFn).toBeCalledTimes(i + 1);
   }
 });

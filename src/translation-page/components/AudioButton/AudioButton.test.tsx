@@ -8,8 +8,8 @@ const mockPlay = jest.fn();
 HTMLAudioElement.prototype.play = mockPlay;
 
 afterEach(() => {
-  mockPlay.mockClear()
-})
+  mockPlay.mockClear();
+});
 test("单击音频按钮播放音频", async () => {
   const user = userEvent.setup();
   const audioElement = document.createElement("audio");

@@ -82,7 +82,7 @@ test("正确处理监听与取消监听", () => {
   expect(mockFn1).toBeCalledTimes(1);
   expect(mockFn2).toBeCalledTimes(2);
   remove1();
-  remove2()
+  remove2();
   postMessage(0, "message");
   jest.runAllTimers();
   expect(mockFn).toBeCalledTimes(3);

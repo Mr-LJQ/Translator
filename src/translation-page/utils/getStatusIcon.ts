@@ -1,4 +1,4 @@
-import {Status} from '../types'
+import { Status } from "../types";
 import { warning } from "@/utils";
 
 const enum StatusIcon {
@@ -25,6 +25,6 @@ export function getStatusIcon(state: Status) {
     [Status.Disconnect]: StatusIcon.Disconnect,
     [Status.ConfigError]: StatusIcon.ConfigError,
   }[state];
-  warning(result !== undefined,`状态 ${state} 不存在对应的图标字符`)
-  return result
+  warning(result !== undefined, `状态 ${state} 不存在对应的图标字符`);
+  return result;
 }

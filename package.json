@@ -6,10 +6,12 @@
   "scripts": {
     "test": "jest",
     "dev": "webpack --watch",
-    "tsc": "tsc --noEmit",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "check-types": "tsc --noEmit",
+    "format": "prettier --write --ignore-unknown src/**/*",
+    "lint": "eslint --fix --ext js,ts,jsx,tsx src"
   },
   "keywords": [],
   "author": "",
