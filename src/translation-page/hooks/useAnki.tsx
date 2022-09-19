@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { produce } from "immer";
 
 import { warning } from "@/utils";
@@ -10,18 +10,19 @@ import { TabPanelName } from "@/extensions-api";
 
 interface AnkiParams {
   loadingSet: Set<string>;
-  ankiButtonInfoObject: AnkiButtonInfoObject;
-  setAnkiButtonInfoObject: React.Dispatch<
-    React.SetStateAction<AnkiButtonInfoObject>
-  >;
 }
 
 /**
  * 该部分主要封装的是与 Anki间的互操作逻辑
  */
 export function useAnki(params: AnkiParams) {
+  const [ankiButtonInfoObject, setAnkiButtonInfoObject] =
+    useState<AnkiButtonInfoObject>({
+      //在使用前会进行赋值
+      [__main__]: null!,
+    });
+  const { loadingSet } = params;
   const { postMessage } = useMessenger();
-  const { ankiButtonInfoObject, setAnkiButtonInfoObject, loadingSet } = params;
   const ankiButtonInfoObjectRef = useRef(ankiButtonInfoObject);
   ankiButtonInfoObjectRef.current = ankiButtonInfoObject;
 
@@ -31,6 +32,9 @@ export function useAnki(params: AnkiParams) {
       //先有相应的数据可以被用户看到，用户的操作才会触发该函数，因此可以断言非空。
       const ankiButtonInfo = ankiButtonInfoObject[key]![idx]!;
       const symbol = `${String(key)}+${idx}`;
+      const tabPanelName = getTabPanelName(data);
+      const { status } = ankiButtonInfo;
+      const prevStatus = status;
       setAnkiButtonInfoObject(function (ankiButtonInfoObject) {
         loadingSet.add(symbol);
         return produce(ankiButtonInfoObject, (draft) => {
@@ -59,9 +63,7 @@ export function useAnki(params: AnkiParams) {
           );
         });
       });
-      const tabPanelName = getTabPanelName(data);
-      const { status } = ankiButtonInfo;
-      const prevStatus = status;
+
       switch (status) {
         case Status.Add:
         case Status.Duplicate:
@@ -161,7 +163,11 @@ export function useAnki(params: AnkiParams) {
     },
     [loadingSet, postMessage, setAnkiButtonInfoObject]
   );
-  return submit;
+  return {
+    submit,
+    ankiButtonInfoObject,
+    setAnkiButtonInfoObject,
+  };
 }
 
 function getTabPanelName(data: NoteData) {

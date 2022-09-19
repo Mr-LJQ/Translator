@@ -30,19 +30,17 @@ export function useFeature() {
   const showTranslationCallbackRef = useRef<() => void>();
 
   const {
-    history,
+    submit: updateAnki,
     ankiButtonInfoObject,
-    updateHistory,
-    renderHistory,
     setAnkiButtonInfoObject,
-  } = useHistory({
+  } = useAnki({
+    loadingSet,
+  });
+
+  const { history, updateHistory, renderHistory } = useHistory({
     data,
     setData,
     loadedSubscribe,
-  });
-
-  const updateAnki = useAnki({
-    loadingSet,
     ankiButtonInfoObject,
     setAnkiButtonInfoObject,
   });

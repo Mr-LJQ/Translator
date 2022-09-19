@@ -1,15 +1,10 @@
-import React, {
-  useState,
-  useCallback,
-  useLayoutEffect,
-  useEffect,
-  useRef,
-} from "react";
+import React, { useCallback, useLayoutEffect, useEffect, useRef } from "react";
 import { TranslationResult } from "@/dictionary";
 import { Command } from "@/configuration";
-import { History, __main__ } from "../utils";
-import { AnkiButtonInfoObject } from "../types";
+
 import { useMessenger } from "../components/Context";
+import { AnkiButtonInfoObject } from "../types";
+import { History } from "../utils";
 
 interface HistoryType {
   scrollTop: number;
@@ -29,18 +24,23 @@ interface HistoryParams {
   data: TranslationResult | undefined;
   loadedSubscribe: (callback: () => void) => void;
   setData: React.Dispatch<React.SetStateAction<TranslationResult | undefined>>;
+  ankiButtonInfoObject: AnkiButtonInfoObject;
+  setAnkiButtonInfoObject: React.Dispatch<
+    React.SetStateAction<AnkiButtonInfoObject>
+  >;
 }
 /**
  * 该部分主要封装的是历史记录相关功能的逻辑
  */
 export function useHistory(params: HistoryParams) {
-  const { data, setData, loadedSubscribe } = params;
+  const {
+    data,
+    setData,
+    loadedSubscribe,
+    ankiButtonInfoObject,
+    setAnkiButtonInfoObject,
+  } = params;
   const { onMessage, postMessage } = useMessenger();
-  const [ankiButtonInfoObject, setAnkiButtonInfoObject] =
-    useState<AnkiButtonInfoObject>({
-      //在使用前会进行赋值
-      [__main__]: null!,
-    });
 
   //实现引用数据
   const historyRef = useRef<HistoryRef>({
@@ -77,7 +77,7 @@ export function useHistory(params: HistoryParams) {
       setData(data);
       setAnkiButtonInfoObject(ankiButtonInfoObject);
     },
-    [setData]
+    [setData, setAnkiButtonInfoObject]
   );
 
   /**
@@ -151,8 +151,6 @@ export function useHistory(params: HistoryParams) {
   return {
     updateHistory,
     renderHistory,
-    ankiButtonInfoObject,
-    setAnkiButtonInfoObject,
     history: historyRef.current.history,
   };
 }
