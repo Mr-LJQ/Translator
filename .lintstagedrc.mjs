@@ -13,5 +13,5 @@ export default {
     "prettier --write",
     "jest --bail --findRelatedTests",
   ],
-  "src/**/*.!{js,jsx,ts,tsx}": "prettier --write --ignore-unknown",
+  "src/**/*.!({js,jsx,ts,tsx})": "prettier --write --ignore-unknown",
 };
