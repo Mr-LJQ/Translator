@@ -31,6 +31,7 @@ import {
 import { View } from ".";
 import { Status } from "../../types";
 import { transformWordData } from "../../utils";
+import { TabPanelName } from "@/extensions-api";
 
 //jsdom没有实现该方法
 const mockScrollTo = jest.spyOn(window, "scrollTo").mockImplementation();
@@ -333,7 +334,10 @@ test("正确的Anki操作功能(useAnki)", async () => {
   });
 
   await user.click(ankiButton);
-  expect(mockOpenOptionsPage).toBeCalledTimes(1);
+  expect(mockOpenOptionsPage).toBeCalledWith(
+    TabPanelName.Word,
+    expect.any(Function)
+  );
   expect(mockAddNote).toBeCalledWith(returnData);
   expect(mockAddNote).toBeCalledTimes(5);
   ankiCallback(createAnkiErrorResponse(""));
@@ -506,6 +510,6 @@ test("切换翻译数据时，停止音频播放", async () => {
   const { postMessage } = messenger;
   postMessage(Command.ShowTranslation, sentenceData, () => void 0);
   await waitFor(() => {
-    expect(mockPause).toBeCalledTimes(1)
+    expect(mockPause).toBeCalledTimes(1);
   });
 });

@@ -12,5 +12,5 @@ test("正确转换 AnkiResponseStatus", () => {
   }).not.toThrowError();
   expect(() => {
     transformAnkiResponseStatus(10);
-  }).toThrowError();
+  }).toBeDefined();
 });
