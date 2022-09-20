@@ -63,7 +63,7 @@ export function createDuplicateResponse(cardIds: number[]) {
     data: cardIds,
     status: AnkiResponseStatus.Duplicate,
     message:
-      "该卡片出现重复项，单击按钮复制重复卡片的ID，以在Anki Browser上快速定位(处理完毕后可再次点击该按钮进行重试操纵)。",
+      "该卡片出现重复项，单击按钮复制重复卡片的ID，以在Anki Browser上快速定位(处理完毕后可再次点击该按钮进行重试)。",
   });
 }
 

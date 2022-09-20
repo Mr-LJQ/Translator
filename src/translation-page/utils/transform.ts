@@ -1,6 +1,5 @@
 import { Status } from "../types";
 import { AnkiResponseStatus } from "@/anki";
-import { warning } from "@/utils";
 import type { WordData, PhraseData } from "@/dictionary";
 import type { WordNoteData, PhraseNoteData } from "../types";
 
@@ -117,6 +116,5 @@ export function transformAnkiResponseStatus(status: AnkiResponseStatus) {
     [AnkiResponseStatus.ConfigError]: Status.ConfigError,
     [AnkiResponseStatus.FirstAddSuccess]: Status.LearnNow,
   }[status];
-  warning(status == null, `未添加对${AnkiResponseStatus[status]} 的转换`);
   return result;
 }

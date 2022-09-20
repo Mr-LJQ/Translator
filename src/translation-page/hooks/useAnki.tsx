@@ -3,9 +3,15 @@ import { produce } from "immer";
 
 import { warning } from "@/utils";
 import { Command } from "@/configuration";
+import { isAnkiResponseError } from "@/anki";
 import { useMessenger } from "../components/Context";
 import { transformAnkiResponseStatus, __main__ } from "../utils";
-import { Status, NoteData, AnkiButtonInfoObject } from "../types";
+import {
+  Status,
+  NoteData,
+  AnkiButtonInfoObject,
+  AnkiButtonInfo,
+} from "../types";
 import { TabPanelName } from "@/extensions-api";
 
 interface AnkiParams {
@@ -31,10 +37,11 @@ export function useAnki(params: AnkiParams) {
       const ankiButtonInfoObject = ankiButtonInfoObjectRef.current;
       //先有相应的数据可以被用户看到，用户的操作才会触发该函数，因此可以断言非空。
       const ankiButtonInfo = ankiButtonInfoObject[key]![idx]!;
-      const symbol = `${String(key)}+${idx}`;
-      const tabPanelName = getTabPanelName(data);
       const { status } = ankiButtonInfo;
       const prevStatus = status;
+      const symbol = `${String(key)}+${idx}`;
+      const tabPanelName = getTabPanelName(data);
+
       setAnkiButtonInfoObject(function (ankiButtonInfoObject) {
         loadingSet.add(symbol);
         return produce(ankiButtonInfoObject, (draft) => {
@@ -42,51 +49,32 @@ export function useAnki(params: AnkiParams) {
           draft[key]![idx]!.status = Status.Loading;
           draft[key]![idx]!.message = "请等待...";
           //只有在该次提交是有效提交，而非错误重试的时候，才更新 lastUsefulSubmission
-          if (
-            status === Status.Add ||
-            status === Status.Forgotten ||
-            status === Status.LearnNow
-          ) {
+          if (isUsefulStatus(status)) {
             draft[key]![idx]!.lastUsefulSubmission = status;
           }
-          warning(
-            status === Status.Add ||
-              status === Status.Forgotten ||
-              status === Status.ConfigError ||
-              status === Status.Duplicate ||
-              status === Status.Disconnect ||
-              status === Status.Error ||
-              status === Status.LearnNow ||
-              status === Status.Loading ||
-              status === Status.Success,
-            "存在新增的 Status 没有处理，请添加处理"
-          );
         });
       });
 
-      switch (status) {
-        case Status.Add:
-        case Status.Duplicate:
-        case Status.ConfigError:
-          return AddNew();
-        case Status.Forgotten:
-        case Status.LearnNow:
-          return refresh();
-        case Status.Disconnect:
-        case Status.Error: {
-          const { lastUsefulSubmission } = ankiButtonInfo;
-          if (lastUsefulSubmission === Status.Add) {
-            return AddNew();
-          } else {
-            return refresh();
-          }
-        }
-        default: {
-          warning(false, "存在新增的 Status 没有处理，请添加处理");
-        }
-      }
+      const strategies = {
+        [Status.Add]: addNew,
+        [Status.Duplicate]: addNew,
+        [Status.ConfigError]: addNew,
+        [Status.Forgotten]: refresh,
+        [Status.LearnNow]: refresh,
+        [Status.Disconnect]: selectPreviousHandler(ankiButtonInfo),
+        [Status.Error]: selectPreviousHandler(ankiButtonInfo),
+        [Status.Loading]: throwError(Status.Loading),
+        [Status.Success]: throwError(Status.Success),
+      };
+      return strategies[status]();
 
-      //处理重置学习进度的逻辑
+      /**
+       * 选择上一次有效提交的处理函数
+       */
+      function selectPreviousHandler(ankiButtonInfo: AnkiButtonInfo) {
+        const { lastUsefulSubmission } = ankiButtonInfo;
+        return lastUsefulSubmission === Status.Add ? addNew : refresh;
+      }
 
       /**
        * 刷新已有卡片学习进度的逻辑
@@ -95,15 +83,14 @@ export function useAnki(params: AnkiParams) {
         //在设计上，进入函数时，必定存在 cardIds
         const cardIds = ankiButtonInfo.cardIds!;
         postMessage(Command.RelearnNote, cardIds, function (ankiResponse) {
-          const { status, message, data } = ankiResponse;
+          const { status, message } = ankiResponse;
           setAnkiButtonInfoObject(function (ankiButtonInfoObject) {
             loadingSet.delete(symbol);
             return produce(ankiButtonInfoObject, (draft) => {
-              draft[key]![idx]!.message = message;
-              if (Array.isArray(data) && data.every((item) => isFinite(item))) {
-                draft[key]![idx]!.cardIds = data;
+              if (!isAnkiResponseError(ankiResponse)) {
+                draft[key]![idx]!.cardIds = ankiResponse.data;
               }
-              //transformAnkiResponseStatus 保证不为undefined，有开发时的报错保护，以及相关单元测试进行保证
+              draft[key]![idx]!.message = message;
               draft[key]![idx]!.status = transformAnkiResponseStatus(status)!;
             });
           });
@@ -113,20 +100,16 @@ export function useAnki(params: AnkiParams) {
       /**
        *添加新卡片的逻辑
        */
-      function AddNew() {
+      function addNew() {
         postMessage(Command.AddNote, data, function (ankiResponse) {
-          const { message, status, data } = ankiResponse;
-          //transformAnkiResponseStatus 保证不为undefined，有开发时的报错保护，以及相关单元测试进行保证
-          const newStatus = transformAnkiResponseStatus(status)!;
+          const { message, status } = ankiResponse;
+          const newStatus = transformAnkiResponseStatus(status);
           /**
            * 这里实现一个功能，当出现配置错误时，
            *  在配置错误被用户修正前，用户点击按钮都会打开配置页面
            *  在修正后，用户点击按钮则会重新添加卡片。
            */
-          if (
-            prevStatus === Status.ConfigError &&
-            newStatus === Status.ConfigError
-          ) {
+          if (isTwiceConfigError(prevStatus, newStatus)) {
             postMessage(Command.OpenOptionsPage, tabPanelName);
           }
 
@@ -134,26 +117,17 @@ export function useAnki(params: AnkiParams) {
            * 如果是重复，则第二次点击会复制一份利于在Anki上查找重复卡片的搜索字符
            *  如果重复已处理，则进行重试，不会复制。
            */
-          if (
-            prevStatus === Status.Duplicate &&
-            newStatus === Status.Duplicate
-          ) {
-            if (data) {
-              const queryText = (data as number[])
-                .map((item) => {
-                  return "cid:" + item;
-                })
-                .join(" OR ");
-              navigator.clipboard.writeText(queryText);
-            }
+          if (isTwiceDuplicate(prevStatus, newStatus)) {
+            !isAnkiResponseError(ankiResponse) &&
+              writeClipboard(ankiResponse.data);
           }
 
           setAnkiButtonInfoObject(function (ankiButtonInfoObject) {
             loadingSet.delete(symbol);
             return produce(ankiButtonInfoObject, (draft) => {
               draft[key]![idx]!.message = message;
-              if (Array.isArray(data) && data.every((item) => isFinite(item))) {
-                draft[key]![idx]!.cardIds = data;
+              if (!isAnkiResponseError(ankiResponse)) {
+                draft[key]![idx]!.cardIds = ankiResponse.data;
               }
               draft[key]![idx]!.status = newStatus;
             });
@@ -171,15 +145,54 @@ export function useAnki(params: AnkiParams) {
 }
 
 function getTabPanelName(data: NoteData) {
-  if ("word" in data) {
-    return TabPanelName.Word;
-  }
-  if ("phrase" in data) {
-    return TabPanelName.Phrase;
-  }
-  if ("sentence" in data) {
-    return TabPanelName.Sentence;
-  }
-  warning(false, "BUG : getTabPanelName 方法无法正确映射到 TabPanelName.");
+  if ("word" in data) return TabPanelName.Word;
+  if ("phrase" in data) return TabPanelName.Phrase;
+  if ("sentence" in data) return TabPanelName.Sentence;
+  warning(false, "getTabPanelName 方法无法正确映射到 TabPanelName.");
   return TabPanelName.Home;
+}
+
+function isUsefulStatus(status: Status) {
+  return {
+    [Status.Add]: true,
+    [Status.LearnNow]: true,
+    [Status.Forgotten]: true,
+    //无用的状态
+    [Status.Error]: false,
+    [Status.Success]: false,
+    [Status.Loading]: false,
+    [Status.Duplicate]: false,
+    [Status.Disconnect]: false,
+    [Status.ConfigError]: false,
+  }[status];
+}
+
+function throwError(status: Status.Loading | Status.Success) {
+  const statusMap = {
+    [Status.Loading]: "Status.Loading",
+    [Status.Success]: "Status.Success",
+  };
+  const state = statusMap[status];
+  return () => {
+    throw new Error(
+      `${state} 状态应被过滤掉，在设计上，处于该状态时应该不能够触发 submit 调用。`
+    );
+  };
+}
+
+function writeClipboard(data: number[]) {
+  const queryText = data
+    .map((item) => {
+      return "cid:" + item;
+    })
+    .join(" OR ");
+  navigator.clipboard.writeText(queryText);
+}
+
+function isTwiceDuplicate(prevStatus: Status, newStatus: Status) {
+  return prevStatus === Status.Duplicate && newStatus === Status.Duplicate;
+}
+
+function isTwiceConfigError(prevStatus: Status, newStatus: Status) {
+  return prevStatus === Status.ConfigError && newStatus === Status.ConfigError;
 }
