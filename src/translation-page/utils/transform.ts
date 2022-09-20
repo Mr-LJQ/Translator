@@ -108,29 +108,15 @@ export function transformPhraseData(data: PhraseData): PhraseNoteData {
  */
 
 export function transformAnkiResponseStatus(status: AnkiResponseStatus) {
-  switch (status) {
-    case AnkiResponseStatus.Success: {
-      return Status.Success;
-    }
-    case AnkiResponseStatus.Forgotten: {
-      return Status.Forgotten;
-    }
-    case AnkiResponseStatus.Duplicate: {
-      return Status.Duplicate;
-    }
-    case AnkiResponseStatus.Disconnect: {
-      return Status.Disconnect;
-    }
-    case AnkiResponseStatus.ConfigError: {
-      return Status.ConfigError;
-    }
-    case AnkiResponseStatus.FirstAddSuccess: {
-      return Status.LearnNow;
-    }
-    case AnkiResponseStatus.Error:
-      return Status.Error;
-    default: {
-      warning(false, `未添加对${AnkiResponseStatus[status]} 的转换`);
-    }
-  }
+  const result = {
+    [AnkiResponseStatus.Error]: Status.Error,
+    [AnkiResponseStatus.Success]: Status.Success,
+    [AnkiResponseStatus.Forgotten]: Status.Forgotten,
+    [AnkiResponseStatus.Duplicate]: Status.Duplicate,
+    [AnkiResponseStatus.Disconnect]: Status.Disconnect,
+    [AnkiResponseStatus.ConfigError]: Status.ConfigError,
+    [AnkiResponseStatus.FirstAddSuccess]: Status.LearnNow,
+  }[status];
+  warning(status == null, `未添加对${AnkiResponseStatus[status]} 的转换`);
+  return result;
 }
