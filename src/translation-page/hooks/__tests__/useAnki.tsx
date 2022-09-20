@@ -167,7 +167,8 @@ describe("检查：useAnki()", () => {
   });
 
   test("测试：各种状态的提交逻辑正确", async () => {
-    const { user, ankiButton, ankiCallbackRef } = await prepare();
+    const { user, ankiButton, ankiCallbackRef, mockAddNote, mockRelearnNote } =
+      await prepare();
 
     const {
       errorParam,
@@ -218,6 +219,8 @@ describe("检查：useAnki()", () => {
       });
       expect(ankiButton).toHaveAttribute("title", title);
     }
+    expect(mockAddNote).toBeCalledTimes(4);
+    expect(mockRelearnNote).toBeCalledTimes(3);
   });
 
   test("测试：出现错误后，再次重试时能够正确复用上次有效提交所调用的处理函数", async () => {
@@ -259,7 +262,7 @@ describe("检查：useAnki()", () => {
     expect(mockRelearnNote).toBeCalledTimes(3);
   });
 
-  test("测试：正确匹配对应的处理函数", async () => {
+  test("测试：cardIds被正确的保存", async () => {
     const {
       user,
       ankiButton,
@@ -272,19 +275,21 @@ describe("检查：useAnki()", () => {
     const {
       firstAddParam,
       forgottenParam,
+      errorResponse,
+      disconnectionResponse,
       successResponse,
       firstAddResponse,
       forgottenResponse,
-      duplicateResponse,
-      configErrorResponse,
     } = getAnkiResponse();
 
     const tests: [jest.Mock<any, any>, AnkiResponse<any>, any, Status][] = [
-      [mockAddNote, duplicateResponse, returnData, Status.Duplicate],
-      [mockAddNote, configErrorResponse, returnData, Status.ConfigError],
-      [mockAddNote, forgottenResponse, returnData, Status.Forgotten],
-      [mockRelearnNote, firstAddResponse, forgottenParam, Status.LearnNow],
-      [mockRelearnNote, successResponse, firstAddParam, Status.Success],
+      [mockAddNote, firstAddResponse, returnData, Status.LearnNow],
+      [mockRelearnNote, errorResponse, firstAddParam, Status.Error],
+      [mockRelearnNote, disconnectionResponse, firstAddParam, Status.Disconnect], //prettier-ignore
+      [mockRelearnNote, forgottenResponse, firstAddParam, Status.Forgotten],
+      [mockRelearnNote, errorResponse, forgottenParam, Status.Error],
+      [mockRelearnNote, disconnectionResponse, forgottenParam, Status.Disconnect], //prettier-ignore
+      [mockRelearnNote, successResponse, forgottenParam, Status.Success],
     ];
 
     for (const [mockFn, ankiResponse, param, status] of tests) {
