@@ -158,7 +158,7 @@ function isChinese(text: string, wordSize: number) {
     chineseSize += chinese.length;
     return chinese;
   });
-  if (chineseSize / wordSize > 2) {
+  if (chineseSize / wordSize >= 0.5) {
     return true;
   }
   return false;
