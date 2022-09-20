@@ -19,17 +19,11 @@ import {
 import {
   AddNoteReturnType,
   createErrorResponse,
-  createConfigErrorResponse,
-  createDisconnectionResponse,
-  createDuplicateResponse,
   createFirstAddSuccessResponse,
-  createForgottenResponse,
   createSuccessAnkiResponse,
 } from "@/anki";
 import { View } from ".";
 import { Status } from "../../types";
-import { transformWordData } from "../../utils";
-import { TabPanelName } from "@/extensions-api";
 
 //jsdom没有实现该方法
 const mockScrollTo = jest.spyOn(window, "scrollTo").mockImplementation();
@@ -257,151 +251,6 @@ test("正确的历史功能(useHistory)", async () => {
     "data-status",
     String(Status.LearnNow)
   );
-});
-
-test("正确的Anki操作功能(useAnki)", async () => {
-  const user = userEvent.setup();
-  render(<View />);
-  const { postMessage, onMessage } = messenger;
-  postMessage(Command.ShowTranslation, wordData, () => void 0);
-  await waitFor(() => {
-    expect(
-      screen.getByRole("heading", { name: wordData.word })
-    ).toBeInTheDocument();
-  });
-
-  const mockAddNote = jest.fn();
-  let ankiCallback: (data: AddNoteReturnType) => void = null!;
-  onMessage(Command.AddNote, (data, callback) => {
-    mockAddNote(data);
-    ankiCallback = callback;
-  });
-
-  const mockRelearnNote = jest.fn();
-  onMessage(Command.RelearnNote, (data, callback) => {
-    mockRelearnNote(data);
-    ankiCallback = callback;
-  });
-
-  //单击按钮后会使其变为 loading状态
-  const ankiButton = screen.getAllByRole("button", { name: "AnkiButton" })[0]!;
-  expect(ankiButton).toHaveAttribute("data-status", String(Status.Add));
-  await user.click(ankiButton);
-  expect(ankiButton).toHaveAttribute("data-status", String(Status.Loading));
-  const returnData = transformWordData(wordData, 0);
-  expect(mockAddNote).toBeCalledWith(returnData);
-  ankiCallback(createDuplicateResponse([123, 456, 789]));
-  await waitFor(() => {
-    expect(ankiButton).toHaveAttribute("data-status", String(Status.Duplicate));
-  });
-
-  //status.Duplicate时，再次点击会将复制一份搜索字符串到剪切板
-  await user.click(ankiButton);
-  expect(ankiButton).toHaveAttribute("data-status", String(Status.Loading));
-  expect(mockAddNote).toBeCalledWith(returnData);
-  ankiCallback(createDuplicateResponse([123, 456, 789]));
-  await waitFor(() => {
-    expect(ankiButton).toHaveAttribute("data-status", String(Status.Duplicate));
-  });
-  const queryText = await navigator.clipboard.readText();
-  expect(queryText).toBe("cid:123 OR cid:456 OR cid:789");
-
-  await user.click(ankiButton);
-  expect(mockAddNote).toBeCalledWith(returnData);
-  expect(mockAddNote).toBeCalledTimes(3);
-  ankiCallback(createConfigErrorResponse(""));
-  await waitFor(() => {
-    expect(ankiButton).toHaveAttribute(
-      "data-status",
-      String(Status.ConfigError)
-    );
-  });
-
-  //测试配置错误状态下再次点击按钮打开配置页的功能
-  const mockOpenOptionsPage = jest.fn();
-  onMessage(Command.OpenOptionsPage, mockOpenOptionsPage);
-  await user.click(ankiButton);
-  expect(mockAddNote).toBeCalledWith(returnData);
-  expect(mockAddNote).toBeCalledTimes(4);
-  ankiCallback(createConfigErrorResponse(""));
-  await waitFor(() => {
-    expect(ankiButton).toHaveAttribute(
-      "data-status",
-      String(Status.ConfigError)
-    );
-  });
-
-  await user.click(ankiButton);
-  expect(mockOpenOptionsPage).toBeCalledWith(
-    TabPanelName.Word,
-    expect.any(Function)
-  );
-  expect(mockAddNote).toBeCalledWith(returnData);
-  expect(mockAddNote).toBeCalledTimes(5);
-  ankiCallback(createErrorResponse(""));
-  await waitFor(() => {
-    expect(ankiButton).toHaveAttribute("data-status", String(Status.Error));
-  });
-
-  await user.click(ankiButton);
-  expect(mockOpenOptionsPage).toBeCalledTimes(1);
-  expect(mockAddNote).toBeCalledWith(returnData);
-  expect(mockAddNote).toBeCalledTimes(6);
-  ankiCallback(createForgottenResponse([4399]));
-  await waitFor(() => {
-    expect(ankiButton).toHaveAttribute("data-status", String(Status.Forgotten));
-  });
-
-  await user.click(ankiButton);
-  expect(mockRelearnNote).toBeCalledWith([4399]);
-  expect(mockRelearnNote).toBeCalledTimes(1);
-  ankiCallback(createFirstAddSuccessResponse([9527]));
-  await waitFor(() => {
-    expect(ankiButton).toHaveAttribute("data-status", String(Status.LearnNow));
-  });
-
-  await user.click(ankiButton);
-  expect(mockRelearnNote).toBeCalledWith([9527]);
-  expect(mockRelearnNote).toBeCalledTimes(2);
-  ankiCallback(createErrorResponse(""));
-  await waitFor(() => {
-    expect(ankiButton).toHaveAttribute("data-status", String(Status.Error));
-  });
-
-  await user.click(ankiButton);
-  expect(mockRelearnNote).toBeCalledWith([9527]);
-  expect(mockRelearnNote).toBeCalledTimes(3);
-  ankiCallback(createDisconnectionResponse(""));
-  await waitFor(() => {
-    expect(ankiButton).toHaveAttribute(
-      "data-status",
-      String(Status.Disconnect)
-    );
-  });
-
-  await user.click(ankiButton);
-  expect(mockRelearnNote).toBeCalledWith([9527]);
-  expect(mockRelearnNote).toBeCalledTimes(4);
-  ankiCallback(createErrorResponse(""));
-  await waitFor(() => {
-    expect(ankiButton).toHaveAttribute("data-status", String(Status.Error));
-  });
-
-  await user.click(ankiButton);
-  expect(mockRelearnNote).toBeCalledWith([9527]);
-  expect(mockRelearnNote).toBeCalledTimes(5);
-  ankiCallback(createErrorResponse(""));
-  await waitFor(() => {
-    expect(ankiButton).toHaveAttribute("data-status", String(Status.Error));
-  });
-
-  await user.click(ankiButton);
-  expect(mockRelearnNote).toBeCalledWith([9527]);
-  expect(mockRelearnNote).toBeCalledTimes(6);
-  ankiCallback(createSuccessAnkiResponse([123]));
-  await waitFor(() => {
-    expect(ankiButton).toHaveAttribute("data-status", String(Status.Success));
-  });
 });
 
 test("正确的实现其它功能(useFeature)", async () => {
