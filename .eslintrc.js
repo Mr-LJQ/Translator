@@ -6,6 +6,10 @@ module.exports = {
     es2021: true,
     browser: true,
   },
+  parserOptions: {
+    ecmaVersion: "latest",
+    sourceType: "module",
+  },
   //对于特定匹配的文件应用不同的配置
   overrides: [
     {
