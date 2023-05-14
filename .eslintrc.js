@@ -1,15 +1,18 @@
 module.exports = {
-  root: true, //根目录，表明该文件所在目录是eslint向上查找并合并配置文件的终点
+  root: true,
+  //根目录，表明该文件所在目录是eslint向上查找并合并配置文件的终点
   env: {
     node: true,
     es2021: true,
     browser: true,
   },
+  //对于特定匹配的文件应用不同的配置
   overrides: [
-    //对于特定匹配的文件应用不同的配置
     {
-      files: ["src/**/*.ts", "src/**/*.tsx"], //应用配置的匹配模式
-      parser: "@typescript-eslint/parser", //用于解析 ts、tsx文件的解析器
+      //应用配置的匹配模式
+      files: ["src/**/*.ts", "src/**/*.tsx"],
+      //用于解析 ts、tsx文件的解析器
+      parser: "@typescript-eslint/parser",
       parserOptions: {
         //传递给解析器的参数
         ecmaFeatures: {
@@ -37,11 +40,13 @@ module.exports = {
       },
     },
   ],
+
   extends: [
     "eslint:recommended",
     "plugin:jest-dom/recommended",
     "plugin:testing-library/react",
     "prettier",
+    "plugin:storybook/recommended",
   ],
   plugins: [
     "react",

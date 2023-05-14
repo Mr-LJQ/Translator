@@ -1,36 +1,37 @@
 const custom = require("../webpack.config.js");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-
 module.exports = {
   stories: ["../src/**/*.stories.@(js|jsx|ts|tsx)"],
-  addons: [
-    "@storybook/addon-a11y",
-    "@storybook/addon-links",
-    "@storybook/addon-essentials",
-    "@storybook/addon-interactions",
-    "storybook-addon-pseudo-states",
-  ],
+  addons: ["@storybook/addon-a11y", "@storybook/addon-links", "@storybook/addon-essentials", "@storybook/addon-interactions", "storybook-addon-pseudo-states"],
   core: {
-    builder: "webpack5",
     options: {
       fsCache: true,
-      lazyCompilation: true,
-    },
+      lazyCompilation: true
+    }
   },
   features: {
-    interactionsDebugger: true,
+    interactionsDebugger: true
   },
-  webpackFinal: async (config) => {
+  webpackFinal: async config => {
     return {
       ...config,
-      resolve: { ...config.resolve, ...custom.resolve },
-      module: { rules: custom.module.rules },
-      plugins: config.plugins.concat(
-        new MiniCssExtractPlugin({
-          filename: "index.css",
-        })
-      ),
+      resolve: {
+        ...config.resolve,
+        ...custom.resolve
+      },
+      module: {
+        rules: custom.module.rules
+      },
+      plugins: config.plugins.concat(new MiniCssExtractPlugin({
+        filename: "index.css"
+      }))
     };
   },
-  framework: "@storybook/react",
+  framework: {
+    name: "@storybook/react-webpack5",
+    options: {}
+  },
+  docs: {
+    autodocs: true
+  }
 };
