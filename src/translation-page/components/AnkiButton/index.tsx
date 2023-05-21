@@ -1,7 +1,7 @@
 import React from "react";
 import classJoin from "classnames";
-import { AnkiButtonInfo, Status } from "../../types";
 import { getStatusIcon } from "../../utils";
+import { AnkiButtonInfo, Status } from "../../types";
 
 interface Props extends AnkiButtonInfo {
   className?: string;

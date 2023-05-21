@@ -1,5 +1,5 @@
 import React from "react";
-import { ComponentStory, ComponentMeta } from "@storybook/react";
+import { StoryObj, Meta } from "@storybook/react";
 import { HiddenChinese } from "../Context";
 import { WordSection } from ".";
 import { createHistory } from "../../utils";
@@ -8,28 +8,37 @@ import { containerDecorator, audioElementDecorator, wordData } from "@/test";
 export default {
   title: "WordSection",
   component: WordSection,
-  decorators: [containerDecorator, audioElementDecorator],
+  decorators: [
+    containerDecorator,
+    audioElementDecorator,
+    (Story, { parameters }) => {
+      return (
+        <HiddenChinese.Provider value={parameters.hiddenChinese}>
+          <Story />
+        </HiddenChinese.Provider>
+      );
+    },
+  ],
+  args: {
+    ...wordData,
+    ankiButtonInfoObject: createHistory(wordData).ankiButtonInfoObject,
+  },
   argTypes: {
     updateAnki: { action: "updateAnki" },
     updateAnkiTranslations: { action: "updateAnkiTranslations" },
   },
-} as ComponentMeta<typeof WordSection>;
+} as Meta<typeof WordSection>;
 
-const createTemplate = function (hiddenChinese: boolean) {
-  return function Template(args) {
-    return (
-      <HiddenChinese.Provider value={hiddenChinese}>
-        <WordSection {...args} />
-      </HiddenChinese.Provider>
-    );
-  } as ComponentStory<typeof WordSection>;
+type Story = StoryObj<typeof WordSection>;
+
+export const Primary: Story = {
+  parameters: {
+    hiddenChinese: false,
+  },
 };
 
-export const Primary = createTemplate(false);
-Primary.args = {
-  ...wordData,
-  ankiButtonInfoObject: createHistory(wordData).ankiButtonInfoObject,
+export const Hidden: Story = {
+  parameters: {
+    hiddenChinese: true,
+  },
 };
-
-export const Hidden = createTemplate(true);
-Hidden.args = Primary.args;

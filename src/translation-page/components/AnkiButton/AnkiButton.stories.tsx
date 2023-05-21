@@ -1,89 +1,105 @@
 import React from "react";
-import { ComponentStory, ComponentMeta } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 import { AnkiButton } from ".";
 import { Status } from "../../types";
 
-const mockFn = jest.fn();
-
-export default {
+const meta: Meta<typeof AnkiButton> = {
   title: "AnkiButton",
   component: AnkiButton,
-  args: {
-    updateAnki: mockFn,
-  },
   parameters: {
     pseudo: {
       hover: ["button:nth-of-type(2)"],
       focus: ["button:nth-of-type(3)"],
     },
   },
-} as ComponentMeta<typeof AnkiButton>;
+};
+export default meta;
 
-const Template: ComponentStory<typeof AnkiButton> = (args) => {
-  return (
-    <>
-      <AnkiButton {...args} />
-      <br />
-      <AnkiButton {...args} />
-      <br />
-      <AnkiButton {...args} />
-    </>
-  );
+type Story = StoryObj<typeof AnkiButton>;
+
+const Template: Story = {
+  render(args) {
+    return (
+      <>
+        <AnkiButton {...args} />
+        <AnkiButton {...args} />
+        <AnkiButton {...args} />
+      </>
+    );
+  },
 };
 
-export const Success = Template.bind({});
-Success.args = {
-  status: Status.Success,
-  message: "Success",
+export const Success: Story = {
+  ...Template,
+  args: {
+    status: Status.Success,
+    message: "Success",
+  },
 };
 
-export const Add = Template.bind({});
-Add.args = {
-  status: Status.Add,
-  message: "Add",
+export const Add: Story = {
+  ...Template,
+  args: {
+    status: Status.Add,
+    message: "Add",
+  },
 };
 
-export const Loading = Template.bind({});
-Loading.args = {
-  status: Status.Loading,
-  message: "Loading",
+export const Loading: Story = {
+  ...Template,
+  args: {
+    status: Status.Loading,
+    message: "Loading",
+  },
 };
 
-export const Error = Template.bind({});
-Error.args = {
-  status: Status.Error,
-  message: "Error",
+export const Error: Story = {
+  ...Template,
+  args: {
+    status: Status.Error,
+    message: "Error",
+  },
 };
 
-export const Disconnect = Template.bind({});
-Disconnect.args = {
-  status: Status.Disconnect,
-  message: "Disconnect",
+export const Disconnect: Story = {
+  ...Template,
+  args: {
+    status: Status.Disconnect,
+    message: "Disconnect",
+  },
 };
 
-export const ConfigError = Template.bind({});
-ConfigError.args = {
-  status: Status.ConfigError,
-  message: "ConfigError",
+export const ConfigError: Story = {
+  ...Template,
+  args: {
+    status: Status.ConfigError,
+    message: "ConfigError",
+  },
 };
 
-export const Duplicate = Template.bind({});
-Duplicate.args = {
-  status: Status.Duplicate,
-  message: "Duplicate",
-  cardIds: [123, 456, 789],
+export const Duplicate: Story = {
+  ...Template,
+  args: {
+    status: Status.Duplicate,
+    message: "Duplicate",
+    cardIds: [123, 456, 789],
+  },
 };
 
-export const Forgotten = Template.bind({});
-Forgotten.args = {
-  status: Status.Forgotten,
-  message: "Forgotten",
-  cardIds: [4399],
+export const Forgotten: Story = {
+  ...Template,
+  args: {
+    status: Status.Forgotten,
+    message: "Forgotten",
+    cardIds: [4399],
+  },
 };
 
-export const LearnNow = Template.bind({});
-LearnNow.args = {
-  status: Status.LearnNow,
-  message: "LearnNow",
-  cardIds: [9527],
+export const LearnNow: Story = {
+  ...Template,
+  args: {
+    status: Status.LearnNow,
+    message: "LearnNow",
+    cardIds: [9527],
+  },
 };

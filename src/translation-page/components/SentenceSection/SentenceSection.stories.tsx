@@ -1,5 +1,4 @@
-import React from "react";
-import { ComponentStory, ComponentMeta } from "@storybook/react";
+import { StoryObj, Meta } from "@storybook/react";
 import { SentenceSection } from ".";
 import {
   sentenceData,
@@ -13,13 +12,11 @@ export default {
   argTypes: {
     updateAnki: { action: "updateAnki" },
   },
-} as ComponentMeta<typeof SentenceSection>;
+} as Meta<typeof SentenceSection>;
 
-const Template: ComponentStory<typeof SentenceSection> = (args) => (
-  <SentenceSection {...args} />
-);
+type Story = StoryObj<typeof SentenceSection>;
 
-export const Primary = Template.bind({});
+export const Primary: Story = {};
 Primary.args = {
   ...sentenceData,
   ankiButtonInfo: {

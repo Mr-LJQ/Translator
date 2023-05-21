@@ -1,5 +1,4 @@
-import React from "react";
-import { ComponentStory, ComponentMeta } from "@storybook/react";
+import { StoryObj, Meta } from "@storybook/react";
 import { PhraseSection } from ".";
 import { containerDecorator, audioElementDecorator, phraseData } from "@/test";
 export default {
@@ -9,13 +8,11 @@ export default {
   argTypes: {
     updateAnki: { action: "updateAnki" },
   },
-} as ComponentMeta<typeof PhraseSection>;
+} as Meta<typeof PhraseSection>;
 
-const Template: ComponentStory<typeof PhraseSection> = (args) => (
-  <PhraseSection {...args} />
-);
+type Story = StoryObj<typeof PhraseSection>;
 
-export const Primary = Template.bind({});
+export const Primary: Story = {};
 Primary.args = {
   ...phraseData,
   ankiButtonInfo: {

@@ -1,5 +1,5 @@
 import React from "react";
-import { ComponentStory, ComponentMeta } from "@storybook/react";
+import { StoryObj, Meta } from "@storybook/react";
 import { Messenger } from "@/utils";
 import { Command } from "@/configuration";
 import {
@@ -34,8 +34,19 @@ export default {
       mapping: renderData,
     },
   },
-  decorators: [containerDecorator],
-} as ComponentMeta<typeof View>;
+  decorators: [
+    containerDecorator,
+    (Story, { args }) => {
+      //@ts-ignore
+      const { hiddenChinese, data } = args;
+      postMessage(Command.HiddenChinese, hiddenChinese);
+      postMessage(Command.ShowTranslation, data, () => void 0);
+      return <Story />;
+    },
+  ],
+} as Meta<typeof View>;
+
+type Story = StoryObj<typeof View>;
 
 const { install, postMessage } = new Messenger({
   self: window,
@@ -43,15 +54,8 @@ const { install, postMessage } = new Messenger({
 });
 install();
 
-const Template: ComponentStory<typeof View> = (args) => {
-  //@ts-ignore
-  const { hiddenChinese, data } = args;
-  postMessage(Command.HiddenChinese, hiddenChinese);
-  postMessage(Command.ShowTranslation, data, () => void 0);
-  return <View />;
-};
-
-export const WordSection = Template.bind({});
-WordSection.args = {
-  hiddenChinese: false,
+export const WordSection: Story = {
+  args: {
+    hiddenChinese: false,
+  },
 };

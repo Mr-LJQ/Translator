@@ -1,5 +1,5 @@
 import React from "react";
-import { ComponentStory, ComponentMeta } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 import { userEvent, within, waitFor } from "@storybook/testing-library";
 import { ErrorSection } from ".";
 import { MessengerContext } from "../Context";
@@ -12,33 +12,31 @@ const postMessageMocked = jest.fn<any, any[]>();
 export default {
   title: "ErrorSection",
   component: ErrorSection,
-  decorators: [containerDecorator],
+  decorators: [
+    containerDecorator,
+    (Story) => {
+      return (
+        <MessengerContext.Provider
+          value={{ postMessage: postMessageMocked, onMessage: onMessageMocked }}
+        >
+          <Story />
+        </MessengerContext.Provider>
+      );
+    },
+  ],
   argTypes: {
     message: {
       control: { type: "text" },
     },
   },
-} as ComponentMeta<typeof ErrorSection>;
+} as Meta<typeof ErrorSection>;
 
-const Template: ComponentStory<typeof ErrorSection> = (args) => (
-  <ErrorSection {...args} />
-);
+type Story = StoryObj<typeof ErrorSection>;
 
-export const Primary = Template.bind({});
+export const Primary: Story = {};
 Primary.args = {
   ...errorData,
 };
-Primary.decorators = [
-  (Story) => {
-    return (
-      <MessengerContext.Provider
-        value={{ postMessage: postMessageMocked, onMessage: onMessageMocked }}
-      >
-        <Story />
-      </MessengerContext.Provider>
-    );
-  },
-];
 Primary.play = async ({ canvasElement }) => {
   const canvas = within(canvasElement);
   const againButton = canvas.getByRole("button", { name: "再次查询" });
@@ -49,8 +47,7 @@ Primary.play = async ({ canvasElement }) => {
   });
 };
 
-export const Cacography = Template.bind({});
+export const Cacography: Story = {};
 Cacography.args = {
   ...cacographyData,
 };
-Cacography.decorators = Primary.decorators;

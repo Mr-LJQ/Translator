@@ -1,7 +1,8 @@
 import React from "react";
-import { ComponentStory, ComponentMeta } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 import { AudioButton } from ".";
 import { audioElementDecorator } from "@/test";
+
 export default {
   title: "AudioButton",
   component: AudioButton,
@@ -12,21 +13,21 @@ export default {
       focus: ["button:nth-of-type(3)"],
     },
   },
-} as ComponentMeta<typeof AudioButton>;
+} as Meta<typeof AudioButton>;
 
-const Template: ComponentStory<typeof AudioButton> = (args) => {
-  return (
-    <>
-      <AudioButton {...args} />
-      <br />
-      <AudioButton {...args} />
-      <br />
-      <AudioButton {...args} />
-    </>
-  );
-};
+type Story = StoryObj<typeof AudioButton>;
 
-export const Primary = Template.bind({});
-Primary.args = {
-  audioURL: "https://dict.youdao.com/dictvoice?audio=word&type=2",
+export const Primary: Story = {
+  render(args) {
+    return (
+      <>
+        <AudioButton {...args} />
+        <AudioButton {...args} />
+        <AudioButton {...args} />
+      </>
+    );
+  },
+  args: {
+    audioURL: "https://dict.youdao.com/dictvoice?audio=word&type=2",
+  },
 };

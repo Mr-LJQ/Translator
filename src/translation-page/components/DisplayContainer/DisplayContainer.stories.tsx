@@ -1,5 +1,5 @@
 import React from "react";
-import { ComponentStory, ComponentMeta } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react";
 import { DisplayContainer } from ".";
 import { __main__, createHistory } from "../../utils";
 import { Primary as ErrorPrimary } from "../ErrorSection/ErrorSection.stories";
@@ -14,6 +14,10 @@ import {
   phraseData,
   sentenceData,
 } from "@/test";
+import { MessengerContext } from "../Context";
+
+const onMessageMocked = jest.fn<any, any[]>();
+const postMessageMocked = jest.fn<any, any[]>();
 
 export default {
   title: "DisplayContainer",
@@ -22,22 +26,29 @@ export default {
   argTypes: {
     updateAnki: { action: "updateAnki" },
   },
-} as ComponentMeta<typeof DisplayContainer>;
+} as Meta<typeof DisplayContainer>;
 
-const Template: ComponentStory<typeof DisplayContainer> = (args) => (
-  <DisplayContainer {...args} />
-);
+type Story = StoryObj<typeof DisplayContainer>;
 
-export const Empty = Template.bind({});
-Empty.args = {};
+export const Empty: Story = {};
 
-export const ErrorSection = Template.bind({});
+export const ErrorSection: Story = {};
 ErrorSection.args = {
   data: errorData,
 };
-ErrorSection.decorators = ErrorPrimary.decorators;
+ErrorSection.decorators = [
+  (Story) => {
+    return (
+      <MessengerContext.Provider
+        value={{ postMessage: postMessageMocked, onMessage: onMessageMocked }}
+      >
+        <Story />
+      </MessengerContext.Provider>
+    );
+  },
+];
 
-export const WordSection = Template.bind({});
+export const WordSection: Story = {};
 WordSection.args = {
   data: wordData,
   ankiButtonInfoObject: createHistory(wordData).ankiButtonInfoObject,
@@ -45,7 +56,7 @@ WordSection.args = {
 
 WordSection.decorators = [hiddenChineseDecorator];
 
-export const PhraseSection = Template.bind({});
+export const PhraseSection: Story = {};
 {
   const { ankiButtonInfo } = PhrasePrimary.args!;
   PhraseSection.args = {
@@ -56,7 +67,7 @@ export const PhraseSection = Template.bind({});
   };
 }
 
-export const SentenceSection = Template.bind({});
+export const SentenceSection: Story = {};
 {
   const { ankiButtonInfo } = SentencePrimary.args!;
   SentenceSection.args = {
@@ -67,7 +78,7 @@ export const SentenceSection = Template.bind({});
   };
 }
 
-export const Loading = Template.bind({});
+export const Loading: Story = {};
 Loading.args = {
   //@ts-ignore 说明 Loading 与 data 无关
   data: {},
