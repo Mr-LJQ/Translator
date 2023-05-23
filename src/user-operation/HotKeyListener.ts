@@ -46,7 +46,7 @@ export class HotKeyListener {
     const otherHotkey = ["shiftKey", "ctrlKey", "altKey"].filter((item) => {
       return item !== hotKey;
     }) as HotKey[];
-
+    //当且仅当只有选词热键按下时,才进行热键翻译
     if (hotKey && event[hotKey] && otherHotkey.every((name) => !event[name])) {
       //当焦点在可输入元素上，不进行热键选词
       const focusNode = document.activeElement;
