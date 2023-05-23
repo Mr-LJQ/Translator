@@ -1,4 +1,4 @@
-import { FunctionAny } from "@/types";
+import { AnyFunction } from "@/types";
 import { Command } from "@/configuration";
 import { warning } from "@/utils";
 import { NoteData } from "@/translation-page";
@@ -25,8 +25,8 @@ export type OnMessage = Messenger["onMessage"];
 export class Messenger {
   private target?: Window;
   private self: Window;
-  private callbacks: { [key: number]: FunctionAny };
-  private handlers: { [key: string]: FunctionAny[] };
+  private callbacks: { [key: number]: AnyFunction };
+  private handlers: { [key: string]: AnyFunction[] };
   constructor(options: { self: Window; target?: Window }) {
     this.self = options.self;
     this.target = options.target;
@@ -122,7 +122,7 @@ export class Messenger {
       callback: (data: AddNoteReturnType) => void
     ) => void
   ): () => void;
-  onMessage(command: Command, listener: FunctionAny): () => void {
+  onMessage(command: Command, listener: AnyFunction): () => void {
     const handlers = this.handlers;
 
     if (handlers[command] == null) {
@@ -168,7 +168,7 @@ export class Messenger {
     data: NoteData,
     callback: (data: AddNoteReturnType) => void
   ): void;
-  postMessage(command: Command, data?: any, callback?: FunctionAny): void {
+  postMessage(command: Command, data?: any, callback?: AnyFunction): void {
     const target = this.target;
     if (target == null) {
       warning(!!target, "target 不存在，其在通信中是必须的");

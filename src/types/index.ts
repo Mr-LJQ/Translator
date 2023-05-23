@@ -24,10 +24,14 @@ export type extractPromiseType<T extends Promise<any>> = T extends Promise<
   ? R
   : never;
 
-export type FunctionAny = (...args: any[]) => void;
-
 export type ReturnPromiseType<T extends (...args: any[]) => Promise<any>> =
   T extends (...args: any[]) => Promise<infer R> ? R : never;
 
 export type PartialOptional<T, K extends keyof T> = Omit<T, K> &
   Partial<Pick<T, K>>;
+
+export type AnyFunction = (...args: any[]) => void;
+
+export interface AnyObject {
+  [key: string]: any;
+}
