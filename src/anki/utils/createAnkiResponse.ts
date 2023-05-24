@@ -4,7 +4,7 @@ import {
   AnkiResponseStatus,
   AnkiResponseSuccess,
 } from "../types";
-export const ankiResponseSymbol = Symbol();
+export const ankiResponseSymbol = `Symbol($ankiResponseSymbol)`;
 
 function createAnkiResponseError<T>(
   options: Omit<AnkiResponse<T>, typeof ankiResponseSymbol | "ok">
