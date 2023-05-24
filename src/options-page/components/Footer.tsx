@@ -1,9 +1,11 @@
 import React, { useState, useCallback, useEffect } from "react";
 import classJoin from "classnames";
-import { setStorage } from "@/extensions-api";
+import isEqual from "lodash.isequal";
+import { getStorageByArray, setStorage } from "@/extensions-api";
 import { LoadingMask } from "@/translation-page";
 import { Button } from "../pure-components";
-import { useAnkiStore, ankiStoreSubscribe, getStorage } from "../stores";
+import { getStorage, useAnkiStore, ankiStoreSubscribe } from "../stores";
+import { Confirmation } from "./Confirmation";
 
 export const Footer = React.memo(function Footer() {
   const version = useAnkiStore((state) => state.version);
@@ -40,6 +42,31 @@ export const Footer = React.memo(function Footer() {
     },
     [isSaving]
   );
+  //退出时判断是否存在未保存的修改，询问用户是否需要保存后再退出
+  const [displayConfirmation, setDisplayConfirmation] = useState(false);
+  const closeHandler = useCallback(() => setDisplayConfirmation(false), []);
+  const exitPage = useCallback(() => {
+    getStorageByArray(
+      [
+        "wordConfig",
+        "phraseConfig",
+        "sentenceConfig",
+        "checkWordDuplicate",
+        "checkPhraseDuplicate",
+        "checkSentenceDuplicate",
+        "ankiConnectionMethod",
+        "ankiConnectionURL",
+        "checkedTabPanel",
+      ],
+      (cachedStorage) => {
+        const storage = getStorage();
+        //相等表示没有需要缓存的数据，可以直接退出
+        if (isEqual(cachedStorage, storage)) return window.close();
+        //否则不能够直接退出，而应该询问用户是否确定保存
+        setDisplayConfirmation(true);
+      }
+    );
+  }, []);
   //处理错误信息
   const [displayAlert, setDisplayAlert] = useState(false);
   const [displayPoint, setDisplayPoint] = useState(true);
@@ -53,6 +80,7 @@ export const Footer = React.memo(function Footer() {
       {(isRefreshing || isSaving) && (
         <LoadingMask className="absolute inset-0 z-50" />
       )}
+      <Confirmation isOpen={displayConfirmation} close={closeHandler} />
       {displayAlert && (
         <AlertMessage
           messages={alertMessages}
@@ -128,7 +156,7 @@ export const Footer = React.memo(function Footer() {
         <Button type="button" onClick={saveOptions}>
           保存
         </Button>
-        <Button type="button" onClick={window.close}>
+        <Button type="button" onClick={exitPage}>
           退出
         </Button>
       </footer>

@@ -55,16 +55,16 @@ export const useAnkiStore = create<State>((set) => ({
     const modelNames = getModelNamesResponse.data;
     result.modelNames = modelNames;
     const fieldNamesObject: FieldNamesObject = {};
-    const promiseArray = modelNames!.map((modelName) => {
+    const promiseArray = modelNames.map((modelName) => {
       return postBackend(Command.GetModelFieldNames, modelName);
     });
     const responses = await Promise.all(promiseArray);
     responses.forEach((item, idx) => {
-      const modelName = modelNames![idx]!;
+      const modelName = modelNames[idx];
       if (isAnkiResponseError(item)) {
         result.alertMessages.push(item.message);
       } else {
-        fieldNamesObject[modelName] = item.data;
+        modelName && (fieldNamesObject[modelName] = item.data);
       }
     });
     result.fieldNamesObject = fieldNamesObject;

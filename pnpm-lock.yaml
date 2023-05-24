@@ -10,6 +10,9 @@ dependencies:
   immer:
     specifier: ^9.0.15
     version: registry.npmmirror.com/immer@9.0.15
+  lodash.isequal:
+    specifier: ^4.5.0
+    version: registry.npmmirror.com/lodash.isequal@4.5.0
   lodash.omit:
     specifier: ^4.5.0
     version: registry.npmmirror.com/lodash.omit@4.5.0
@@ -93,6 +96,9 @@ devDependencies:
   '@types/jest':
     specifier: ^28.1.8
     version: registry.npmmirror.com/@types/jest@28.1.8
+  '@types/lodash.isequal':
+    specifier: ^4.5.6
+    version: registry.npmmirror.com/@types/lodash.isequal@4.5.6
   '@types/lodash.omit':
     specifier: ^4.5.7
     version: registry.npmmirror.com/@types/lodash.omit@4.5.7
@@ -6253,6 +6259,14 @@ packages:
     version: 7.0.11
     dev: true
 
+  registry.npmmirror.com/@types/lodash.isequal@4.5.6:
+    resolution: {integrity: sha512-Ww4UGSe3DmtvLLJm2F16hDwEQSv7U0Rr8SujLUA2wHI2D2dm8kPu6Et+/y303LfjTIwSBKXB/YTUcAKpem/XEg==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@types/lodash.isequal/-/lodash.isequal-4.5.6.tgz}
+    name: '@types/lodash.isequal'
+    version: 4.5.6
+    dependencies:
+      '@types/lodash': registry.npmmirror.com/@types/lodash@4.14.184
+    dev: true
+
   registry.npmmirror.com/@types/lodash.omit@4.5.7:
     resolution: {integrity: sha512-6q6cNg0tQ6oTWjSM+BcYMBhan54P/gLqBldG4AuXd3nKr0oeVekWNS4VrNEu3BhCSDXtGapi7zjhnna0s03KpA==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@types/lodash.omit/-/lodash.omit-4.5.7.tgz}
     name: '@types/lodash.omit'
@@ -12202,6 +12216,12 @@ packages:
     name: lodash.debounce
     version: 4.0.8
     dev: true
+
+  registry.npmmirror.com/lodash.isequal@4.5.0:
+    resolution: {integrity: sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/lodash.isequal/-/lodash.isequal-4.5.0.tgz}
+    name: lodash.isequal
+    version: 4.5.0
+    dev: false
 
   registry.npmmirror.com/lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/lodash.merge/-/lodash.merge-4.6.2.tgz}

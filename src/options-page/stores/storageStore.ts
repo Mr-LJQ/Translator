@@ -1,19 +1,20 @@
 import create from "zustand";
 import omit from "lodash.omit";
 import { immer } from "zustand/middleware/immer";
-import {
-  Storage,
-  WordConfig,
-  PhraseConfig,
-  CheckWordDuplicate,
-  CheckPhraseDuplicate,
-  CheckSentenceDuplicate,
-  SentenceConfig,
-  getStorageByArray,
+import { getStorageByArray, TabPanelName } from "@/extensions-api";
+import type {
   ConfigKeys,
+  Storage,
   DuplicateConfigKeys,
 } from "@/extensions-api";
-import { DuplicateConfigName, ConfigName } from "../types";
+import type { DuplicateConfigName, ConfigName } from "../types";
+import { DEFAULT_ANKI_CONNECTION_URL } from "@/configuration";
+
+type State = StorageStore & Handler;
+type OtherConfigKeys = keyof Pick<
+  State,
+  "ankiConnectionMethod" | "ankiConnectionURL" | "checkedTabPanel"
+>;
 
 type StorageStore = Pick<
   Storage,
@@ -51,93 +52,71 @@ export interface Handler {
   ) => void;
 }
 
-type State = StorageStore & Handler;
-
 export const useStorageStore = create<State, [["zustand/immer", never]]>(
   immer((set) => {
     function updateConfig(
-      configName: "wordConfig",
-      name: keyof WordConfig,
-      value: string
-    ): void;
-    function updateConfig(
-      configName: "phraseConfig",
-      name: keyof PhraseConfig,
-      value: string
-    ): void;
-    function updateConfig(
-      configName: "sentenceConfig",
-      name: keyof SentenceConfig,
-      value: string
-    ): void;
-    function updateConfig(
-      configName: ConfigName,
-      name: ConfigKeys,
-      value: string
+      configName: ConfigName | DuplicateConfigName,
+      name: ConfigKeys | DuplicateConfigKeys,
+      value: string | boolean
     ): void {
       set((state) => {
+        const target = state[configName];
+        if (!Object.prototype.hasOwnProperty.call(target, name))
+          /**
+           * 在设计上传入的 configName 与 name 是一一对应的。
+           *  例如 configName 为 "wordConfig" 时， name 的类型应该是 keyof WordConfig
+           *   因此当相应的属性不存在时，表面代码中存在BUG需要进行修复。
+           */
+          throw new Error(
+            `传入的${configName},${name}属性并不一一对应,这是一个不符合设计的BUG.`
+          );
         //@ts-ignore 是能够正确配对的
-        state[configName][name] = value;
+        target[name] = value;
       });
     }
 
-    function updateDuplicateConfig(
-      configName: "checkWordDuplicate",
-      name: keyof CheckWordDuplicate,
-      value: boolean
-    ): void;
-    function updateDuplicateConfig(
-      configName: "checkPhraseDuplicate",
-      name: keyof CheckPhraseDuplicate,
-      value: boolean
-    ): void;
-    function updateDuplicateConfig(
-      configName: "checkSentenceDuplicate",
-      name: keyof CheckSentenceDuplicate,
-      value: boolean
-    ): void;
-    function updateDuplicateConfig(
-      configName: DuplicateConfigName,
-      name: DuplicateConfigKeys,
-      value: boolean
-    ): void {
+    function fetchStorage() {
+      getStorageByArray(
+        [
+          "wordConfig",
+          "phraseConfig",
+          "sentenceConfig",
+          "checkWordDuplicate",
+          "checkPhraseDuplicate",
+          "checkSentenceDuplicate",
+          "ankiConnectionMethod",
+          "ankiConnectionURL",
+          "checkedTabPanel",
+        ],
+        (val) => {
+          set(val);
+        }
+      );
+    }
+
+    function updateOtherConfig<K extends OtherConfigKeys>(
+      name: K,
+      value: State[K]
+    ) {
       set((state) => {
-        //@ts-ignore 是能够正确配对的
-        state[configName][name] = value;
+        state[name] = value;
       });
     }
     return {
-      fetchStorage() {
-        getStorageByArray(
-          [
-            "wordConfig",
-            "phraseConfig",
-            "sentenceConfig",
-            "checkWordDuplicate",
-            "checkPhraseDuplicate",
-            "checkSentenceDuplicate",
-            "ankiConnectionMethod",
-            "ankiConnectionURL",
-            "checkedTabPanel",
-          ],
-          (val) => {
-            set(val);
-          }
-        );
-      },
+      fetchStorage,
       updateConfig,
-      updateDuplicateConfig,
-      updateOtherConfig<
-        K extends keyof Pick<
-          State,
-          "ankiConnectionMethod" | "ankiConnectionURL" | "checkedTabPanel"
-        >
-      >(name: K, value: State[K]) {
-        set((state) => {
-          state[name] = value;
-        });
-      },
-    } as unknown as State; //设计上是，必须先调用 fetchStorage获取到 相应的数据后，才能够调用其它方法的
+      updateOtherConfig,
+      updateDuplicateConfig: updateConfig,
+      checkedTabPanel: TabPanelName.Home,
+      ankiConnectionMethod: "AnkiConnection",
+      ankiConnectionURL: DEFAULT_ANKI_CONNECTION_URL,
+      wordConfig: {},
+      phraseConfig: {},
+      sentenceConfig: {},
+      checkWordDuplicate: {},
+      checkPhraseDuplicate: {},
+      checkSentenceDuplicate: {},
+    };
   })
 );
 
