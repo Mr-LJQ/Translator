@@ -56,7 +56,7 @@ export class Dictionary {
   async translate(text: string): Promise<TranslationResult> {
     const { cache } = this;
     const translation = cache.get(text);
-    if (translation) return translation;
+    if (translation !== -1) return translation;
     const translationResult = await this.translateText(text);
     if (isErrorData(translationResult) && !translationResult.cache) {
       translationResult.queryText = text;
