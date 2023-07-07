@@ -68,7 +68,9 @@ export const ConfigTabs = React.memo(function ConfigTabs() {
           <Tab className={classNameCallback}>单词配置</Tab>
           <Tab className={classNameCallback}>短语配置</Tab>
           <Tab className={classNameCallback}>句子配置</Tab>
-          <Tab className={classNameCallback} style={{flex:1}}>联系作者</Tab>
+          <Tab className={classNameCallback} style={{ marginTop: "auto" }}>
+            联系作者
+          </Tab>
         </Tab.List>
         <Tab.Panels className="flex-1">
           <Tab.Panel>
