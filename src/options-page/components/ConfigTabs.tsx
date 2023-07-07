@@ -5,6 +5,7 @@ import { ConfigType } from "../types";
 import { AnkiConfig } from "./AnkiConfig";
 import { useStorageStore } from "../stores";
 import { BasisConfig } from "./BasisConfig";
+import { ContactAuthor } from "./ContactAuthor";
 import { onStorageChange, setStorage, TabPanelName } from "@/extensions-api";
 export const ConfigTabs = React.memo(function ConfigTabs() {
   const checkedTabPanel = useStorageStore((state) => state.checkedTabPanel);
@@ -31,6 +32,7 @@ export const ConfigTabs = React.memo(function ConfigTabs() {
     [TabPanelName.Word]: 1,
     [TabPanelName.Phrase]: 2,
     [TabPanelName.Sentence]: 3,
+    [TabPanelName.Author]: 4,
   }[checkedTabPanel];
 
   const classNameCallback = useCallback(
@@ -66,6 +68,7 @@ export const ConfigTabs = React.memo(function ConfigTabs() {
           <Tab className={classNameCallback}>单词配置</Tab>
           <Tab className={classNameCallback}>短语配置</Tab>
           <Tab className={classNameCallback}>句子配置</Tab>
+          <Tab className={classNameCallback} style={{flex:1}}>联系作者</Tab>
         </Tab.List>
         <Tab.Panels className="flex-1">
           <Tab.Panel>
@@ -79,6 +82,9 @@ export const ConfigTabs = React.memo(function ConfigTabs() {
           </Tab.Panel>
           <Tab.Panel>
             <AnkiConfig configType={ConfigType.Sentence} />
+          </Tab.Panel>
+          <Tab.Panel>
+            <ContactAuthor />
           </Tab.Panel>
         </Tab.Panels>
       </Tab.Group>

@@ -49,6 +49,7 @@ export const enum TabPanelName {
   Word,
   Phrase,
   Sentence,
+  Author,
 }
 
 export type WordConfig = Partial<WordFields & CommonConfig>;
