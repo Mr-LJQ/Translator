@@ -241,7 +241,14 @@ function isInputElement(ele: any): ele is HTMLInputElement {
 function createMask(cssText: string) {
   //通过蒙版点击监听来隐藏 translationPage，如果绑定在document上，有可能因为处于其它iframe而无效
   const wrapper = document.createElement("div");
-  wrapper.style.setProperty("display", "contents", "important");
+  wrapper.style.cssText = `
+    position:fixed;
+    left:0;
+    top:0;
+    right:0;
+    bottom:0;
+  `;
+  wrapper.style.setProperty("display", "block", "important");
   const shadowRoot = wrapper.attachShadow({
     mode: "open",
   });
