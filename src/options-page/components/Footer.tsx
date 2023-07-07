@@ -143,7 +143,7 @@ export const Footer = React.memo(function Footer() {
                 cursor-pointer 
               "
             >
-              错误
+              自检提示
             </button>
             {displayPoint && (
               <span className="flex absolute h-3 w-3 top-0 right-0 -mt-1 -mr-1">
@@ -185,7 +185,7 @@ function AlertMessage(props: {
               className="flex items-center border-b text-black pb-1 border-black mb-2"
             >
               <span className="ri-error-warning-line text-red-600 text-2xl w-7" />
-              <p className="whitespace-pre text-xs border-l pl-1 ">{item}</p>
+              <p className="whitespace-pre text-base border-l pl-1 ">{item}</p>
             </li>
           );
         })}
