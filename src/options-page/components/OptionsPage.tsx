@@ -10,9 +10,22 @@ export function OptionsPage() {
   }, [fetchAnki]);
 
   return (
-    <form action="#" className="relative flex flex-col h-full ">
-      <ConfigTabs />
-      <Footer />
-    </form>
+    <div
+      className={`
+        w-11/12 
+        min-w-[40rem]
+        h-[35rem]
+        my-12
+        mx-auto 
+        rounded-xl
+        shadow-lg 
+        bg-white
+      `}
+    >
+      <form action="#" className="relative flex flex-col rounded-lg h-full">
+        <ConfigTabs />
+        <Footer />
+      </form>
+    </div>
   );
 }

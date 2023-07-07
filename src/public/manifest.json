@@ -26,7 +26,8 @@
     "default_title": "翻译助手"
   },
   "options_ui": {
-    "page": "optionsPage.html"
+    "page": "optionsPage.html",
+    "open_in_tab": true
   },
   "permissions": ["storage", "contextMenus", "<all_urls>"],
   "web_accessible_resources": ["translationPage.js", "translationPage.html"],

@@ -18,7 +18,7 @@ export const Fieldset = React.forwardRef<
       ref={ref}
       {...other}
       className={classJoin(
-        "grid grid-cols-4 gap-y-1 gap-x-2 px-2 text-black text-base",
+        "grid grid-cols-4 gap-y-2 gap-x-2 px-2 text-black text-base",
         className
       )}
     >

@@ -78,7 +78,7 @@ export const Footer = React.memo(function Footer() {
   return (
     <>
       {(isRefreshing || isSaving) && (
-        <LoadingMask className="absolute inset-0 z-50" />
+        <LoadingMask className="fixed inset-0 z-50" />
       )}
       <Confirmation isOpen={displayConfirmation} close={closeHandler} />
       {displayAlert && (

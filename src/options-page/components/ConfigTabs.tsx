@@ -37,9 +37,11 @@ export const ConfigTabs = React.memo(function ConfigTabs() {
     ({ selected }: { selected: boolean }) => {
       return classJoin(
         {
-          "prior:text-red-600 prior:border-red-600 prior:border-b-2": selected,
+          "prior:text-[#3872e0] prior:bg-[#3872e014]": selected,
         },
         `
+          h-12
+          rounded-lg
           mt-1 mx-2 
           px-2 
           first:ml-0
@@ -57,15 +59,15 @@ export const ConfigTabs = React.memo(function ConfigTabs() {
   );
 
   return (
-    <div className="flex-1">
-      <Tab.Group onChange={onChange} selectedIndex={selectedIndex}>
-        <Tab.List className="flex justify-around border-b mb-0">
-          <Tab className={classNameCallback}>基础配置</Tab>
+    <div className="flex flex-row  flex-1">
+      <Tab.Group onChange={onChange} selectedIndex={selectedIndex} vertical>
+        <Tab.List className="flex w-52 border-r-4 border-r-gray-200 flex-col border-b mb-0">
+          <Tab className={classNameCallback}>通用</Tab>
           <Tab className={classNameCallback}>单词配置</Tab>
           <Tab className={classNameCallback}>短语配置</Tab>
           <Tab className={classNameCallback}>句子配置</Tab>
         </Tab.List>
-        <Tab.Panels>
+        <Tab.Panels className="flex-1">
           <Tab.Panel>
             <BasisConfig />
           </Tab.Panel>

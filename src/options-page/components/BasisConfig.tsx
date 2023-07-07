@@ -11,7 +11,7 @@ import {
 export const BasisConfig = React.memo(function BasisConfig() {
   return (
     <>
-      <H3 className="col-span-4">基础配置</H3>
+      <H3 className="col-span-4">通用</H3>
       <Fieldset>
         <ConnectionMethod />
         <ConnectionURL />

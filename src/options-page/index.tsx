@@ -4,8 +4,9 @@ import { OptionsPage } from "./components/OptionsPage";
 import { fetchStorage, storageStoreSubscribe } from "./stores";
 import "../index.css";
 
+document.body.classList.add("bg-gray-200");
+
 const root = document.getElementById("root")!;
-root.classList.add("h-[26rem]", "w-[30rem]");
 fetchStorage();
 const unsubscribe = storageStoreSubscribe(function () {
   unsubscribe();
