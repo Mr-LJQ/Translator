@@ -10,7 +10,7 @@ import { translateWord as _translateWord } from "./translateWord";
 import { createCacography, request, NEXT_HANDLER } from "../../utils";
 import { translatePhrase as _translatePhrase } from "./translatePhrase";
 import { translateSentence as _translateSentence } from "./translateSentence";
-
+import type { CheerioAPI } from "cheerio";
 export const youdao = {
   translateWord: catchError(_translateWord),
   translatePhrase: catchError(_translatePhrase),
@@ -20,17 +20,17 @@ export const youdao = {
 /**
  * 用于获取有道翻译页面
  * @param text 待翻译文本
- * @returns 翻译文本对应的 Document
+ * @returns 解析 翻译页面html后返回的操纵对象
  */
 async function getDOM(text: string) {
-  const dom = (await request(
+  const $ = (await request(
     "https://dict.youdao.com/w/" + encodeURIComponent(text),
     {
       timeout: 4000,
       responseType: "document",
     }
-  )) as Document;
-  return dom;
+  )) as CheerioAPI;
+  return $;
 }
 
 /**
@@ -48,20 +48,20 @@ function catchError(
   handler: typeof _translateSentence
 ): (text: string) => Promise<SentenceData | typeof NEXT_HANDLER>;
 function catchError(
-  handler: (dom: Document) => void | Exclude<TranslationResult, ErrorData>
+  handler: ($: CheerioAPI) => void | Exclude<TranslationResult, ErrorData>
 ): (
   text: string
 ) => Promise<Exclude<TranslationResult, ErrorData> | typeof NEXT_HANDLER> {
   return async (text: string) => {
-    const dom = await getDOM(text);
+    const $ = await getDOM(text);
     let result;
     try {
-      result = handler(dom);
+      result = handler($);
     } catch (e) {
       warning(false, (e as any)?.message);
       result = NEXT_HANDLER;
     }
-    if (result == null) handleNotFound(dom);
+    if (result == null) handleNotFound($);
     //void 的情况应该被 handleNotFound 处理，
     // 但为了避免版本多次迭代后可能出现的 void，
     //  因此设定默认值为 NEXT_HANDLER
@@ -74,9 +74,9 @@ function catchError(
  *  可能是用户拼写错误
  *  也可能是真的没有找到任何翻译
  */
-function handleNotFound(dom: Document) {
+function handleNotFound($: CheerioAPI) {
   //可能是用户拼写出错，推测正确的拼写给用户参考
-  const possibleSpelling = getCorrectSpelling(dom);
+  const possibleSpelling = getCorrectSpelling($);
   if (possibleSpelling) {
     throw createCacography(possibleSpelling);
   }
@@ -87,13 +87,14 @@ function handleNotFound(dom: Document) {
 /**
  * 获取页面的中关于拼写错误部分的正确推断
  */
-function getCorrectSpelling(dom: Document) {
-  const inferCorrects = [
-    ...dom.querySelectorAll("#results-contents .error-typo .typo-rel a"),
-  ].reduce((acc, node) => {
-    const text = node.textContent;
-    if (text) acc.push(text);
-    return acc;
-  }, [] as string[]);
+function getCorrectSpelling($: CheerioAPI) {
+  const inferCorrects = $("#results-contents .error-typo .typo-rel a")
+    .map((i, e) => {
+      return $(e).text();
+    })
+    .toArray()
+    .filter((text) => {
+      return text;
+    });
   if (inferCorrects.length) return inferCorrects;
 }

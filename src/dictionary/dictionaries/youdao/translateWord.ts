@@ -1,15 +1,21 @@
+import type { CheerioAPI, Element as CheerioElement } from "cheerio";
 import type { WordData, ExampleSentence, TranslationItem } from "../../types";
-
-//单词翻译
-export function translateWord(dom: Document): WordData | void {
+/**
+ * 单词翻译
+ */
+export function translateWord($: CheerioAPI): WordData | void {
   //这是一个与传入的参数全等的字符串，之所以进行这一步，
   // 是因为如果该字符不能够在网页上被找到，则意味着翻译不存在/拼写错误。
-  const word = getOriginText(dom);
+  const word = getOriginText($);
   const star_amount =
-    Number(dom.querySelector(".star")?.className?.match(/star(\d)/)?.[1]) || 0;
+    Number(
+      $(".star")
+        .attr("class")
+        ?.match(/star(\d)/)?.[1]
+    ) || 0;
   if (!word) return;
-  const translations = formatTranslations(getTranslation(dom));
-  const translationList = getTranslationList(dom);
+  const translations = formatTranslations(getTranslation($));
+  const translationList = getTranslationList($);
   if (!translations && !translationList) return;
   return {
     word,
@@ -17,8 +23,8 @@ export function translateWord(dom: Document): WordData | void {
     type: "WORD",
     translations,
     translationList,
-    form: getForm(dom),
-    phonetic: getPhonetic(dom, word),
+    form: getForm($),
+    phonetic: getPhonetic($, word),
   };
 }
 
@@ -26,64 +32,58 @@ export function translateWord(dom: Document): WordData | void {
  * 获取单词的形式，例如,对于 word 则有
  * [ 复数 words 第三人称单数 words 现在分词 wording 过去式 worded 过去分词 worded ]
  */
-function getForm(dom: Document) {
-  const p = dom.querySelector("#phrsListTab .trans-container p.additional");
-  if (!p) return;
-  const form = p.textContent?.trim();
-  if (form?.startsWith("[") && form.endsWith("]")) return form;
+function getForm($: CheerioAPI) {
+  const p = $("#phrsListTab .trans-container p.additional");
+  const form = p.text().trim();
+  if (form.startsWith("[") && form.endsWith("]")) return form;
   return;
 }
 
 /**
  * 获取翻译源文本
- * @param dom
- * @returns
  */
-function getOriginText(dom: Document): string {
-  return (
-    dom.querySelector(".wordbook-js")?.firstElementChild?.textContent?.trim() ||
-    ""
-  );
+function getOriginText($: CheerioAPI): string {
+  return $(".wordbook-js").children().first().text().trim() || "";
 }
 
 /**
  * 获取单词的粗略翻译
- * @param dom 具有翻译内容的页面DOM
+ * @param
  * @returns
  */
-function getTranslation(dom: Document): string[] | undefined {
-  const ul = dom.querySelector("#phrsListTab .trans-container > ul");
-  if (!ul) return;
-  const liNodes = ul.children;
-  const result = Array.from(liNodes).reduce((result, li) => {
-    const text = li.textContent;
-    if (!text) return result;
-    result.push(text);
-    return result;
-  }, [] as string[]);
-  if (!result.length) return;
-
+function getTranslation($: CheerioAPI): string[] | undefined {
+  const ul = $("#phrsListTab .trans-container > ul");
+  if (ul.length === 0) return;
+  const result = ul
+    .children()
+    .map((i, e) => {
+      const text = $(e).text();
+      return text;
+    })
+    .toArray()
+    .filter((text) => {
+      return text;
+    });
+  if (result.length === 0) return;
   return result;
 }
 
 /**
- * @param dom 有道翻译页面文档DOM
- * @param word 翻译的目标单词
- * @returns 单词音标与音频对象
+ * 获取单词音标与音频对象
  */
-function getPhonetic(dom: Document, word: string) {
-  let en = dom
-    .querySelectorAll(".pronounce")?.[0]
-    ?.textContent?.replace(/\s*|\r|\n/g, "");
-  let am = dom
-    .querySelectorAll(".pronounce")?.[1]
-    ?.textContent?.replace(/\s*|\r|\n/g, "");
+function getPhonetic($: CheerioAPI, word: string) {
+  let en = $(".pronounce")
+    .first()
+    .text()
+    .replace(/\s*|\r|\n/g, "");
+  let am = $(".pronounce")
+    .eq(1)
+    .text()
+    .replace(/\s*|\r|\n/g, "");
   const en_audio = `https://dict.youdao.com/dictvoice?audio=${word}&type=1`;
   const am_audio = `https://dict.youdao.com/dictvoice?audio=${word}&type=2`;
 
-  let phonetic = dom
-    .querySelector("#collinsResult .wt-container .phonetic")
-    ?.textContent?.trim();
+  let phonetic = $("#collinsResult .wt-container .phonetic").text().trim();
   if (phonetic) {
     phonetic = phonetic.replace(/^\//g, "[").replace(/\/$/, "]");
     if (!en || en.length < 3) en = (en || "") + phonetic;
@@ -99,16 +99,14 @@ function getPhonetic(dom: Document, word: string) {
 }
 
 /**
- * @param dom 网易网页版翻译所对应的DOM文档对象
- * @param word 查询的单词
- * @returns 获取单词例句相关的数据数组
+ * 获取单词例句相关的数据数组
  */
-function getTranslationList(dom: Document): Array<TranslationItem> | undefined {
+function getTranslationList($: CheerioAPI): Array<TranslationItem> | undefined {
   //获取所有翻译项
-  const lis = dom.querySelectorAll("#collinsResult .ol li");
+  const lis = $("#collinsResult .ol li");
   const result = Array.from(lis).reduce((result, li) => {
     //处理释义与对应的翻译的逻辑
-    const textResult = getTranslationText(li);
+    const textResult = getTranslationText($, li);
     //过滤无效项
     if (!textResult) {
       return result;
@@ -118,7 +116,7 @@ function getTranslationList(dom: Document): Array<TranslationItem> | undefined {
     //清除<b></b>避免影响音频获取
     const definition_origin = definition.replace(/<b>|<\/b>/g, "");
     result.push({
-      part_of_speech: getPartOfSpeech(li), //词性
+      part_of_speech: getPartOfSpeech($, li), //词性
       definition, //定义
       definition_audio: `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(
         definition_origin
@@ -127,7 +125,7 @@ function getTranslationList(dom: Document): Array<TranslationItem> | undefined {
         .slice(index)
         .replace(/see|also|→/gi, "")
         .trim(), //翻译
-      example_sentences: getExampleSentences(li), //例句数组
+      example_sentences: getExampleSentences($, li), //例句数组
     });
     return result;
   }, [] as Array<TranslationItem>);
@@ -137,40 +135,36 @@ function getTranslationList(dom: Document): Array<TranslationItem> | undefined {
 }
 
 /**
- *
- * @param li 需要处理的其中一条翻译条目所对应的li元素节点
- * @returns 返回该释义对应单词的词性，例如：n-count
+ * 返回该释义对应单词的词性，例如：n-count
  */
-function getPartOfSpeech(li: Element): string {
-  const targetNode = li.querySelector(".collinsMajorTrans p .additional");
-  return (targetNode && targetNode.textContent?.trim()) || "";
+function getPartOfSpeech($: CheerioAPI, li: CheerioElement): string {
+  const targetNode = $(".collinsMajorTrans p .additional", li);
+  return targetNode.text().trim() || "";
 }
 
 /**
- * @param li 需要处理的其中一条翻译条目所对应的li元素节点
  * @returns [text,index] 返回翻译文本 text ，以及用于截取英文释义与中文翻译的下标 index
  */
-function getTranslationText(li: Element): [string, number] | null {
-  const pNode = li.querySelector(".collinsMajorTrans p");
-  if (!pNode) return null; //不存在释义项
+function getTranslationText(
+  $: CheerioAPI,
+  li: CheerioElement
+): [string, number] | null {
+  const pNode = $(".collinsMajorTrans p", li);
+  if (pNode.length === 0) return null; //不存在释义项
   //过滤掉干扰项
-  const nodes = Array.from(pNode.childNodes).filter((node) => {
-    //过滤展示词性的节点
-    if (
-      node.nodeType === 1 &&
-      (node as Element).classList.contains("additional")
-    )
-      return false;
+  const nodes = pNode.contents().filter((i, e) => {
+    if (e.nodeType === 1 && $(e).hasClass("additional")) return false;
     return true;
   });
   //合并目标文本
   let text = "";
-  nodes.forEach((node) => {
-    if (node.nodeType === 3) {
-      text += node.textContent;
+  nodes.each((i, e) => {
+    if (e.nodeType === 3) {
+      text += $(e).text();
     }
-    if (node.nodeName === "B") {
-      text += `<b>${node.textContent}</b>`;
+    //@ts-ignore
+    if (e.tagName === "b") {
+      text += `<b>${$(e).text()}</b>`;
     }
   });
   text = text.trim();
@@ -189,16 +183,17 @@ function getTranslationText(li: Element): [string, number] | null {
 }
 
 /**
- *
- * @param li 需要处理的其中一条翻译条目所对应的li元素节点
- * @returns 返回例句相关数据
+ * 返回例句相关数据
  */
-function getExampleSentences(li: Element): ExampleSentence[] | undefined {
-  const div_example_s = li.querySelectorAll(".exampleLists .examples");
+function getExampleSentences(
+  $: CheerioAPI,
+  li: CheerioElement
+): ExampleSentence[] | undefined {
+  const div_example_s = $(".exampleLists .examples", li);
   const exampleSentences = Array.from(div_example_s).reduce((acc, div) => {
-    const children = div.children;
-    const example_sentence = children[0]?.textContent?.trim() || "";
-    const example_sentence_translation = children[1]?.textContent?.trim() || "";
+    const children = $(div).children();
+    const example_sentence = children.first().text().trim() || "";
+    const example_sentence_translation = children.eq(1).text().trim() || "";
 
     //如果例句存在才添加，否则应该过滤掉
     if (example_sentence) {

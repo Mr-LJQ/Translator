@@ -1,18 +1,19 @@
+import type { CheerioAPI } from "cheerio";
 import type { ExampleSentence, PhraseData } from "../../types";
-//短语翻译
-export function translatePhrase(dom: Document): PhraseData | void {
-  const phrase = getOriginText(dom);
+/**
+ * 短语翻译
+ */
+export function translatePhrase($: CheerioAPI): PhraseData | void {
+  const phrase = getOriginText($);
   if (!phrase) return;
-  const translation = dom
-    .querySelectorAll("#ydTrans .trans-container p")[1]
-    ?.textContent?.trim();
-  const translations = getTranslation(dom) || (translation && [translation]);
+  const translation = $("#ydTrans .trans-container p").eq(1).text().trim();
+  const translations = getTranslation($) || (translation && [translation]);
   if (!translations) return;
 
   const phrase_audio = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(
     phrase
   )}`;
-  const example_sentences = getPhraseExamples(dom);
+  const example_sentences = getPhraseExamples($);
   return {
     phrase,
     translations,
@@ -23,56 +24,49 @@ export function translatePhrase(dom: Document): PhraseData | void {
 }
 /**
  * 获取翻译源文本
- * @param dom
- * @returns
  */
-function getOriginText(dom: Document) {
-  return (
-    dom.querySelector(".wordbook-js")?.firstElementChild?.textContent?.trim() ||
-    ""
-  );
+function getOriginText($: CheerioAPI) {
+  return $(".wordbook-js").children().first().text().trim() || "";
 }
 /**
  * 获取单词的粗略翻译
- * @param dom 具有翻译内容的页面DOM
- * @returns
  */
-function getTranslation(dom: Document) {
-  const ul = dom.querySelector("#phrsListTab .trans-container > ul");
-  if (!ul) return;
-  const liNodes = ul.children;
-  const result = Array.from(liNodes).reduce((result, li) => {
-    const text = li.textContent?.trim();
-    if (!text) return result;
-    result.push(text);
-    return result;
-  }, [] as string[]);
-  if (!result.length) return;
+function getTranslation($: CheerioAPI) {
+  const ul = $("#phrsListTab .trans-container > ul");
+  if (ul.length === 0) return;
+  const result = ul
+    .children()
+    .map((i, e) => {
+      return $(e).text().trim();
+    })
+    .toArray()
+    .filter((text) => text);
+  if (result.length === 0) return;
   return result;
 }
 /**
  * 获取短语例句
- * @param dom
- * @returns
  */
-function getPhraseExamples(dom: Document) {
-  const liNodes = dom.querySelectorAll("#bilingual .ol li");
+function getPhraseExamples($: CheerioAPI) {
+  const liNodes = $("#bilingual .ol li");
   const result = Array.from(liNodes).reduce((result, li) => {
-    const pNodes = li.querySelectorAll("p");
-    if (!pNodes[0] || !pNodes[1]) return result;
+    const pNodes = $("p", li);
+    if (pNodes.length < 2) return result;
     //用于获取音频
-    const example_sentence_origin = pNodes[0]?.textContent?.trim() || "";
+    const example_sentence_origin = pNodes.first().text() || "";
     //获取短语加粗的例句
-    const example_sentence = Array.from(pNodes[0].childNodes)
+    const example_sentence = Array.from(pNodes.first().contents())
       .reduce((sentence, node) => {
-        if (node.nodeName !== "SPAN") return sentence;
-        const children = (<HTMLSpanElement>node).children;
-        if (!children.length) return sentence + node.textContent;
-        const childNodes = node.childNodes;
+        //@ts-ignore
+        if (node.tagName !== "span") return sentence;
+        const children = $(node).children();
+        if (!children.length) return sentence + $(node).text();
+        const childNodes = $(node).contents();
         const text = Array.from(childNodes).reduce((text, node) => {
-          if (node.nodeType === 3) return text + node.textContent;
-          if (node.nodeName === "B") {
-            return text + `<b>${node.textContent}</b>`;
+          if (node.nodeType === 3) return text + $(node).text();
+          //@ts-ignore
+          if (node.tagName === "b") {
+            return text + `<b>${$(node).text()}</b>`;
           }
           return text;
         }, "");
@@ -80,7 +74,7 @@ function getPhraseExamples(dom: Document) {
       }, "")
       .trim();
 
-    const example_sentence_translation = pNodes[1].textContent?.trim() || "";
+    const example_sentence_translation = pNodes.eq(1).text().trim() || "";
     const example_audio = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(
       example_sentence_origin
     )}&le=eng`;
