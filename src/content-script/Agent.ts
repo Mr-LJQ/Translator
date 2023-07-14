@@ -160,19 +160,13 @@ export class Agent {
     //此处的translationPage.html需要参考所生成文件的具体名称
     iframe.src = getURL("translationPage.html");
 
-    /**
-     * 之所以不使用 inset: 0px; 的写法，是因为那样写会占用更多的内存
-     *  该 mask 已经提升到合成层，而合成层会占用更大的内存，而占用的内存与元素大小正相关
-     *  通过下面的写法，元素的大小为 1*1,占用内存小，而用scale放大后又可以保证原有效果（本质是时间换空间？）
-     */
     const mask = createMask(`
       position:fixed;
       z-index:99999;
-      top:50%;
-      left:50%;
-      width:1px;
-      height:1px;
-      transform:scale(5000);
+      left:0;
+      top:0;
+      right:0;
+      bottom:0;
       background:rgba(0,0,0,.3);
     `);
     this.mask = mask;
@@ -241,15 +235,7 @@ function isInputElement(ele: any): ele is HTMLInputElement {
 function createMask(cssText: string) {
   //通过蒙版点击监听来隐藏 translationPage，如果绑定在document上，有可能因为处于其它iframe而无效
   const wrapper = document.createElement("div");
-  wrapper.style.cssText = `
-    position:fixed;
-    z-index:99999;
-    left:0;
-    top:0;
-    right:0;
-    bottom:0;
-  `;
-  wrapper.style.setProperty("display", "block", "important");
+  wrapper.style.setProperty("display", "contents", "important");
   const shadowRoot = wrapper.attachShadow({
     mode: "open",
   });
