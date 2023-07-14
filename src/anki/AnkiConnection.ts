@@ -307,41 +307,40 @@ export class AnkiConnection {
     action: Action,
     params: { [key: string]: any } = {}
   ): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const { version } = this;
-      const { ankiConnectionURL } = this.ankiConfig;
-      const xhr = new XMLHttpRequest();
-      xhr.addEventListener("error", () =>
-        reject(
-          createDisconnectionResponse(
-            `无法通过URL: ${ankiConnectionURL} 连接到Anki，可通过检查：\n\t- Anki是否打开\n\t- AnkiConnection插件是否安装\n\t- 目标URL是否正确配置来排查该问题`
-          )
-        )
-      );
-      xhr.addEventListener("load", () => {
-        try {
-          const response = JSON.parse(xhr.responseText);
-          if (
-            Object.getOwnPropertyNames(response).length != 2 ||
-            !Object.prototype.hasOwnProperty.call(response, "result") ||
-            !Object.prototype.hasOwnProperty.call(response, "error")
-          ) {
-            throw createErrorResponse(
-              "AnkiConnection版本过低，请更新到最新版本。"
-            );
-          }
-          if (response.error) {
-            throw createErrorResponse(response.error);
-          }
-          resolve(response.result);
-        } catch (e) {
-          reject(e);
-        }
+    const { version } = this;
+    const { ankiConnectionURL } = this.ankiConfig;
+    let response;
+    try {
+      response = await fetch(ankiConnectionURL, {
+        method: "POST",
+        body: JSON.stringify({ action, version, params }),
       });
-
-      xhr.open("POST", ankiConnectionURL);
-      xhr.send(JSON.stringify({ action, version, params }));
-    });
+    } catch (e) {
+      throw createDisconnectionResponse(
+        `无法通过URL: ${ankiConnectionURL} 连接到Anki，可通过检查：\n\t- Anki是否打开\n\t- AnkiConnection插件是否安装\n\t- 目标URL是否正确配置来排查该问题`
+      );
+    }
+    if (!response.ok) {
+      throw createDisconnectionResponse(
+        `无法通过URL: ${ankiConnectionURL} 连接到Anki，可通过检查：\n\t- Anki是否打开\n\t- AnkiConnection插件是否安装\n\t- 目标URL是否正确配置来排查该问题`
+      );
+    }
+    try {
+      response = await response.json();
+      if (
+        Object.getOwnPropertyNames(response).length != 2 ||
+        !Object.prototype.hasOwnProperty.call(response, "result") ||
+        !Object.prototype.hasOwnProperty.call(response, "error")
+      ) {
+        throw createErrorResponse("AnkiConnection版本过低，请更新到最新版本。");
+      }
+      if (response.error) {
+        throw createErrorResponse(response.error);
+      }
+      return response.result;
+    } catch (e) {
+      throw e as Error;
+    }
   }
 }
 
