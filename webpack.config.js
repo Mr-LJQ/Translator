@@ -2,7 +2,8 @@ const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-
+const { WebpackManifestPlugin } = require("webpack-manifest-plugin");
+const manifest = require("./src/manifest.json");
 module.exports = {
   target: "web",
   mode: "development",
@@ -29,7 +30,7 @@ module.exports = {
     reactVendors: ["react", "react-dom", "classnames", "immer"],
   },
   output: {
-    filename: "[name].js",
+    filename: "[name].[contenthash].js",
     path: path.resolve(__dirname, "./dist/"),
     clean: true,
   },
@@ -63,13 +64,13 @@ module.exports = {
       title: "Browser Action Page",
       template: "./src/index.html",
       chunks: ["browserAction", "reactVendors"],
-      filename: "browserAction.html",
+      filename: manifest.action.default_popup,
     }),
     new HtmlWebpackPlugin({
       title: "Options Page",
       template: "./src/index.html",
       chunks: ["optionsPage", "reactVendors"],
-      filename: "optionsPage.html",
+      filename: manifest.options_ui.page,
     }),
     new HtmlWebpackPlugin({
       title: "Translation Page",
@@ -85,6 +86,24 @@ module.exports = {
           to: path.resolve(__dirname, "./dist/"),
         },
       ],
+    }),
+    new WebpackManifestPlugin({
+      publicPath:"./",
+      serialize(sourceMap) {
+        return JSON.stringify(
+          manifest,
+          (key, val) => {
+            const reg = /\{\{(.+)\}\}/g;
+            if (typeof val === "string") {
+              return val.replace(reg, (_, name) => {
+                return sourceMap[name];
+              });
+            }
+            return val;
+          },
+          2
+        );
+      },
     }),
   ],
 };
