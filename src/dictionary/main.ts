@@ -11,14 +11,8 @@
 
 import transformWords from "lodash.words";
 import { youdao, alibaba } from "./dictionaries";
-import {
-  Cache,
-  chain,
-  isErrorData,
-  NEXT_HANDLER,
-  createNoCacheError,
-} from "./utils";
-
+import { chain, isErrorData, NEXT_HANDLER, createNoCacheError } from "./utils";
+import { Cache } from "@/utils";
 import type {
   WordData,
   PhraseData,

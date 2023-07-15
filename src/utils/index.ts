@@ -1,7 +1,7 @@
-export { validateText } from "./validateText";
+export { Cache } from "./Cache";
 export { Messenger } from "./Messenger";
+export { validateText } from "./validateText";
 export type { PostMessage, OnMessage } from "./Messenger";
-
 /**
  * 纯函数，Object.entries()的单一版本，只提取单个键的[key,value]
  */
