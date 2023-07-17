@@ -3,13 +3,24 @@ export {
   getStorageByObject,
   setStorage,
   onStorageChange,
+  getSessionStorage,
+  setSessionStorage,
+  removeSessionStorage,
+  getBytesInUseSessionStorage,
 } from "./storage";
 
 export { onCommand } from "./commands";
-export { setBadgeText } from "./browserAction";
-export { executeScript, postFrontend } from "./tabs";
-export { addContextMenuItem, onContextMenuClick } from "./contextMenus";
-export { postBackend, onMessage, getURL, openOptionsPage } from "./runtime";
+export { setBadgeText } from "./action";
+export { postFrontend } from "./tabs";
+export { executeScript } from "./scripting";
+export { createMenuItem, onContextMenuClick } from "./contextMenus";
+export {
+  postBackend,
+  onMessage,
+  getURL,
+  openOptionsPage,
+  onInstalled,
+} from "./runtime";
 export { TabPanelName } from "./types";
 export type {
   Storage,

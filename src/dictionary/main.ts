@@ -8,11 +8,15 @@
  * 这条责任链应该越短越好，因为每一个处理器其实都需要进行网络请求，
  *  而网络请求往往是缓慢的，特别是在网络情况不好的时候。
  */
-
+import {
+  getSessionStorage,
+  setSessionStorage,
+  removeSessionStorage,
+  getBytesInUseSessionStorage,
+} from "@/extensions-api";
 import transformWords from "lodash.words";
 import { youdao, alibaba } from "./dictionaries";
 import { chain, isErrorData, NEXT_HANDLER, createNoCacheError } from "./utils";
-import { Cache } from "@/utils";
 import type {
   WordData,
   PhraseData,
@@ -21,7 +25,6 @@ import type {
 } from "./types";
 
 export class Dictionary {
-  private cache: Cache<string, TranslationResult>;
   private phraseTranslators: Array<
     (text: string) => Promise<PhraseData | typeof NEXT_HANDLER>
   >;
@@ -34,13 +37,12 @@ export class Dictionary {
   private chineseTranslators: Array<
     (text: string) => Promise<WordData | SentenceData | typeof NEXT_HANDLER>
   >;
-  constructor(max = 30) {
+  constructor() {
     const { translateWord, translatePhrase, translateSentence } = youdao;
     this.wordTranslators = [translateWord];
     this.phraseTranslators = [translatePhrase];
     this.chineseTranslators = [translateWord, alibaba.translateChinese];
     this.sentenceTranslators = [translateSentence, alibaba.translateSentence];
-    this.cache = new Cache(max);
   }
   /**
    * 该函数主要处理缓存的问题
@@ -48,15 +50,32 @@ export class Dictionary {
    * @returns 翻译结果
    */
   async translate(text: string): Promise<TranslationResult> {
-    const { cache } = this;
-    const translation = cache.get(text);
-    if (translation !== -1) return translation;
+    const cacheObject = await getSessionStorage({
+      translationCachedObject: {},
+    });
+    const translationCachedObject = cacheObject.translationCachedObject || {};
+    if (Reflect.has(translationCachedObject, text))
+      return translationCachedObject[text]!;
     const translationResult = await this.translateText(text);
     if (isErrorData(translationResult) && !translationResult.cache) {
       translationResult.queryText = text;
       return translationResult;
     }
-    this.cache.set(text, translationResult);
+    translationCachedObject[text] = translationResult;
+    try {
+      await setSessionStorage({ translationCachedObject });
+      // 这是显而易见的异步查询，但不知道为何eslint报错
+      // eslint-disable-next-line testing-library/no-await-sync-query
+      const bytes = await getBytesInUseSessionStorage(
+        "translationCachedObject"
+      );
+      if (bytes > 2 ** 19) {
+        //只缓存0.5M翻译数据
+        removeSessionStorage("translationCachedObject");
+      }
+    } catch (e) {
+      removeSessionStorage("translationCachedObject");
+    }
     return translationResult;
   }
   /**

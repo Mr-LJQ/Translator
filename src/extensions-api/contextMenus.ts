@@ -1,4 +1,4 @@
-export function addContextMenuItem(
+export function createMenuItem(
   createProperties: chrome.contextMenus.CreateProperties,
   callback?: () => void
 ) {

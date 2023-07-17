@@ -25,10 +25,3 @@ export async function postFrontend(
     });
   });
 }
-
-export function executeScript(
-  details: chrome.tabs.InjectDetails,
-  callback?: ((result: any[]) => void) | undefined
-) {
-  chrome.tabs.executeScript(details, callback);
-}

@@ -1,6 +1,7 @@
 import pick from "lodash.pick";
 import { DEFAULT_ANKI_CONNECTION_URL } from "@/configuration";
 import { Storage, TabPanelName, PartialStorage } from "./types";
+import { TranslationResult } from "@/dictionary";
 
 //缓存默认值对象，用于在用户刚刚加载拓展，没有进行任何配置时作为初始配置。
 //确保 Storage 中的缓存无论何时都是符合要求的，不存在刚刚加载插件时因为 Storage 为空而导致的问题。
@@ -118,4 +119,37 @@ export function setStorage(
   callback?: () => void
 ) {
   chrome.storage.local.set(partialStorage, callback);
+}
+
+interface SessionStorage {
+  injectScriptOnceObject: { [key: string]: true };
+  translationCachedObject: {
+    [key: string]: TranslationResult;
+  };
+}
+
+export function getSessionStorage(
+  keys?:
+    | keyof SessionStorage
+    | Array<keyof SessionStorage>
+    | Partial<SessionStorage>
+    | null
+): Promise<Partial<SessionStorage>> {
+  return chrome.storage.session.get(keys);
+}
+
+export function setSessionStorage(items: Partial<SessionStorage>) {
+  return chrome.storage.session.set(items);
+}
+
+export function removeSessionStorage(
+  keys: keyof Pick<SessionStorage, "translationCachedObject">
+) {
+  return chrome.storage.session.remove(keys);
+}
+
+export function getBytesInUseSessionStorage(
+  keys: keyof Pick<SessionStorage, "translationCachedObject">
+): Promise<number> {
+  return chrome.storage.session.getBytesInUse(keys);
 }

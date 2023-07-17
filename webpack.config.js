@@ -1,4 +1,5 @@
 const path = require("path");
+const fs = require("fs");
 const CopyPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
@@ -30,7 +31,11 @@ module.exports = {
     reactVendors: ["react", "react-dom", "classnames", "immer"],
   },
   output: {
-    filename: "[name].[contenthash].js",
+    filename: () => {
+      return "[name].js";
+      //if (data.chunk.name === "injectScript") return "[name].js"
+      //return "[name].[contenthash].js"
+    },
     path: path.resolve(__dirname, "./dist/"),
     clean: true,
   },
@@ -88,8 +93,11 @@ module.exports = {
       ],
     }),
     new WebpackManifestPlugin({
-      publicPath:"./",
+      publicPath: "./",
       serialize(sourceMap) {
+        const manifest = JSON.parse(
+          fs.readFileSync(path.join(__dirname, "./src/manifest.json"))
+        );
         return JSON.stringify(
           manifest,
           (key, val) => {

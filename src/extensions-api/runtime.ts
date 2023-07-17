@@ -150,3 +150,9 @@ export function onMessage(handler: Handler) {
     return true; //为了使sendResponse可以异步调用，这是必须的
   });
 }
+
+export function onInstalled(
+  callback: (details: chrome.runtime.InstalledDetails) => void
+) {
+  chrome.runtime.onInstalled.addListener(callback);
+}
