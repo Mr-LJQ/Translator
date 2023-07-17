@@ -53,7 +53,7 @@ function getPhraseExamples($: CheerioAPI) {
     const pNodes = $("p", li);
     if (pNodes.length < 2) return result;
     //用于获取音频
-    const example_sentence_origin = pNodes.first().text() || "";
+    const example_sentence_origin = pNodes.first().text().trim() || "";
     //获取短语加粗的例句
     const example_sentence = Array.from(pNodes.first().contents())
       .reduce((sentence, node) => {

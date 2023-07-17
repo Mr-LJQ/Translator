@@ -221,7 +221,10 @@ function formatTranslations(translations: string[] | undefined) {
     const point = cur.indexOf(".") + 1;
     const part_of_speech = point === -1 ? "" : cur.slice(0, point);
     const oldArray = acc[part_of_speech];
-    const newArray = cur.slice(point).split("；");
+    const newArray = cur
+      .slice(point)
+      .split("；")
+      .map((text) => text.trim());
 
     if (oldArray == null) {
       acc[part_of_speech] = newArray;
