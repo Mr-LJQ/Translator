@@ -95,7 +95,7 @@ export class AnkiConnection {
           return createErrorResponse(e);
         }
         return createErrorResponse(
-          "这是一个出乎该插件开发者预料的错误,如需解决请提交该问题"
+          "这是一个出乎拓展开发者预料的错误,如需解决请提交该问题"
         );
       }
     };
@@ -317,12 +317,12 @@ export class AnkiConnection {
       });
     } catch (e) {
       throw createDisconnectionResponse(
-        `无法通过URL: ${ankiConnectionURL} 连接到Anki，可通过检查：\n\t- Anki是否打开\n\t- AnkiConnection插件是否安装\n\t- 目标URL是否正确配置来排查该问题`
+        `无法通过URL: ${ankiConnectionURL} 连接到Anki，可通过检查：\n\t- Anki是否打开\n\t- AnkiConnect插件是否安装\n\t- 目标URL是否正确配置来排查该问题`
       );
     }
     if (!response.ok) {
       throw createDisconnectionResponse(
-        `无法通过URL: ${ankiConnectionURL} 连接到Anki，可通过检查：\n\t- Anki是否打开\n\t- AnkiConnection插件是否安装\n\t- 目标URL是否正确配置来排查该问题`
+        `无法通过URL: ${ankiConnectionURL} 连接到Anki，可通过检查：\n\t- Anki是否打开\n\t- AnkiConnect插件是否安装\n\t- 目标URL是否正确配置来排查该问题`
       );
     }
     try {

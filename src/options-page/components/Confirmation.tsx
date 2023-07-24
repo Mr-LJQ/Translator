@@ -49,7 +49,7 @@ export const Confirmation = memo(function Confirmation(props: Props) {
                 </Dialog.Title>
 
                 <Dialog.Description className="mt-2 text-sm text-gray-500">
-                  当前配置与插件缓存的配置不一致，请确认是否需要对新配置进行保存。
+                  存在未保存的配置，请确认是否继续退出配置页面？
                 </Dialog.Description>
 
                 <div className="mt-4">

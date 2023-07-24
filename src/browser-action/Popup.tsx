@@ -109,12 +109,12 @@ export class Popup extends React.Component<Record<string, never>, State> {
             setEnabled={handleSwitchOpen}
             title="停用划词功能与热键选词功能"
           >
-            开关插件
+            开启拓展
           </Switch>
           <Switch
             enabled={switchStrengthenSelectionByPressedCtrl}
             setEnabled={handleStrengthenSelectionByPressedCtrl}
-            title="增强划词功能的效果，使其在按住Ctrl键时，能够查询可编辑框中的文本并且可以选中部分本来不可以选中的文本"
+            title="增强拖蓝翻译的效果，使其在按住Ctrl键时，能够查询可编辑框中的文本"
           >
             划词增强
           </Switch>
