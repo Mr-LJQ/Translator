@@ -13,11 +13,11 @@ import {
   getStorageByObject,
   createMenuItem,
   onContextMenuClick,
-  getStorageByArray,
   getSessionStorage,
   setSessionStorage,
   onInstalled,
   removeSessionStorage,
+  getStoragePromiseByArray,
 } from "@/extensions-api";
 
 //初始化isOpen标识文本
@@ -53,57 +53,53 @@ onMessage(async ({ command, data, sendResponse }) => {
     }
   }
 
-  const anki = new AnkiConnection();
-  //初始化AnkiConfig
   //值是必定存在的，因为 getStorage 内部会保证在没值的时候使用默认值，而默认值设定了相应的值
-  getStorageByArray(
-    [
-      "wordConfig",
-      "phraseConfig",
-      "sentenceConfig",
-      "ankiConnectionURL",
-      "checkWordDuplicate",
-      "checkPhraseDuplicate",
-      "checkSentenceDuplicate",
-    ],
-    async (config) => {
-      anki.updateAnkiConfig<AnkiConfig>(config); //初始化时，必须包括所有的 AnkiConfig 配置
-      switch (command) {
-        case Command.AddNote: {
-          const response = await anki.addNote(data);
-          sendResponse(response);
-          break;
-        }
-        case Command.RelearnNote: {
-          const response = await anki.relearnCards(data);
-          sendResponse(response);
-          break;
-        }
-        case Command.GetDeckNames: {
-          const response = await anki.getDeckNames();
-          sendResponse(response);
-          break;
-        }
-        case Command.GetModelNames: {
-          const response = await anki.getModelNames();
-          sendResponse(response);
-          break;
-        }
-        case Command.GetVersion: {
-          const response = await anki.getVersion();
-          sendResponse(response);
-          break;
-        }
-        case Command.GetModelFieldNames: {
-          const response = await anki.getModelFieldNames(data);
-          sendResponse(response);
-          break;
-        }
-        default:
-          throw new Error(`存在未处理的指令:${Command[command]},这是一个BUG`);
-      }
+  const config = await getStoragePromiseByArray([
+    "wordConfig",
+    "phraseConfig",
+    "sentenceConfig",
+    "ankiConnectionURL",
+    "checkWordDuplicate",
+    "checkPhraseDuplicate",
+    "checkSentenceDuplicate",
+  ]);
+  //初始化AnkiConfig
+  const anki = new AnkiConnection();
+  anki.updateAnkiConfig<AnkiConfig>(config); //初始化时，必须包括所有的 AnkiConfig 配置
+  switch (command) {
+    case Command.AddNote: {
+      const response = await anki.addNote(data);
+      sendResponse(response);
+      break;
     }
-  );
+    case Command.RelearnNote: {
+      const response = await anki.relearnCards(data);
+      sendResponse(response);
+      break;
+    }
+    case Command.GetDeckNames: {
+      const response = await anki.getDeckNames();
+      sendResponse(response);
+      break;
+    }
+    case Command.GetModelNames: {
+      const response = await anki.getModelNames();
+      sendResponse(response);
+      break;
+    }
+    case Command.GetVersion: {
+      const response = await anki.getVersion();
+      sendResponse(response);
+      break;
+    }
+    case Command.GetModelFieldNames: {
+      const response = await anki.getModelFieldNames(data);
+      sendResponse(response);
+      break;
+    }
+    default:
+      throw new Error(`存在未处理的指令:${Command[command]},这是一个BUG`);
+  }
 });
 
 onStorageChange({

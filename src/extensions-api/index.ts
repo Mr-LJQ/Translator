@@ -1,5 +1,6 @@
 export {
   getStorageByArray,
+  getStoragePromiseByArray,
   getStorageByObject,
   setStorage,
   onStorageChange,

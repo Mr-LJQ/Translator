@@ -88,6 +88,14 @@ export function getStorageByArray<K extends StorageKeys>(
   getStorage(names, callback);
 }
 
+export function getStoragePromiseByArray<K extends StorageKeys>(
+  names: K[]
+): Promise<Pick<Storage, K>> {
+  return new Promise((resolve) => {
+    getStorage(names, resolve);
+  });
+}
+
 export function getStorageByObject(
   handlers: StorageHandlers<Storage>,
   callback?: GetStorageCallback
