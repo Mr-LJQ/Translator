@@ -98,7 +98,7 @@ export function transformPhraseData(data: PhraseData): PhraseNoteData {
     example_sentence_3: example_sentences[2]?.example_sentence,
     example_sentence_translation_3:
       example_sentences[2]?.example_sentence_translation,
-    example_audio_3: example_sentences[2]?.example_sentence_translation,
+    example_audio_3: example_sentences[2]?.example_audio,
   });
 }
 
