@@ -4,6 +4,10 @@
   <img width="596" src="docs/assets/storybook.jpg">
 </p>
 
+## 拓展安装
+- <a href="https://microsoftedge.microsoft.com/addons/detail/%E7%BF%BB%E8%AF%91%E5%8A%A9%E6%89%8B/aighjkjildikgnknknggknhkdnhggabf?hl=zh-CN">Edge</a>
+- <a href="https://gitee.com/LiLearn/translator-browser-extensions/releases">chrome离线插件</a>
+<!-- - <a href="">Firefox</a> -->
 ## 该拓展有什么用？
 
 更轻松的英语翻译
@@ -114,8 +118,9 @@
 > 不会，对于翻译查询的结果会进行临时缓存（容量为 0.5M），浏览器关闭后自动清空缓存，容量达到上限也会清空缓存。
 
 拖蓝翻译、热键翻译突然失效
+
 > 翻译失效的区域是页面中嵌套的另一个页面，在失效的区域点击鼠标右键，如果存在 `注入翻译助手` 项，则需要点击该项，以将翻译功能注入该嵌套页面中。
-> 
+>
 > 如果不存在 `注入翻译助手` 项，则检查是否开启拓展。
 
 <img src="./docs/assets/menu.png">
@@ -124,3 +129,4 @@
 [ankiconnect]: https://ankiweb.net/shared/info/2055492159
 [标签栏]: #标签栏
 [配置页]: #配置页面
+[edge]: https://microsoftedge.microsoft.com/addons/detail/%E7%BF%BB%E8%AF%91%E5%8A%A9%E6%89%8B/aighjkjildikgnknknggknhkdnhggabf?hl=zh-CN
