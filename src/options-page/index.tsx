@@ -7,6 +7,7 @@ import "../index.css";
 document.body.classList.add("bg-gray-200");
 
 const root = document.getElementById("root")!;
+root.classList.add("text-sm");
 fetchStorage();
 const unsubscribe = storageStoreSubscribe(function () {
   unsubscribe();
