@@ -27,17 +27,18 @@ getStorageByObject({
   },
 });
 
+const dictionary = new Dictionary();
+const anki = new AnkiConnection();
+
 //监听所有发送到后端的请求，并进行处理
 onMessage(async ({ command, data, sendResponse }) => {
   switch (command) {
     case Command.TranslateText: {
-      const dictionary = new Dictionary();
       const response = await dictionary.translate(data);
       sendResponse(response);
       return;
     }
     case Command.TranslateInjectText: {
-      const dictionary = new Dictionary();
       const response = await dictionary.translate(data.text);
       postFrontend(Command.ShowInjectTranslation, {
         translatedData: response,
@@ -63,8 +64,7 @@ onMessage(async ({ command, data, sendResponse }) => {
     "checkPhraseDuplicate",
     "checkSentenceDuplicate",
   ]);
-  //初始化AnkiConfig
-  const anki = new AnkiConnection();
+
   anki.updateAnkiConfig<AnkiConfig>(config); //初始化时，必须包括所有的 AnkiConfig 配置
   switch (command) {
     case Command.AddNote: {
