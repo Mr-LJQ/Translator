@@ -1,7 +1,7 @@
 {
   "name": "翻译助手",
   "manifest_version": 3,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "便捷的翻译器，提供了拖蓝翻译、热键翻译、搜索栏查询等多种查询翻译的能力，并且可以很方便的将翻译数据添加到Anki中进行复习。",
   "icons": {
     "48": "logo_48.png"
